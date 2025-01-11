@@ -72,12 +72,7 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    // WPILib dependencies
-    implementation 'edu.wpi.first.wpilibj:wpilibj-java:2025.1.1'
-    implementation 'edu.wpi.first.wpilibj2:wpilibj2-java:2025.1.1'
-    implementation 'edu.wpi.first.math:wpimath-java:2025.1.1'
-    implementation 'edu.wpi.first.wpilibj.simulation:wpilibj-simulation-java:2025.1.1'
-
+    
     // CTRE Phoenix dependencies
     implementation 'com.ctre.phoenix:api-java:5.19.4'
 }
