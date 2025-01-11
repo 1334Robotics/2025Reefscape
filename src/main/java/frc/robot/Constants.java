@@ -16,4 +16,10 @@ public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
+  public static class ElevatorConstants {
+    public static final double GEAR_RATIO = 10.0;
+    public static final double MAX_HEIGHT_INCHES = 30.0;
+    public static final double MIN_HEIGHT_INCHES = 0.0;
+    public static final double POSITION_TOLERANCE = 0.5;
+  }
 }
