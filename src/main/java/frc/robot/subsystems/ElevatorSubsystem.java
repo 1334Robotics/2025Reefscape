@@ -26,23 +26,36 @@ public class ElevatorSubsystem extends SubsystemBase {
     private final MotionMagicVoltage secondaryMotionMagic = new MotionMagicVoltage(0);
     
     // Simulation
-    private ElevatorSim elevatorSim;
+    private ElevatorSim primaryElevatorSim;
+    private ElevatorSim secondaryElevatorSim;
     
     public ElevatorSubsystem(int primaryMotorId, int secondaryMotorId) {
         primaryMotor = new TalonFX(primaryMotorId);
         secondaryMotor = new TalonFX(secondaryMotorId);
         configureMotor();
         
-        // Initialize simulation
-        elevatorSim = new ElevatorSim(
+        // Initialize simulation for primary motor
+        primaryElevatorSim = new ElevatorSim(
             DCMotor.getKrakenX60(1),
             ElevatorConstants.GEAR_RATIO,
             10.0, // Mass in kg
             0.05, // Drum radius in meters
             ElevatorConstants.MIN_HEIGHT_INCHES,
             ElevatorConstants.MAX_HEIGHT_INCHES,
-            true // Simulate gravity
-            , primaryMotorId, null
+            true, // Simulate gravity
+            primaryMotorId, new double[] {0.01, 0.01} // Measurement standard deviations
+        );
+
+        // Initialize simulation for secondary motor
+        secondaryElevatorSim = new ElevatorSim(
+            DCMotor.getKrakenX60(1),
+            ElevatorConstants.GEAR_RATIO,
+            10.0, // Mass in kg
+            0.05, // Drum radius in meters
+            ElevatorConstants.MIN_HEIGHT_INCHES,
+            ElevatorConstants.MAX_HEIGHT_INCHES,
+            true, // Simulate gravity
+            secondaryMotorId, new double[] {0.01, 0.01} // Measurement standard deviations
         );
     }
     
@@ -54,18 +67,18 @@ public class ElevatorSubsystem extends SubsystemBase {
     
     @Override
     public void periodic() {
-        primaryPositionInches = Units.rotationsToDegrees(((Rotation2d) primaryMotor.getPosition().getValue()).getDegrees()) * ElevatorConstants.GEAR_RATIO;
-        secondaryPositionInches = Units.rotationsToDegrees(((Rotation2d) secondaryMotor.getPosition().getValue()).getDegrees()) * ElevatorConstants.GEAR_RATIO;
+        // Get position in rotations and convert to inches
+        primaryPositionInches = primaryMotor.getPosition().getValueAsDouble() * ElevatorConstants.GEAR_RATIO;
+        secondaryPositionInches = secondaryMotor.getPosition().getValueAsDouble() * ElevatorConstants.GEAR_RATIO;
     }
     
     @Override
     public void simulationPeriodic() {
-        elevatorSim.setInput(primaryMotor.get());
-        elevatorSim.update(0.02);
-        
-        double simPosition = elevatorSim.getPositionMeters();
-        primaryMotor.setPosition(simPosition / Units.inchesToMeters(1.0));
-        secondaryMotor.setPosition(simPosition / Units.inchesToMeters(1.0));
+        // Update simulation for primary motor
+        primaryElevatorSim.update(0.02); // Assuming a 20ms update period
+
+        // Update simulation for secondary motor
+        secondaryElevatorSim.update(0.02); // Assuming a 20ms update period
     }
     
     public Command moveToPosition(double heightInches) {
