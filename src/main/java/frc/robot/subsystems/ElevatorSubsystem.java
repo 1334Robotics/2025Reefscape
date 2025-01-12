@@ -7,8 +7,9 @@ import edu.wpi.first.math.util.Units;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
-import edu.wpi.first.math.system.LinearSystem;
+import edu.wpi.first.math.MathUtil;
 
 public class ElevatorSubsystem extends SubsystemBase {
     // Hardware
@@ -35,6 +36,7 @@ public class ElevatorSubsystem extends SubsystemBase {
             ElevatorConstants.MIN_HEIGHT_INCHES,
             ElevatorConstants.MAX_HEIGHT_INCHES,
             true // Simulate gravity
+            , motorId, null
         );
     }
     
@@ -45,7 +47,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     
     @Override
     public void periodic() {
-        currentPositionInches = elevatorMotor.getPosition().getValue() * ElevatorConstants.GEAR_RATIO;
+        currentPositionInches = Units.rotationsToDegrees(((Rotation2d) elevatorMotor.getPosition().getValue()).getDegrees()) * ElevatorConstants.GEAR_RATIO;
     }
     
     @Override
@@ -54,7 +56,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         elevatorSim.update(0.02);
         
         double simPosition = elevatorSim.getPositionMeters();
-        // Update simulated position
+        elevatorMotor.setPosition(simPosition / Units.inchesToMeters(1.0));
     }
     
     public Command moveToPosition(double heightInches) {
@@ -76,5 +78,45 @@ public class ElevatorSubsystem extends SubsystemBase {
     
     public double getCurrentHeight() {
         return currentPositionInches;
+    }
+
+    public void setTargetPosition(double targetInches) {
+        // Clamp target position within safe limits
+        targetPositionInches = MathUtil.clamp(
+            targetInches,
+            ElevatorConstants.MIN_HEIGHT_INCHES,
+            ElevatorConstants.MAX_HEIGHT_INCHES
+        );
+        
+        // Convert inches to motor rotations
+        double targetRotations = targetPositionInches / (2 * Math.PI * ElevatorConstants.DRUM_RADIUS_INCHES);
+        
+        // Set motion magic target
+        motionMagic.Position = targetRotations;
+        elevatorMotor.setControl(motionMagic);
+    }
+
+    public void moveToPreset(ElevatorPosition preset) {
+        setTargetPosition(preset.heightInches);
+    }
+
+    public void stop() {
+        elevatorMotor.stopMotor();
+    }
+
+    public boolean isAtTarget() {
+        return Math.abs(currentPositionInches - targetPositionInches) < ElevatorConstants.POSITION_TOLERANCE_INCHES;
+    }
+
+    public enum ElevatorPosition {
+        GROUND(0.0),
+        MIDDLE(24.0),
+        HIGH(48.0);
+
+        public final double heightInches;
+        
+        ElevatorPosition(double heightInches) {
+            this.heightInches = heightInches;
+        }
     }
 }
