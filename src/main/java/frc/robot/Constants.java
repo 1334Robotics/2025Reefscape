@@ -21,5 +21,7 @@ public final class Constants {
     public static final double MAX_HEIGHT_INCHES = 30.0;
     public static final double MIN_HEIGHT_INCHES = 0.0;
     public static final double POSITION_TOLERANCE = 0.5;
+    public static final double DRUM_RADIUS_INCHES = 0.75;
+    public static final double POSITION_TOLERANCE_INCHES = 0.5;
   }
 }
