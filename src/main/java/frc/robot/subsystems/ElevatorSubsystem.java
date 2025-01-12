@@ -13,18 +13,24 @@ import edu.wpi.first.math.MathUtil;
 
 public class ElevatorSubsystem extends SubsystemBase {
     // Hardware
-    private final TalonFX elevatorMotor;
-    private final MotionMagicVoltage motionMagic = new MotionMagicVoltage(0);
+    private final TalonFX primaryMotor;
+    private final TalonFX secondaryMotor;
     
     // State tracking
-    private double targetPositionInches = 0.0;
-    private double currentPositionInches = 0.0;
+    private double primaryPositionInches = 0.0;
+    private double secondaryPositionInches = 0.0;
+    private double primaryTargetInches = 0.0;
+    private double secondaryTargetInches = 0.0;
+    
+    private final MotionMagicVoltage primaryMotionMagic = new MotionMagicVoltage(0);
+    private final MotionMagicVoltage secondaryMotionMagic = new MotionMagicVoltage(0);
     
     // Simulation
     private ElevatorSim elevatorSim;
     
-    public ElevatorSubsystem(int motorId) {
-        elevatorMotor = new TalonFX(motorId);
+    public ElevatorSubsystem(int primaryMotorId, int secondaryMotorId) {
+        primaryMotor = new TalonFX(primaryMotorId);
+        secondaryMotor = new TalonFX(secondaryMotorId);
         configureMotor();
         
         // Initialize simulation
@@ -36,87 +42,124 @@ public class ElevatorSubsystem extends SubsystemBase {
             ElevatorConstants.MIN_HEIGHT_INCHES,
             ElevatorConstants.MAX_HEIGHT_INCHES,
             true // Simulate gravity
-            , motorId, null
+            , primaryMotorId, null
         );
     }
     
     private void configureMotor() {
-        elevatorMotor.setPosition(0.0);
+        primaryMotor.setPosition(0.0);
+        secondaryMotor.setPosition(0.0);
         // Add motor configuration here
     }
     
     @Override
     public void periodic() {
-        currentPositionInches = Units.rotationsToDegrees(((Rotation2d) elevatorMotor.getPosition().getValue()).getDegrees()) * ElevatorConstants.GEAR_RATIO;
+        primaryPositionInches = Units.rotationsToDegrees(((Rotation2d) primaryMotor.getPosition().getValue()).getDegrees()) * ElevatorConstants.GEAR_RATIO;
+        secondaryPositionInches = Units.rotationsToDegrees(((Rotation2d) secondaryMotor.getPosition().getValue()).getDegrees()) * ElevatorConstants.GEAR_RATIO;
     }
     
     @Override
     public void simulationPeriodic() {
-        elevatorSim.setInput(elevatorMotor.get());
+        elevatorSim.setInput(primaryMotor.get());
         elevatorSim.update(0.02);
         
         double simPosition = elevatorSim.getPositionMeters();
-        elevatorMotor.setPosition(simPosition / Units.inchesToMeters(1.0));
+        primaryMotor.setPosition(simPosition / Units.inchesToMeters(1.0));
+        secondaryMotor.setPosition(simPosition / Units.inchesToMeters(1.0));
     }
     
     public Command moveToPosition(double heightInches) {
         return runOnce(() -> {
-            targetPositionInches = heightInches;
-            elevatorMotor.setControl(motionMagic.withPosition(heightInches / ElevatorConstants.GEAR_RATIO));
+            primaryTargetInches = heightInches;
+            secondaryTargetInches = heightInches;
+            primaryMotor.setControl(primaryMotionMagic.withPosition(heightInches / ElevatorConstants.GEAR_RATIO));
+            secondaryMotor.setControl(secondaryMotionMagic.withPosition(heightInches / ElevatorConstants.GEAR_RATIO));
         });
     }
     
     public Command holdPosition() {
         return run(() -> {
-            elevatorMotor.setControl(motionMagic.withPosition(targetPositionInches / ElevatorConstants.GEAR_RATIO));
+            primaryMotor.setControl(primaryMotionMagic.withPosition(primaryTargetInches / ElevatorConstants.GEAR_RATIO));
+            secondaryMotor.setControl(secondaryMotionMagic.withPosition(secondaryTargetInches / ElevatorConstants.GEAR_RATIO));
         });
     }
     
     public boolean atTargetPosition() {
-        return Math.abs(currentPositionInches - targetPositionInches) < ElevatorConstants.POSITION_TOLERANCE;
+        return Math.abs(primaryPositionInches - primaryTargetInches) < ElevatorConstants.POSITION_TOLERANCE &&
+               Math.abs(secondaryPositionInches - secondaryTargetInches) < ElevatorConstants.POSITION_TOLERANCE;
     }
     
     public double getCurrentHeight() {
-        return currentPositionInches;
+        return primaryPositionInches;
     }
 
-    public void setTargetPosition(double targetInches) {
-        // Clamp target position within safe limits
-        targetPositionInches = MathUtil.clamp(
-            targetInches,
-            ElevatorConstants.MIN_HEIGHT_INCHES,
-            ElevatorConstants.MAX_HEIGHT_INCHES
+    public void setTargetPosition(double primaryTargetInches, double secondaryTargetInches) {
+        // Clamp primary stage
+        this.primaryTargetInches = MathUtil.clamp(
+            primaryTargetInches,
+            ElevatorConstants.PRIMARY_MIN_HEIGHT_INCHES,
+            ElevatorConstants.PRIMARY_MAX_HEIGHT_INCHES
         );
         
-        // Convert inches to motor rotations
-        double targetRotations = targetPositionInches / (2 * Math.PI * ElevatorConstants.DRUM_RADIUS_INCHES);
+        // Clamp secondary stage
+        this.secondaryTargetInches = MathUtil.clamp(
+            secondaryTargetInches,
+            ElevatorConstants.SECONDARY_MIN_HEIGHT_INCHES,
+            ElevatorConstants.SECONDARY_MAX_HEIGHT_INCHES
+        );
         
-        // Set motion magic target
-        motionMagic.Position = targetRotations;
-        elevatorMotor.setControl(motionMagic);
+        // Convert to rotations for both stages
+        double primaryRotations = this.primaryTargetInches / 
+            (2 * Math.PI * ElevatorConstants.PRIMARY_DRUM_RADIUS_INCHES);
+        double secondaryRotations = this.secondaryTargetInches / 
+            (2 * Math.PI * ElevatorConstants.SECONDARY_DRUM_RADIUS_INCHES);
+        
+        // Set motion magic for both motors
+        primaryMotionMagic.Position = primaryRotations;
+        secondaryMotionMagic.Position = secondaryRotations;
+        
+        primaryMotor.setControl(primaryMotionMagic);
+        secondaryMotor.setControl(secondaryMotionMagic);
     }
 
     public void moveToPreset(ElevatorPosition preset) {
-        setTargetPosition(preset.heightInches);
+        setTargetPosition(preset.primaryHeightInches, preset.secondaryHeightInches);
     }
 
     public void stop() {
-        elevatorMotor.stopMotor();
+        primaryMotor.stopMotor();
+        secondaryMotor.stopMotor();
     }
 
     public boolean isAtTarget() {
-        return Math.abs(currentPositionInches - targetPositionInches) < ElevatorConstants.POSITION_TOLERANCE_INCHES;
+        boolean primaryAtTarget = Math.abs(primaryPositionInches - primaryTargetInches) < 
+            ElevatorConstants.POSITION_TOLERANCE_INCHES;
+        boolean secondaryAtTarget = Math.abs(secondaryPositionInches - secondaryTargetInches) < 
+            ElevatorConstants.POSITION_TOLERANCE_INCHES;
+        return primaryAtTarget && secondaryAtTarget;
     }
 
     public enum ElevatorPosition {
-        GROUND(0.0),
-        MIDDLE(24.0),
-        HIGH(48.0);
+        GROUND(0.0, 0.0),
+        MIDDLE(24.0, 12.0),
+        HIGH(48.0, 24.0);
 
-        public final double heightInches;
+        public final double primaryHeightInches;
+        public final double secondaryHeightInches;
         
-        ElevatorPosition(double heightInches) {
-            this.heightInches = heightInches;
+        ElevatorPosition(double primaryHeight, double secondaryHeight) {
+            this.primaryHeightInches = primaryHeight;
+            this.secondaryHeightInches = secondaryHeight;
         }
     }
 }
+
+
+// Example command usage
+ElevatorSubsystem elevator = new ElevatorSubsystem(1, 2);
+elevator.setTargetPosition(36.0, 24.0);  // Move primary to 36 inches, secondary to 24 inches
+elevator.moveToPreset(ElevatorPosition.HIGH);  // Move to preset position (both stages)
+
+// Create commands
+Command customPositionCommand = elevator.moveToPosition(48.0);
+Command holdPositionCommand = elevator.holdPosition();
