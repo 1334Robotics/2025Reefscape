@@ -156,10 +156,6 @@ public class ElevatorSubsystem extends SubsystemBase {
 
 
 // Example command usage
-ElevatorSubsystem elevator = new ElevatorSubsystem(1, 2);
-elevator.setTargetPosition(36.0, 24.0);  // Move primary to 36 inches, secondary to 24 inches
-elevator.moveToPreset(ElevatorPosition.HIGH);  // Move to preset position (both stages)
-
-// Create commands
-Command customPositionCommand = elevator.moveToPosition(48.0);
-Command holdPositionCommand = elevator.holdPosition();
+// ElevatorSubsystem elevator = new ElevatorSubsystem(1, 2);
+// elevator.setTargetPosition(36.0, 24.0);  // Move primary to 36 inches, secondary to 24 inches
+// elevator.moveToPreset(ElevatorPosition.HIGH);  // Move to preset position (both stages)
