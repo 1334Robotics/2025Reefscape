@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.PID;  // Assuming the PID class is located in the same package or imported
 
 // Need photon vision data
 
