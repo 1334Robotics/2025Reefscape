@@ -1,4 +1,4 @@
-public class PIDsubsystem{
+public class PID{
     private double kP, kI, kD;
     private double tau;
     private double limMin, limMax;
