@@ -21,6 +21,8 @@ public class PIDSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // Get data from PhotonVision
+    int y = 0;
+    int theta = 0;
     pidY.update(setPointY, y);
     pidTheta.update(setPointTheta, theta);
 
