@@ -28,7 +28,7 @@ public class RobotContainer {
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
   // Subsystems
-  public final GyroSubsystem gyroSubsystem = new GyroSubsystem();
+  public static final GyroSubsystem gyroSubsystem = new GyroSubsystem();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
