@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.elevator;
 
 import frc.robot.Constants.ElevatorConstants;
 import edu.wpi.first.wpilibj2.command.Command;
