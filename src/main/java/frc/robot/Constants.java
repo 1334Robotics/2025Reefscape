@@ -4,16 +4,20 @@
 
 package frc.robot;
 
-/**
- * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
- * constants. This class should not be used for any other purpose. All constants should be declared
- * globally (i.e. public static). Do not put anything functional in this class.
- *
- * <p>It is advised to statically import this class (or one of its inner classes) wherever the
- * constants are needed, to reduce verbosity.
- */
+import edu.wpi.first.math.util.Units;
+
 public final class Constants {
-  public static class OperatorConstants {
-    public static final int kDriverControllerPort = 0;
-  }
+    public static final class DriveConstants {
+        public static final double MAX_SPEED = Units.feetToMeters(14.5); // Kraken X60 free speed
+        public static final double MAX_ANGULAR_SPEED = Math.PI * 2.0; // 1 rotation per second
+        
+        // The directory name for the deploy directory containing YAGSL JSON files
+        public static final String SWERVE_CONFIG_DIR = "swerve";
+        
+        public static final double DEADBAND = 0.1;
+    }
+    
+    public static final class OIConstants {
+        public static final int DRIVER_CONTROLLER_PORT = 0;
+    }
 }
