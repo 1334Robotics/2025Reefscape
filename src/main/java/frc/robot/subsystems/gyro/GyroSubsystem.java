@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.gyro;
 
 import static edu.wpi.first.units.Units.Degrees;
 
@@ -7,13 +7,13 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import frc.robot.constants.GyroConstants;
 
 public class GyroSubsystem extends SubsystemBase {
     private Pigeon2 pigeon;
   
     public GyroSubsystem() {
-        pigeon = new Pigeon2(Constants.GYRO_DEVICEID);
+        pigeon = new Pigeon2(GyroConstants.GYRO_DEVICEID);
     }
 
     public GyroSubsystem(int deviceId) {
