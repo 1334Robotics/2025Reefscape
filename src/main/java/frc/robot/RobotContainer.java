@@ -4,9 +4,7 @@
 
 package frc.robot;
 
-import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.Autos;
-import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.constants.RobotContainerConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,16 +18,13 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
-  private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
-
-  // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
+  // Controllers
+  private final CommandXboxController driverController = new CommandXboxController(RobotContainerConstants.DRIVER_CONTROLLER_PORT);
 
   // Subsystems
   public static final GyroSubsystem gyroSubsystem = new GyroSubsystem();
-  public static final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(1, 2);
+  public static final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(RobotContainerConstants.ELEVATOR_PRIMARY_MOTOR_ID,
+                                                                                  RobotContainerConstants.ELEVATOR_SECONDARY_MOTOR_ID);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -47,27 +42,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    // Up arrow - Move elevator up
-    m_driverController.povUp().whileTrue(
-        elevatorSubsystem.run(() -> {
-            elevatorSubsystem.setManualControl(0.5); // 50% power up
-        })
-    ).whileFalse(
-        elevatorSubsystem.runOnce(() -> {
-            elevatorSubsystem.setManualControl(0.0); // Stop
-        })
-    );
-
-    // Down arrow - Move elevator down  
-    m_driverController.povDown().whileTrue(
-        elevatorSubsystem.run(() -> {
-            elevatorSubsystem.setManualControl(-0.5); // 50% power down
-        })
-    ).whileFalse(
-        elevatorSubsystem.runOnce(() -> {
-            elevatorSubsystem.setManualControl(0.0); // Stop
-        })
-    );
+    
   }
 
   /**
@@ -76,7 +51,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
-    return Autos.exampleAuto(m_exampleSubsystem);
+    return null;
   }
 }
