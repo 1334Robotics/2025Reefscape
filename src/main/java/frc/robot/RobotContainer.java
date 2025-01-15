@@ -4,8 +4,11 @@
 
 package frc.robot;
 
-import frc.robot.constants.RobotContainerConstants;
+import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.Autos;
+import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.gyro.GyroSubsystem;
+import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -22,6 +25,7 @@ public class RobotContainer {
 
   // Subsystems
   public static final GyroSubsystem gyroSubsystem = new GyroSubsystem();
+  public static final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(1, 2);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -39,7 +43,13 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    // Place controller bindings here
+    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
+    new Trigger(m_exampleSubsystem::exampleCondition)
+        .onTrue(new ExampleCommand(m_exampleSubsystem));
+
+    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
+    // cancelling on release.
+    m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
   }
 
   /**
