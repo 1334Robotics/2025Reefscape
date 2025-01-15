@@ -6,8 +6,6 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
-import frc.robot.commands.ExampleCommand;
-import frc.robot.commands.MoveElevatorCommand;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
@@ -49,13 +47,27 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    new Trigger(m_exampleSubsystem::exampleCondition)
-        .onTrue(new ExampleCommand(m_exampleSubsystem));
+    // Up arrow - Move elevator up
+    m_driverController.povUp().whileTrue(
+        elevatorSubsystem.run(() -> {
+            elevatorSubsystem.setManualControl(0.5); // 50% power up
+        })
+    ).whileFalse(
+        elevatorSubsystem.runOnce(() -> {
+            elevatorSubsystem.setManualControl(0.0); // Stop
+        })
+    );
 
-    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+    // Down arrow - Move elevator down  
+    m_driverController.povDown().whileTrue(
+        elevatorSubsystem.run(() -> {
+            elevatorSubsystem.setManualControl(-0.5); // 50% power down
+        })
+    ).whileFalse(
+        elevatorSubsystem.runOnce(() -> {
+            elevatorSubsystem.setManualControl(0.0); // Stop
+        })
+    );
   }
 
   /**

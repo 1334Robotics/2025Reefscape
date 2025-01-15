@@ -8,6 +8,7 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class ElevatorSubsystem extends SubsystemBase {
     // Hardware
@@ -19,6 +20,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     private double secondaryPositionInches = 0.0;
     private double primaryTargetInches = 0.0;
     private double secondaryTargetInches = 0.0;
+    private double manualPower = 0.0;
     
     private final MotionMagicVoltage primaryMotionMagic = new MotionMagicVoltage(0);
     private final MotionMagicVoltage secondaryMotionMagic = new MotionMagicVoltage(0);
@@ -68,15 +70,30 @@ public class ElevatorSubsystem extends SubsystemBase {
         // Get position in rotations and convert to inches
         primaryPositionInches = primaryMotor.getPosition().getValueAsDouble() * ElevatorConstants.GEAR_RATIO;
         secondaryPositionInches = secondaryMotor.getPosition().getValueAsDouble() * ElevatorConstants.GEAR_RATIO;
+
+        // Put values on NetworkTables for simulation visualization
+        SmartDashboard.putNumber("Elevator/Primary Position (inches)", primaryPositionInches);
+        SmartDashboard.putNumber("Elevator/Secondary Position (inches)", secondaryPositionInches);
+        SmartDashboard.putNumber("Elevator/Manual Power", manualPower);
     }
     
     @Override
     public void simulationPeriodic() {
-        // Update simulation for primary motor
-        primaryElevatorSim.update(0.02); // Assuming a 20ms update period
+        // Update simulation with manual control values
+        primaryElevatorSim.setInput(manualPower * 12.0); // Convert -1 to 1 to voltage
+        secondaryElevatorSim.setInput(manualPower * 12.0);
 
-        // Update simulation for secondary motor
-        secondaryElevatorSim.update(0.02); // Assuming a 20ms update period
+        // Update simulation
+        primaryElevatorSim.update(0.02);
+        secondaryElevatorSim.update(0.02);
+
+        // Update simulated encoder positions
+        double primarySimPosition = primaryElevatorSim.getPositionMeters();
+        double secondarySimPosition = secondaryElevatorSim.getPositionMeters();
+
+        // Convert meters to motor rotations for simulation
+        primaryMotor.getSimState().setRawRotorPosition(primarySimPosition / (2 * Math.PI * ElevatorConstants.PRIMARY_DRUM_RADIUS_INCHES));
+        secondaryMotor.getSimState().setRawRotorPosition(secondarySimPosition / (2 * Math.PI * ElevatorConstants.SECONDARY_DRUM_RADIUS_INCHES));
     }
     
     public Command moveToPosition(double heightInches) {
@@ -148,6 +165,13 @@ public class ElevatorSubsystem extends SubsystemBase {
         boolean secondaryAtTarget = Math.abs(secondaryPositionInches - secondaryTargetInches) < 
             ElevatorConstants.POSITION_TOLERANCE_INCHES;
         return primaryAtTarget && secondaryAtTarget;
+    }
+
+    // Add this method to enable manual control
+    public void setManualControl(double power) {
+        manualPower = power;
+        primaryMotor.set(power);
+        secondaryMotor.set(power);
     }
 
     public enum ElevatorPosition {
