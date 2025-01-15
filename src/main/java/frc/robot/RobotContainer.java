@@ -25,7 +25,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
-  private final ElevatorSubsystem m_elevatorSubsystem = new ElevatorSubsystem(1, 2);
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
@@ -33,6 +32,7 @@ public class RobotContainer {
 
   // Subsystems
   public static final GyroSubsystem gyroSubsystem = new GyroSubsystem();
+  public static final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(1, 2);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
