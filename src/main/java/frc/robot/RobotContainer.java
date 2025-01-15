@@ -4,12 +4,12 @@
 
 package frc.robot;
 
-import frc.robot.constants.RobotContainerConstants;
-import frc.robot.subsystems.gyro.GyroSubsystem;
-import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.constants.RobotContainerConstants;
+import frc.robot.subsystems.elevator.ElevatorSubsystem;
+import frc.robot.subsystems.gyro.GyroSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -42,8 +42,28 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    
-  }
+    // Up arrow - Move elevator up
+    driverController.povUp().whileTrue(
+        elevatorSubsystem.run(() -> {
+            elevatorSubsystem.setManualControl(0.5); // 50% power up
+        })
+    ).whileFalse(
+        elevatorSubsystem.runOnce(() -> {
+            elevatorSubsystem.setManualControl(0.0); // Stop
+        })
+    );
+
+    // Down arrow - Move elevator down  
+    driverController.povDown().whileTrue(
+        elevatorSubsystem.run(() -> {
+            elevatorSubsystem.setManualControl(-0.5); // 50% power down
+        })
+    ).whileFalse(
+        elevatorSubsystem.runOnce(() -> {
+            elevatorSubsystem.setManualControl(0.0); // Stop
+        })
+    );
+}
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
