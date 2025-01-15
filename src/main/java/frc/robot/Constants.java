@@ -16,4 +16,20 @@ public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
+  public static class ElevatorConstants {
+    public static final double GEAR_RATIO = 10.0;
+    public static final double MAX_HEIGHT_INCHES = 30.0;
+    public static final double MIN_HEIGHT_INCHES = 0.0;
+    public static final double POSITION_TOLERANCE = 0.5;
+    public static final double DRUM_RADIUS_INCHES = 0.75;
+    public static final double POSITION_TOLERANCE_INCHES = 0.5;
+    
+    public static final double PRIMARY_MAX_HEIGHT_INCHES = 48.0;
+    public static final double PRIMARY_MIN_HEIGHT_INCHES = 0.0;
+    public static final double SECONDARY_MAX_HEIGHT_INCHES = 24.0;
+    public static final double SECONDARY_MIN_HEIGHT_INCHES = 0.0;
+    
+    public static final double PRIMARY_DRUM_RADIUS_INCHES = 1.0;
+    public static final double SECONDARY_DRUM_RADIUS_INCHES = 0.75;
+  }
 }
