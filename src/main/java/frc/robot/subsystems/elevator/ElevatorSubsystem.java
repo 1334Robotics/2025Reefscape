@@ -175,9 +175,10 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public enum ElevatorPosition {
-        GROUND(0.0, 0.0),
-        MIDDLE(24.0, 12.0),
-        HIGH(48.0, 24.0);
+        L0(0.0, 0.0),
+        L1(24.0, 12.0),
+        L2(36.0, 18.0),
+        L3(48.0, 24.0);
 
         public final double primaryHeightInches;
         public final double secondaryHeightInches;
