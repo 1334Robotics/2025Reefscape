@@ -1,6 +1,6 @@
 package frc.robot.subsystems.elevator;
 
-import frc.robot.Constants.ElevatorConstants;
+import frc.robot.constants.ElevatorConstants;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.TalonFX;
