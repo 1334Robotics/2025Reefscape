@@ -7,20 +7,20 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.MailboxConstants;
 
-public class MailboxSubststem extends SubsystemBase {
+public class MailboxSubsystem extends SubsystemBase {
     private final TalonSRX[] motors;
 
-    public MailboxSubststem() {
+    public MailboxSubsystem() {
         this.motors = new TalonSRX[2];
         this.motors[0] = new TalonSRX(MailboxConstants.MOTOR_ONE_ID);
-        this.motors[2] = new TalonSRX(MailboxConstants.MOTOR_TWO_ID);
+        this.motors[1] = new TalonSRX(MailboxConstants.MOTOR_TWO_ID);
         SmartDashboard.putString("[MAILBOX] State", "Unknown");
     }
 
-    public MailboxSubststem(int motorOneId, int motorTwoId) {
+    public MailboxSubsystem(int motorOneId, int motorTwoId) {
         this.motors = new TalonSRX[2];
         this.motors[0] = new TalonSRX(motorOneId);
-        this.motors[2] = new TalonSRX(motorTwoId);
+        this.motors[1] = new TalonSRX(motorTwoId);
         SmartDashboard.putString("[MAILBOX] State", "Unknown");
     }
 
@@ -41,5 +41,11 @@ public class MailboxSubststem extends SubsystemBase {
         this.motors[0].set(ControlMode.PercentOutput, 0);
         this.motors[1].set(ControlMode.PercentOutput, 0);
         SmartDashboard.putString("[MAILBOX] State", "Stopped");
+    }
+
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("[MAILBOX] Motor One Speed", this.motors[0].getMotorOutputPercent());
+        SmartDashboard.putNumber("[MAILBOX] Motor Two Speed", this.motors[1].getMotorOutputPercent());
     }
 }
