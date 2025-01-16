@@ -1,0 +1,25 @@
+{
+  "location": {
+    "front": -10.875,
+    "left": 10.875
+  },
+  "drive": {
+    "type": "talonfx",
+    "id": 5,
+    "canbus": "rio"
+  },
+  "angle": {
+    "type": "talonfx",
+    "id": 6,
+    "canbus": "rio"
+  },
+  "encoder": {
+    "type": "cancoder",
+    "id": 11,
+    "canbus": "rio"
+  },
+  "inverted": {
+    "drive": false,
+    "angle": false
+  }
+}
