@@ -4,11 +4,17 @@
 
 package frc.robot;
 
+import frc.robot.commands.mailbox.InputCommand;
+import frc.robot.commands.mailbox.OutputCommand;
+import frc.robot.commands.mailbox.StopCommand;
 import frc.robot.constants.RobotContainerConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
+import frc.robot.subsystems.mailbox.MailboxSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -19,12 +25,19 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // Controllers
-  private final CommandXboxController driverController = new CommandXboxController(RobotContainerConstants.DRIVER_CONTROLLER_PORT);
+  private final XboxController driverController   = new XboxController(RobotContainerConstants.DRIVER_CONTROLLER_PORT);
+  private final XboxController operatorController = new XboxController(RobotContainerConstants.OPERATOR_CONTROLLER_PORT);
+
+  // Controller buttons
+  private final JoystickButton mailboxInputButton  = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_INPUT_BUTTON);
+  private final JoystickButton mailboxOutputButton = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_OUTPUT_BUTTON);
+  private final JoystickButton mailboxStopButton   = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_STOP_BUTTON);
 
   // Subsystems
   public static final GyroSubsystem gyroSubsystem = new GyroSubsystem();
   public static final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(RobotContainerConstants.ELEVATOR_PRIMARY_MOTOR_ID,
                                                                                   RobotContainerConstants.ELEVATOR_SECONDARY_MOTOR_ID);
+  public static final MailboxSubsystem mailboxSubsystem = new MailboxSubsystem();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -42,7 +55,9 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    
+    mailboxInputButton.onTrue(new InputCommand());
+    mailboxOutputButton.onTrue(new OutputCommand());
+    mailboxStopButton.onTrue(new StopCommand());
   }
 
   /**
