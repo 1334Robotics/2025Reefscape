@@ -15,4 +15,11 @@ public class ElevatorConstants {
     
     public static final double PRIMARY_DRUM_RADIUS_INCHES = 1;
     public static final double SECONDARY_DRUM_RADIUS_INCHES = 0.75;
+
+    public static final double GROUND_PRIMARY_HEIGHT = 0;
+    public static final double GROUND_SECONDARY_HEIGHT = 0;
+    public static final double MIDDLE_PRIMARY_HEIGHT = 24;
+    public static final double MIDDLE_SECONDARY_HEIGHT = 12;
+    public static final double HIGH_PRIMARY_HEIGHT = 48;
+    public static final double HIGH_SECONDARY_HEIGHT = 24;
 }
