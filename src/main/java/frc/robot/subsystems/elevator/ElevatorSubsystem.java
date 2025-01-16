@@ -72,9 +72,9 @@ public class ElevatorSubsystem extends SubsystemBase {
         secondaryPositionInches = secondaryMotor.getPosition().getValueAsDouble() * ElevatorConstants.GEAR_RATIO;
 
         // Put values on NetworkTables for simulation visualization
-        SmartDashboard.putNumber("Elevator/Primary Position (inches)", primaryPositionInches);
-        SmartDashboard.putNumber("Elevator/Secondary Position (inches)", secondaryPositionInches);
-        SmartDashboard.putNumber("Elevator/Manual Power", manualPower);
+        SmartDashboard.putNumber("[ELEVATOR] Primary Position (inches)", primaryPositionInches);
+        SmartDashboard.putNumber("[ELEVATOR] Secondary Position (inches)", secondaryPositionInches);
+        SmartDashboard.putNumber("[ELEVATOR] Manual Power", manualPower);
     }
     
     @Override
@@ -175,9 +175,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public enum ElevatorPosition {
-        GROUND(0.0, 0.0),
-        MIDDLE(24.0, 12.0),
-        HIGH(48.0, 24.0);
+        GROUND(ElevatorConstants.GROUND_PRIMARY_HEIGHT, ElevatorConstants.GROUND_SECONDARY_HEIGHT),
+        MIDDLE(ElevatorConstants.MIDDLE_PRIMARY_HEIGHT, ElevatorConstants.MIDDLE_SECONDARY_HEIGHT),
+        HIGH(ElevatorConstants.HIGH_PRIMARY_HEIGHT, ElevatorConstants.HIGH_SECONDARY_HEIGHT);
 
         public final double primaryHeightInches;
         public final double secondaryHeightInches;
