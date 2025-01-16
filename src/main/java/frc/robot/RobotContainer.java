@@ -61,7 +61,6 @@ public class RobotContainer {
     mailboxInputButton.onTrue(new InputCommand());
     mailboxOutputButton.onTrue(new OutputCommand());
     mailboxStopButton.onTrue(new StopCommand());
-  }
     // Up arrow - Move elevator up
     new Trigger(() -> driverController.getPOV() == 0).whileTrue(
         elevatorSubsystem.run(() -> {
