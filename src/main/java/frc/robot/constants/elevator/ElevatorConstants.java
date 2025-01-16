@@ -1,4 +1,4 @@
-package frc.robot.constants;
+package frc.robot.constants.elevator;
 
 public class ElevatorConstants {
     public static final double GEAR_RATIO = 10;

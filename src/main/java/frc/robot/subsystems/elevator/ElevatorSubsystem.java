@@ -1,8 +1,9 @@
 package frc.robot.subsystems.elevator;
 
-import frc.robot.constants.ElevatorConstants;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.constants.elevator.ElevatorConstants;
+
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -88,8 +89,10 @@ public class ElevatorSubsystem extends SubsystemBase {
         secondaryElevatorSim.update(0.02);
 
         // Update simulated encoder positions
-        double primarySimPosition = primaryElevatorSim.getPositionMeters();
-        double secondarySimPosition = secondaryElevatorSim.getPositionMeters();
+        double primarySimPositionMeters = primaryElevatorSim.getPositionMeters();
+        double secondarySimPositionMeters = secondaryElevatorSim.getPositionMeters();
+        double primarySimPosition = primarySimPositionMeters * 39.3701; // Convert meters to inches
+        double secondarySimPosition = secondarySimPositionMeters * 39.3701; // Convert meters to inches
 
         // Convert meters to motor rotations for simulation
         primaryMotor.getSimState().setRawRotorPosition(primarySimPosition / (2 * Math.PI * ElevatorConstants.PRIMARY_DRUM_RADIUS_INCHES));
