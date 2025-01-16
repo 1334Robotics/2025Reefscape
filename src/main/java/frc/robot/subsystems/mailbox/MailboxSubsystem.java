@@ -15,6 +15,8 @@ public class MailboxSubsystem extends SubsystemBase {
         this.motors[0] = new TalonSRX(MailboxConstants.MOTOR_ONE_ID);
         this.motors[1] = new TalonSRX(MailboxConstants.MOTOR_TWO_ID);
         SmartDashboard.putString("[MAILBOX] State", "Unknown");
+        SmartDashboard.putNumber("[MAILBOX] Motor One Speed", 0);
+        SmartDashboard.putNumber("[MAILBOX] Motor Two Speed", 0);
     }
 
     public MailboxSubsystem(int motorOneId, int motorTwoId) {
@@ -22,6 +24,8 @@ public class MailboxSubsystem extends SubsystemBase {
         this.motors[0] = new TalonSRX(motorOneId);
         this.motors[1] = new TalonSRX(motorTwoId);
         SmartDashboard.putString("[MAILBOX] State", "Unknown");
+        SmartDashboard.putNumber("[MAILBOX] Motor One Speed", 0);
+        SmartDashboard.putNumber("[MAILBOX] Motor Two Speed", 0);
     }
 
     public void input() {
