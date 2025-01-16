@@ -96,12 +96,12 @@ public class ElevatorSubsystem extends SubsystemBase {
         secondaryMotor.getSimState().setRawRotorPosition(secondarySimPosition / (2 * Math.PI * ElevatorConstants.SECONDARY_DRUM_RADIUS_INCHES));
     }
     
-    public Command moveToPosition(double heightInches) {
+    public Command moveToPosition(double primaryheightInches , double secondaryheightInches) {
         return runOnce(() -> {
-            primaryTargetInches = heightInches;
-            secondaryTargetInches = heightInches;
-            primaryMotor.setControl(primaryMotionMagic.withPosition(heightInches / ElevatorConstants.GEAR_RATIO));
-            secondaryMotor.setControl(secondaryMotionMagic.withPosition(heightInches / ElevatorConstants.GEAR_RATIO));
+            primaryTargetInches = primaryheightInches;
+            secondaryTargetInches = secondaryheightInches;
+            primaryMotor.setControl(primaryMotionMagic.withPosition(primaryheightInches / ElevatorConstants.GEAR_RATIO));
+            secondaryMotor.setControl(secondaryMotionMagic.withPosition(secondaryheightInches / ElevatorConstants.GEAR_RATIO));
         });
     }
     
@@ -117,8 +117,12 @@ public class ElevatorSubsystem extends SubsystemBase {
                Math.abs(secondaryPositionInches - secondaryTargetInches) < ElevatorConstants.POSITION_TOLERANCE;
     }
     
-    public double getCurrentHeight() {
+    public double getCurrentHeightPrimary() {
         return primaryPositionInches;
+    }
+
+    public double getCurrentHeightSecondary() {
+        return secondaryPositionInches;
     }
 
     public void setTargetPosition(double primaryTargetInches, double secondaryTargetInches) {
@@ -189,9 +193,3 @@ public class ElevatorSubsystem extends SubsystemBase {
         }
     }
 }
-
-
-// Example command usage
-// ElevatorSubsystem elevator = new ElevatorSubsystem(1, 2);
-// elevator.setTargetPosition(36.0, 24.0);  // Move primary to 36 inches, secondary to 24 inches
-// elevator.moveToPreset(ElevatorPosition.HIGH);  // Move to preset position (both stages)
