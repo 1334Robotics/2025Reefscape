@@ -4,13 +4,16 @@
 
 package frc.robot;
 
+import frc.robot.commands.drive.DriveCommand;
 import frc.robot.commands.mailbox.InputCommand;
 import frc.robot.commands.mailbox.OutputCommand;
 import frc.robot.commands.mailbox.StopCommand;
 import frc.robot.constants.RobotContainerConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
+import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -38,11 +41,18 @@ public class RobotContainer {
   public static final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(RobotContainerConstants.ELEVATOR_PRIMARY_MOTOR_ID,
                                                                                   RobotContainerConstants.ELEVATOR_SECONDARY_MOTOR_ID);
   public static final MailboxSubsystem mailboxSubsystem = new MailboxSubsystem();
+  public static final SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
+
+    DriveCommand xboxDriveCommand = new DriveCommand(() -> MathUtil.applyDeadband(driverController.getLeftX(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
+                                                     () -> MathUtil.applyDeadband(driverController.getLeftY(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
+                                                     () -> MathUtil.applyDeadband(-driverController.getRightX(), RobotContainerConstants.CONTROLLER_ROTATION_DEADBAND));
+
+    swerveSubsystem.setDefaultCommand(xboxDriveCommand);
   }
 
   /**
