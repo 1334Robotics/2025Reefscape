@@ -3,6 +3,8 @@ package frc.robot.constants;
 import frc.robot.XboxMappings;
 
 public class RobotContainerConstants {
+    public static final String CANIVORE_NAME = "CANivore";
+    
     public static final int DRIVER_CONTROLLER_PORT      = 0;
     public static final int OPERATOR_CONTROLLER_PORT    = 1;
 

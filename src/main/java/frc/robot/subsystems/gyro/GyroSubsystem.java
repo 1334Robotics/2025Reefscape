@@ -13,15 +13,15 @@ public class GyroSubsystem extends SubsystemBase {
     private Pigeon2 pigeon;
   
     public GyroSubsystem() {
-        pigeon = new Pigeon2(GyroConstants.DEVICEID);
+        this.pigeon = new Pigeon2(GyroConstants.DEVICEID, GyroConstants.CAN_BUS);
     }
 
     public GyroSubsystem(int deviceId) {
-        pigeon = new Pigeon2(deviceId);
+        this.pigeon = new Pigeon2(deviceId);
     }
 
     public GyroSubsystem(int deviceId, String canBus) {
-        pigeon = new Pigeon2(deviceId, canBus);
+        this.pigeon = new Pigeon2(deviceId, canBus);
     }
 
     public class GyroData {
