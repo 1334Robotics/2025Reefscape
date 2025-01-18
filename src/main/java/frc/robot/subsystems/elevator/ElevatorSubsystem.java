@@ -39,7 +39,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         primaryElevatorSim = new ElevatorSim(
             DCMotor.getKrakenX60(1),
             ElevatorConstants.GEAR_RATIO,
-            10.0, // Mass in kg
+            0.1, // Mass in kg
             0.05, // Drum radius in meters
             ElevatorConstants.MIN_HEIGHT_INCHES,
             ElevatorConstants.MAX_HEIGHT_INCHES,
@@ -51,7 +51,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         secondaryElevatorSim = new ElevatorSim(
             DCMotor.getKrakenX60(1),
             ElevatorConstants.GEAR_RATIO,
-            10.0, // Mass in kg
+            0.1, // Mass in kg
             0.05, // Drum radius in meters
             ElevatorConstants.MIN_HEIGHT_INCHES,
             ElevatorConstants.MAX_HEIGHT_INCHES,
