@@ -86,27 +86,46 @@ public class VisionSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        var result = camera.getLatestResult();
-        if (result.hasTargets()) {
-            PhotonTrackedTarget target = result.getBestTarget();
-            double ambiguity = target.getPoseAmbiguity();
-            
-            if (ambiguity < VisionConstants.MAX_AMBIGUITY) {
-                SmartDashboard.putNumber("Vision/TagID", target.getFiducialId());
-                SmartDashboard.putNumber("Vision/Ambiguity", ambiguity);
-                SmartDashboard.putNumber("Vision/Yaw", target.getYaw());
-                SmartDashboard.putNumber("Vision/Pitch", target.getPitch());
-                
-                Pose2d currentPose = getCurrentPose();
-                m_field.setRobotPose(currentPose);
-                lastPose = currentPose;
+        try {
+            var result = camera.getLatestResult();
+            if (result != null && result.hasTargets()) {
+                PhotonTrackedTarget target = result.getBestTarget();
+                if (target != null) {
+                    double ambiguity = target.getPoseAmbiguity();
+                    
+                    if (ambiguity < VisionConstants.MAX_AMBIGUITY) {
+                        SmartDashboard.putNumber("Vision/TagID", target.getFiducialId());
+                        SmartDashboard.putNumber("Vision/Ambiguity", ambiguity);
+                        SmartDashboard.putNumber("Vision/Yaw", target.getYaw());
+                        SmartDashboard.putNumber("Vision/Pitch", target.getPitch());
+                        
+                        updatePoseEstimation();
+                    }
+                }
             }
+        } catch (Exception e) {
+            System.err.println("Error in VisionSubsystem periodic: " + e.getMessage());
+        }
+    }
+
+    private void updatePoseEstimation() {
+        try {
+            Pose2d currentPose = getCurrentPose();
+            m_field.setRobotPose(currentPose);
+            lastPose = currentPose;
+        } catch (Exception e) {
+            System.err.println("Error updating pose estimation: " + e.getMessage());
         }
     }
 
     private Pose2d getCurrentPose() {
-        Optional<EstimatedRobotPose> result = getEstimatedGlobalPose(lastPose);
-        return result.map(pose -> pose.estimatedPose.toPose2d()).orElse(lastPose);
+        try {
+            Optional<EstimatedRobotPose> result = getEstimatedGlobalPose(lastPose);
+            return result.map(pose -> pose.estimatedPose.toPose2d()).orElse(lastPose);
+        } catch (Exception e) {
+            System.err.println("Error getting current pose: " + e.getMessage());
+            return lastPose;
+        }
     }
 
     @Override
@@ -115,7 +134,7 @@ public class VisionSubsystem extends SubsystemBase {
             try {
                 visionSim.update(lastPose);
                 var result = camera.getLatestResult();
-                if (result.hasTargets()) {
+                if (result != null && result.hasTargets()) {
                     SmartDashboard.putNumber("Vision/SimTargetCount", result.getTargets().size());
                 }
             } catch (Exception e) {
@@ -125,11 +144,20 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
-        if (poseEstimator == null) {
+        try {
+            if (poseEstimator == null) {
+                return Optional.empty();
+            }
+            poseEstimator.setReferencePose(prevEstimatedRobotPose);
+            var result = camera.getLatestResult();
+            if (result == null) {
+                return Optional.empty();
+            }
+            return poseEstimator.update(result);
+        } catch (Exception e) {
+            System.err.println("Error getting estimated global pose: " + e.getMessage());
             return Optional.empty();
         }
-        poseEstimator.setReferencePose(prevEstimatedRobotPose);
-        return poseEstimator.update(camera.getLatestResult());
     }
 
     public void updateCameraPosition(Transform3d newTransform) {
