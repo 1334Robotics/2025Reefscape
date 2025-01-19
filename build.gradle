@@ -11,24 +11,16 @@ java {
 def ROBOT_MAIN_CLASS = "frc.robot.Main"
 
 // Define my targets (RoboRIO) and artifacts (deployable files)
-// This is added by GradleRIO's backing project DeployUtils.
 deploy {
     targets {
         roborio(getTargetTypeClass('RoboRIO')) {
-            // Team number is loaded either from the .wpilib/wpilib_preferences.json
-            // or from command line. If not found an exception will be thrown.
-            // You can use getTeamOrDefault(team) instead of getTeamNumber if you
-            // want to store a team number in this file.
             team = project.frc.getTeamNumber()
             debug = project.frc.getDebugOrDefault(false)
 
             artifacts {
-                // First part is artifact name, 2nd is artifact type
-                // getTargetTypeClass is a shortcut to get the class type using a string
                 frcJava(getArtifactTypeClass('FRCJavaArtifact')) {
                 }
 
-                // Static files artifact
                 frcStaticFileDeploy(getArtifactTypeClass('FileTreeArtifact')) {
                     files = project.fileTree('src/main/deploy')
                     directory = '/home/lvuser/deploy'
@@ -47,6 +39,13 @@ wpi.java.debugJni = false
 // Set this to true to enable desktop support.
 def includeDesktopSupport = true
 
+repositories {
+    mavenCentral()
+    maven { url = uri("https://frcmaven.wpi.edu/artifactory/release") }
+    maven { url = uri("https://frcmaven.wpi.edu/artifactory/vendors-release") }
+    maven { url = uri("https://maven.ctr-electronics.com/release") }
+}
+
 sourceSets {
     main {
         java {
@@ -61,16 +60,13 @@ sourceSets {
     }
 }
 
-// Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
-// Also defines JUnit 5.
 dependencies {
     annotationProcessor wpi.java.deps.wpilibAnnotations()
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
 
-    // PhotonVision dependencies
-    implementation "org.photonvision:PhotonLib-java:v2024.1.1-beta-7"
-    implementation "org.photonvision:PhotonVision-java:v2024.1.1-beta-7"
+    // Just use WPILib vendor deps for PhotonVision
+    implementation wpi.java.vendor.java()
 
     roborioDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.roborio)
     roborioDebug wpi.java.vendor.jniDebug(wpi.platforms.roborio)
@@ -85,7 +81,6 @@ dependencies {
     nativeRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.desktop)
     nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
     simulationRelease wpi.sim.enableRelease()
-    simulation wpi.sim.ws_server.desktop()
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -99,15 +94,11 @@ test {
     systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
 }
 
-// Simulation configuration (e.g. environment variables).
+// Simulation configuration
 wpi.sim.addGui().defaultEnabled = true
 wpi.sim.addDriverstation()
-wpi.sim.envVar("HALSIMWS_HOST", "127.0.0.1")
-wpi.sim.envVar("HALSIMWS_PORT", "3300")
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
-// in order to make them all available at runtime. Also adding the manifest so WPILib
-// knows where to look for our Robot Class.
 jar {
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     from sourceSets.main.allSource

@@ -8,11 +8,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-import org.photonvision.estimation.EstimatedRobotPose;
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
-import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 import frc.robot.constants.VisionConstants;
 
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -25,6 +25,8 @@ public class VisionSubsystem extends SubsystemBase {
     private final AprilTagFieldLayout tagLayout;
     private PhotonPoseEstimator poseEstimator;
     private final Field2d m_field = new Field2d();
+    private Pose2d lastPose = new Pose2d();
+    
     // Simulation-specific components
     private VisionSystemSim visionSim;
     private PhotonCameraSim cameraSim;
@@ -36,15 +38,14 @@ public class VisionSubsystem extends SubsystemBase {
         System.out.println("Camera created: " + VisionConstants.CAMERA_NAME);
 
         try {
-            // Load 2024 field layout
+            // Load field layout
             tagLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
             System.out.println("AprilTag layout loaded successfully");
             
             // Initialize pose estimator
             poseEstimator = new PhotonPoseEstimator(
                 tagLayout, 
-                PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, 
-                camera, 
+                PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                 VisionConstants.ROBOT_TO_CAMERA
             );
 
@@ -60,10 +61,8 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     private void initializeSimulation() {
-        // Create vision system simulation
         visionSim = new VisionSystemSim("main");
         
-        // Configure camera properties for simulation
         SimCameraProperties cameraProp = new SimCameraProperties();
         cameraProp.setCalibration(
             VisionConstants.CAMERA_RESOLUTION_WIDTH,
@@ -78,10 +77,7 @@ public class VisionSubsystem extends SubsystemBase {
         cameraProp.setAvgLatencyMs(VisionConstants.SIM_AVERAGE_LATENCY_MS);
         cameraProp.setLatencyStdDevMs(VisionConstants.SIM_LATENCY_STD_DEV_MS);
 
-        // Create camera simulation
         cameraSim = new PhotonCameraSim(camera, cameraProp);
-        
-        // Add camera and AprilTags to simulation
         visionSim.addCamera(cameraSim, VisionConstants.ROBOT_TO_CAMERA);
         visionSim.addAprilTags(tagLayout);
         
@@ -90,54 +86,68 @@ public class VisionSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // Get the latest vision data
-        PhotonPipelineResult result = camera.getLatestResult();
+        var result = camera.getLatestResult();
         if (result.hasTargets()) {
-            var target = result.getBestTarget();
-            System.out.println("Detected AprilTag ID: " + target.getFiducialId() +
-                             ", Yaw: " + target.getYaw() +
-                             ", Pitch: " + target.getPitch());
-            // Update field visualization with latest target data
-            m_field.setRobotPose(getCurrentPose());
-            System.out.println("Target found: ID=" + target.getFiducialId());
+            PhotonTrackedTarget target = result.getBestTarget();
+            double ambiguity = target.getPoseAmbiguity();
+            
+            if (ambiguity < VisionConstants.MAX_AMBIGUITY) {
+                SmartDashboard.putNumber("Vision/TagID", target.getFiducialId());
+                SmartDashboard.putNumber("Vision/Ambiguity", ambiguity);
+                SmartDashboard.putNumber("Vision/Yaw", target.getYaw());
+                SmartDashboard.putNumber("Vision/Pitch", target.getPitch());
+                
+                Pose2d currentPose = getCurrentPose();
+                m_field.setRobotPose(currentPose);
+                lastPose = currentPose;
+            }
         }
     }
 
     private Pose2d getCurrentPose() {
-        // This is a placeholder - replace with your actual robot pose
-        return new Pose2d();
+        Optional<EstimatedRobotPose> result = getEstimatedGlobalPose(lastPose);
+        return result.map(pose -> pose.estimatedPose.toPose2d()).orElse(lastPose);
+    }
 
     @Override
     public void simulationPeriodic() {
-        if (visionSim != null) {
-            // For simulation testing, we'll use a static pose
-            // In a real robot, this would come from odometry
-            Pose2d robotPose = new Pose2d(3, 3, new Rotation2d());
-            visionSim.update(robotPose);
-            System.out.println("Vision simulation updated with pose: " + robotPose.toString());
+        if (visionSim != null && cameraSim != null) {
+            try {
+                visionSim.update(lastPose);
+                var result = camera.getLatestResult();
+                if (result.hasTargets()) {
+                    SmartDashboard.putNumber("Vision/SimTargetCount", result.getTargets().size());
+                }
+            } catch (Exception e) {
+                System.err.println("Error in vision simulation: " + e.getMessage());
+            }
         }
     }
 
-    /**
-     * Gets the estimated robot pose if available
-     * @param prevEstimatedRobotPose Previous estimated robot pose for reference
-     * @return Optional containing the estimated pose, or empty if no estimate available
-     */
     public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
         if (poseEstimator == null) {
             return Optional.empty();
         }
         poseEstimator.setReferencePose(prevEstimatedRobotPose);
-        return poseEstimator.update();
+        return poseEstimator.update(camera.getLatestResult());
     }
 
-    /**
-     * Updates the camera position if it's mounted on a moving mechanism (like a turret)
-     * @param newTransform The new robot-to-camera transform
-     */
     public void updateCameraPosition(Transform3d newTransform) {
+        if (poseEstimator != null) {
+            poseEstimator.setRobotToCameraTransform(newTransform);
+        }
         if (RobotBase.isSimulation() && visionSim != null) {
             visionSim.adjustCamera(cameraSim, newTransform);
         }
+    }
+
+    public boolean isConnected() {
+        return camera.isConnected();
+    }
+
+    public double getLatencyMillis() {
+        var currentTime = edu.wpi.first.wpilibj.Timer.getFPGATimestamp();
+        var timestampSeconds = camera.getLatestResult().getTimestampSeconds();
+        return (currentTime - timestampSeconds) * 1000.0; // Convert to milliseconds
     }
 }
