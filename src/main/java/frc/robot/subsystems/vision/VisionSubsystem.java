@@ -26,6 +26,7 @@ public class VisionSubsystem extends SubsystemBase {
     private PhotonPoseEstimator poseEstimator;
     private final Field2d m_field = new Field2d();
     private Pose2d lastPose = new Pose2d();
+    private boolean hasLoggedSimWarning = false;
     
     // Simulation-specific components
     private VisionSystemSim visionSim;
@@ -87,6 +88,14 @@ public class VisionSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         try {
+            if (camera == null) {
+                if (!hasLoggedSimWarning) {
+                    System.out.println("Camera not initialized in VisionSubsystem");
+                    hasLoggedSimWarning = true;
+                }
+                return;
+            }
+
             var result = camera.getLatestResult();
             if (result != null && result.hasTargets()) {
                 PhotonTrackedTarget target = result.getBestTarget();
@@ -102,19 +111,27 @@ public class VisionSubsystem extends SubsystemBase {
                         updatePoseEstimation();
                     }
                 }
+            } else {
+                SmartDashboard.putNumber("Vision/TagID", -1);
+                SmartDashboard.putNumber("Vision/HasTarget", 0);
             }
         } catch (Exception e) {
-            System.err.println("Error in VisionSubsystem periodic: " + e.getMessage());
+            System.err.println("Error in VisionSubsystem periodic: " + e.toString());
+            e.printStackTrace();
         }
     }
 
     private void updatePoseEstimation() {
         try {
+            if (poseEstimator == null) {
+                return;
+            }
             Pose2d currentPose = getCurrentPose();
             m_field.setRobotPose(currentPose);
             lastPose = currentPose;
         } catch (Exception e) {
-            System.err.println("Error updating pose estimation: " + e.getMessage());
+            System.err.println("Error updating pose estimation: " + e.toString());
+            e.printStackTrace();
         }
     }
 
@@ -123,29 +140,43 @@ public class VisionSubsystem extends SubsystemBase {
             Optional<EstimatedRobotPose> result = getEstimatedGlobalPose(lastPose);
             return result.map(pose -> pose.estimatedPose.toPose2d()).orElse(lastPose);
         } catch (Exception e) {
-            System.err.println("Error getting current pose: " + e.getMessage());
+            System.err.println("Error getting current pose: " + e.toString());
+            e.printStackTrace();
             return lastPose;
         }
     }
 
     @Override
     public void simulationPeriodic() {
-        if (visionSim != null && cameraSim != null) {
+        if (RobotBase.isSimulation()) {
             try {
+                if (visionSim == null || cameraSim == null) {
+                    if (!hasLoggedSimWarning) {
+                        System.out.println("Vision simulation not fully initialized");
+                        hasLoggedSimWarning = true;
+                    }
+                    return;
+                }
+
                 visionSim.update(lastPose);
+                
                 var result = camera.getLatestResult();
                 if (result != null && result.hasTargets()) {
                     SmartDashboard.putNumber("Vision/SimTargetCount", result.getTargets().size());
+                } else {
+                    SmartDashboard.putNumber("Vision/SimTargetCount", 0);
                 }
             } catch (Exception e) {
-                System.err.println("Error in vision simulation: " + e.getMessage());
+                System.err.println("Error in vision simulation: " + e.toString());
+                e.printStackTrace();
             }
         }
     }
 
+
     public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
         try {
-            if (poseEstimator == null) {
+            if (poseEstimator == null || camera == null) {
                 return Optional.empty();
             }
             poseEstimator.setReferencePose(prevEstimatedRobotPose);
@@ -155,7 +186,8 @@ public class VisionSubsystem extends SubsystemBase {
             }
             return poseEstimator.update(result);
         } catch (Exception e) {
-            System.err.println("Error getting estimated global pose: " + e.getMessage());
+            System.err.println("Error getting estimated global pose: " + e.toString());
+            e.printStackTrace();
             return Optional.empty();
         }
     }
