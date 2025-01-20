@@ -7,6 +7,8 @@ package frc.robot;
 import frc.robot.commands.mailbox.InputCommand;
 import frc.robot.commands.mailbox.OutputCommand;
 import frc.robot.commands.mailbox.StopCommand;
+import frc.robot.commands.solenoid.ExtendCommand;
+import frc.robot.commands.solenoid.RetractCommand;
 import frc.robot.constants.RobotContainerConstants;
 // import frc.robot.constants.SolenoidConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
@@ -35,11 +37,16 @@ public class RobotContainer {
   private final JoystickButton mailboxInputButton  = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_INPUT_BUTTON);
   private final JoystickButton mailboxOutputButton = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_OUTPUT_BUTTON);
   private final JoystickButton mailboxStopButton   = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_STOP_BUTTON);
+  private final JoystickButton extendButton = new JoystickButton(operatorController, RobotContainerConstants.SOLENOID_EXTEND_BUTTON);
+  private final JoystickButton retractButton = new JoystickButton(operatorController, RobotContainerConstants.SOLENOID_RETRACT_BUTTON);
+
 
   // Subsystems
   public static final GyroSubsystem gyroSubsystem = new GyroSubsystem();
   public static final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(RobotContainerConstants.ELEVATOR_PRIMARY_MOTOR_ID,
                                                                                   RobotContainerConstants.ELEVATOR_SECONDARY_MOTOR_ID);
+  public static final MailboxSubsystem mailboxSubsystem = new MailboxSubsystem();
+  public static final SolenoidSubsystem solenoidSubsystem = new SolenoidSubsystem();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -60,6 +67,9 @@ public class RobotContainer {
     mailboxInputButton.onTrue(new InputCommand());
     mailboxOutputButton.onTrue(new OutputCommand());
     mailboxStopButton.onTrue(new StopCommand());
+    extendButton.onTrue(new ExtendCommand());
+    retractButton.onTrue(new RetractCommand());
+    
   }
 
   /**
