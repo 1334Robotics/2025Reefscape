@@ -33,7 +33,7 @@ public class VisionSubsystem extends SubsystemBase {
     private PhotonCameraSim cameraSim;
 
     public VisionSubsystem() {
-        SmartDashboard.putData("Field", m_field);
+        SmartDashboard.putData("[VISION] Field", m_field);
         System.out.println("Initializing VisionSubsystem");
         camera = new PhotonCamera(VisionConstants.CAMERA_NAME);
         System.out.println("Camera created: " + VisionConstants.CAMERA_NAME);
@@ -103,17 +103,17 @@ public class VisionSubsystem extends SubsystemBase {
                     double ambiguity = target.getPoseAmbiguity();
                     
                     if (ambiguity < VisionConstants.MAX_AMBIGUITY) {
-                        SmartDashboard.putNumber("Vision/TagID", target.getFiducialId());
-                        SmartDashboard.putNumber("Vision/Ambiguity", ambiguity);
-                        SmartDashboard.putNumber("Vision/Yaw", target.getYaw());
-                        SmartDashboard.putNumber("Vision/Pitch", target.getPitch());
+                        SmartDashboard.putNumber("[VISION] TagID", target.getFiducialId());
+                        SmartDashboard.putNumber("[VISION] Ambiguity", ambiguity);
+                        SmartDashboard.putNumber("[VISION] Yaw", target.getYaw());
+                        SmartDashboard.putNumber("[VISION] Pitch", target.getPitch());
                         
                         updatePoseEstimation();
                     }
                 }
             } else {
-                SmartDashboard.putNumber("Vision/TagID", -1);
-                SmartDashboard.putNumber("Vision/HasTarget", 0);
+                SmartDashboard.putNumber("[VISION] TagID", -1);
+                SmartDashboard.putNumber("[VISION] HasTarget", 0);
             }
         } catch (Exception e) {
             System.err.println("Error in VisionSubsystem periodic: " + e.toString());
@@ -162,9 +162,9 @@ public class VisionSubsystem extends SubsystemBase {
                 
                 var result = camera.getLatestResult();
                 if (result != null && result.hasTargets()) {
-                    SmartDashboard.putNumber("Vision/SimTargetCount", result.getTargets().size());
+                    SmartDashboard.putNumber("[VISION] SimTargetCount", result.getTargets().size());
                 } else {
-                    SmartDashboard.putNumber("Vision/SimTargetCount", 0);
+                    SmartDashboard.putNumber("[VISION] SimTargetCount", 0);
                 }
             } catch (Exception e) {
                 System.err.println("Error in vision simulation: " + e.toString());
