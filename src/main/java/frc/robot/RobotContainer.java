@@ -8,6 +8,8 @@ import frc.robot.commands.drive.DriveCommand;
 import frc.robot.commands.mailbox.InputCommand;
 import frc.robot.commands.mailbox.OutputCommand;
 import frc.robot.commands.mailbox.StopCommand;
+import frc.robot.commands.solenoid.ExtendCommand;
+import frc.robot.commands.solenoid.RetractCommand;
 import frc.robot.constants.RobotContainerConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
@@ -15,10 +17,12 @@ import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.XboxController;
+import frc.robot.subsystems.solenoid.SolenoidSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -35,6 +39,9 @@ public class RobotContainer {
   private final JoystickButton mailboxInputButton  = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_INPUT_BUTTON);
   private final JoystickButton mailboxOutputButton = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_OUTPUT_BUTTON);
   private final JoystickButton mailboxStopButton   = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_STOP_BUTTON);
+  private final JoystickButton extendButton = new JoystickButton(operatorController, RobotContainerConstants.SOLENOID_EXTEND_BUTTON);
+  private final JoystickButton retractButton = new JoystickButton(operatorController, RobotContainerConstants.SOLENOID_RETRACT_BUTTON);
+
 
   // Subsystems
   public static final GyroSubsystem gyroSubsystem = new GyroSubsystem();
@@ -42,6 +49,7 @@ public class RobotContainer {
                                                                                   RobotContainerConstants.ELEVATOR_SECONDARY_MOTOR_ID);
   public static final MailboxSubsystem mailboxSubsystem = new MailboxSubsystem();
   public static final SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
+  public static final SolenoidSubsystem solenoidSubsystem = new SolenoidSubsystem();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -68,6 +76,9 @@ public class RobotContainer {
     mailboxInputButton.onTrue(new InputCommand());
     mailboxOutputButton.onTrue(new OutputCommand());
     mailboxStopButton.onTrue(new StopCommand());
+    extendButton.onTrue(new ExtendCommand());
+    retractButton.onTrue(new RetractCommand());
+    
   }
 
   /**
