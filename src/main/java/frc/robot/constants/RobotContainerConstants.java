@@ -13,6 +13,9 @@ public class RobotContainerConstants {
     public static final int MAILBOX_OUTPUT_BUTTON = XboxMappings.Button.A;
     public static final int MAILBOX_INPUT_BUTTON  = XboxMappings.Button.B;
     public static final int MAILBOX_STOP_BUTTON   = XboxMappings.Button.X;
+
+    public static final double CONTROLLER_MOVEMENT_DEADBAND = 0.1;
+    public static final double CONTROLLER_ROTATION_DEADBAND = 0.3;
     public static final int SOLENOID_EXTEND_BUTTON = XboxMappings.Button.RightBumper;
     public static final int SOLENOID_RETRACT_BUTTON = XboxMappings.Button.LeftBumper;
 }
