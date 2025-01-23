@@ -18,6 +18,9 @@ import frc.robot.constants.VisionConstants;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+
 import java.util.Optional;
 
 public class VisionSubsystem extends SubsystemBase {
@@ -28,12 +31,27 @@ public class VisionSubsystem extends SubsystemBase {
     private Pose2d lastPose = new Pose2d();
     private boolean hasLoggedSimWarning = false;
     
+    // NetworkTables
+    private final NetworkTable visionTable;
+    
     // Simulation-specific components
     private VisionSystemSim visionSim;
     private PhotonCameraSim cameraSim;
 
     public VisionSubsystem() {
-        SmartDashboard.putData("Field", m_field);
+        // Initialize NetworkTables
+        visionTable = NetworkTableInstance.getDefault().getTable("Vision");
+        
+        // Initialize SmartDashboard entries under Vision table
+        visionTable.getEntry("HasTarget").setBoolean(false);
+        visionTable.getEntry("TargetID").setDouble(-1);
+        visionTable.getEntry("TargetYaw").setDouble(0.0);
+        visionTable.getEntry("TargetPitch").setDouble(0.0);
+        visionTable.getEntry("TargetAmbiguity").setDouble(-1);
+        
+        // Add Field2d widget to Vision table
+        NetworkTableInstance.getDefault().getTable("Vision").putData("Field", m_field);
+        
         System.out.println("Initializing VisionSubsystem");
         camera = new PhotonCamera(VisionConstants.CAMERA_NAME);
         System.out.println("Camera created: " + VisionConstants.CAMERA_NAME);
@@ -97,23 +115,29 @@ public class VisionSubsystem extends SubsystemBase {
             }
 
             var result = camera.getLatestResult();
-            if (result != null && result.hasTargets()) {
+            boolean hasTarget = result != null && result.hasTargets();
+            visionTable.getEntry("HasTarget").setBoolean(hasTarget);
+            
+            if (hasTarget) {
                 PhotonTrackedTarget target = result.getBestTarget();
                 if (target != null) {
                     double ambiguity = target.getPoseAmbiguity();
                     
                     if (ambiguity < VisionConstants.MAX_AMBIGUITY) {
-                        SmartDashboard.putNumber("Vision/TagID", target.getFiducialId());
-                        SmartDashboard.putNumber("Vision/Ambiguity", ambiguity);
-                        SmartDashboard.putNumber("Vision/Yaw", target.getYaw());
-                        SmartDashboard.putNumber("Vision/Pitch", target.getPitch());
+                        visionTable.getEntry("TargetID").setDouble(target.getFiducialId());
+                        visionTable.getEntry("TargetYaw").setDouble(target.getYaw());
+                        visionTable.getEntry("TargetPitch").setDouble(target.getPitch());
+                        visionTable.getEntry("TargetAmbiguity").setDouble(ambiguity);
                         
                         updatePoseEstimation();
                     }
                 }
             } else {
-                SmartDashboard.putNumber("Vision/TagID", -1);
-                SmartDashboard.putNumber("Vision/HasTarget", 0);
+                // Clear target data when no target is visible
+                visionTable.getEntry("TargetID").setDouble(-1);
+                visionTable.getEntry("TargetYaw").setDouble(0.0);
+                visionTable.getEntry("TargetPitch").setDouble(0.0);
+                visionTable.getEntry("TargetAmbiguity").setDouble(-1);
             }
         } catch (Exception e) {
             System.err.println("Error in VisionSubsystem periodic: " + e.toString());
@@ -162,9 +186,9 @@ public class VisionSubsystem extends SubsystemBase {
                 
                 var result = camera.getLatestResult();
                 if (result != null && result.hasTargets()) {
-                    SmartDashboard.putNumber("Vision/SimTargetCount", result.getTargets().size());
+                    visionTable.getEntry("SimTargetCount").setDouble(result.getTargets().size());
                 } else {
-                    SmartDashboard.putNumber("Vision/SimTargetCount", 0);
+                    visionTable.getEntry("SimTargetCount").setDouble(0);
                 }
             } catch (Exception e) {
                 System.err.println("Error in vision simulation: " + e.toString());
