@@ -134,7 +134,7 @@ public class VisionSubsystem extends SubsystemBase {
                 return;
             }
 
-            var result = camera.getLatestPipelineResult();
+            var result = camera.getLatestResult();
             boolean hasTarget = result != null && result.hasTargets();
             visionTable.getEntry("HasTarget").setBoolean(hasTarget);
             
@@ -199,7 +199,7 @@ public class VisionSubsystem extends SubsystemBase {
         try {
             visionSim.update(lastPose);
             
-            var result = camera.getLatestPipelineResult();
+            var result = camera.getLatestResult();
             visionTable.getEntry("SimTargetCount").setDouble(
                 result != null && result.hasTargets() ? result.getTargets().size() : 0
             );
@@ -215,7 +215,7 @@ public class VisionSubsystem extends SubsystemBase {
                 return Optional.empty();
             }
             poseEstimator.setReferencePose(prevEstimatedRobotPose);
-            var result = camera.getLatestPipelineResult();
+            var result = camera.getLatestResult();
             if (result == null) {
                 return Optional.empty();
             }
@@ -241,7 +241,7 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     public double getLatencyMillis() {
-        var result = camera.getLatestPipelineResult();
+        var result = camera.getLatestResult();
         if (result == null) {
             return 0.0;
         }
