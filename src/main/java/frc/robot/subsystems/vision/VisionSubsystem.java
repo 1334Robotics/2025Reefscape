@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 import java.util.Optional;
@@ -28,7 +29,18 @@ public class VisionSubsystem extends SubsystemBase {
     private final AprilTagFieldLayout tagLayout;
     private final PhotonPoseEstimator poseEstimator;
     private final Field2d m_field = new Field2d();
+    
+    // NetworkTables structure
     private final NetworkTable visionTable;
+    private final NetworkTableEntry hasTargetEntry;
+    private final NetworkTableEntry targetIdEntry;
+    private final NetworkTableEntry targetYawEntry;
+    private final NetworkTableEntry targetPitchEntry;
+    private final NetworkTableEntry targetAmbiguityEntry;
+    private final NetworkTableEntry poseXEntry;
+    private final NetworkTableEntry poseYEntry;
+    private final NetworkTableEntry poseRotEntry;
+    private final NetworkTableEntry latencyMsEntry;
     
     // Mutable state
     private Pose2d lastPose = new Pose2d();
@@ -37,12 +49,35 @@ public class VisionSubsystem extends SubsystemBase {
     // Simulation-specific components
     private final VisionSystemSim visionSim;
     private final PhotonCameraSim cameraSim;
+    private final NetworkTableEntry simTargetCountEntry;
 
     public VisionSubsystem() {
-        // Initialize NetworkTables
+        // Initialize NetworkTables with hierarchical structure
         visionTable = NetworkTableInstance.getDefault().getTable("Vision");
         
-        // Initialize vision table entries
+        // Target detection entries
+        NetworkTable targetTable = visionTable.getSubTable("target");
+        hasTargetEntry = targetTable.getEntry("hasTarget");
+        targetIdEntry = targetTable.getEntry("id");
+        targetYawEntry = targetTable.getEntry("yaw");
+        targetPitchEntry = targetTable.getEntry("pitch");
+        targetAmbiguityEntry = targetTable.getEntry("ambiguity");
+        
+        // Pose estimation entries
+        NetworkTable poseTable = visionTable.getSubTable("pose");
+        poseXEntry = poseTable.getEntry("x");
+        poseYEntry = poseTable.getEntry("y");
+        poseRotEntry = poseTable.getEntry("rotation");
+        
+        // Performance metrics
+        NetworkTable metricsTable = visionTable.getSubTable("metrics");
+        latencyMsEntry = metricsTable.getEntry("latencyMs");
+        
+        // Simulation entries
+        NetworkTable simTable = visionTable.getSubTable("sim");
+        simTargetCountEntry = simTable.getEntry("targetCount");
+        
+        // Initialize all entries with default values
         initializeNetworkTableEntries();
         
         System.out.println("Initializing VisionSubsystem");
@@ -71,6 +106,9 @@ public class VisionSubsystem extends SubsystemBase {
                 visionSim = null;
                 cameraSim = null;
             }
+            
+            // Add Field2d widget to SmartDashboard
+            SmartDashboard.putData("Field", m_field);
         } catch (Exception e) {
             System.err.println("Error initializing vision subsystem: " + e.getMessage());
             e.printStackTrace();
@@ -79,28 +117,22 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     private void initializeNetworkTableEntries() {
-        // Create subtables for better organization
-        NetworkTable targetTable = visionTable.getSubTable("Target");
-        NetworkTable poseTable = visionTable.getSubTable("Pose");
-        NetworkTable simTable = visionTable.getSubTable("Simulation");
+        // Initialize with default values
+        hasTargetEntry.setBoolean(false);
+        targetIdEntry.setDouble(-1);
+        targetYawEntry.setDouble(0.0);
+        targetPitchEntry.setDouble(0.0);
+        targetAmbiguityEntry.setDouble(-1);
         
-        // Initialize target tracking entries
-        targetTable.getEntry("HasTarget").setBoolean(false);
-        targetTable.getEntry("ID").setDouble(-1);
-        targetTable.getEntry("Yaw").setDouble(0.0);
-        targetTable.getEntry("Pitch").setDouble(0.0);
-        targetTable.getEntry("Ambiguity").setDouble(-1);
+        poseXEntry.setDouble(0.0);
+        poseYEntry.setDouble(0.0);
+        poseRotEntry.setDouble(0.0);
         
-        // Initialize pose estimation entries
-        poseTable.getEntry("X").setDouble(0.0);
-        poseTable.getEntry("Y").setDouble(0.0);
-        poseTable.getEntry("Rotation").setDouble(0.0);
+        latencyMsEntry.setDouble(0.0);
         
-        // Initialize simulation entries
-        simTable.getEntry("TargetCount").setDouble(0);
-        
-        // Add Field2d widget
-        SmartDashboard.putData("Vision/Field", m_field);
+        if (RobotBase.isSimulation()) {
+            simTargetCountEntry.setDouble(0);
+        }
     }
 
     private static class SimComponents {
@@ -149,10 +181,12 @@ public class VisionSubsystem extends SubsystemBase {
                 return;
             }
 
-            NetworkTable targetTable = visionTable.getSubTable("Target");
             var result = camera.getLatestResult();
             boolean hasTarget = result != null && result.hasTargets();
-            targetTable.getEntry("HasTarget").setBoolean(hasTarget);
+            hasTargetEntry.setBoolean(hasTarget);
+            
+            // Update latency metrics
+            latencyMsEntry.setDouble(getLatencyMillis());
             
             if (hasTarget) {
                 PhotonTrackedTarget target = result.getBestTarget();
@@ -160,20 +194,31 @@ public class VisionSubsystem extends SubsystemBase {
                     double ambiguity = target.getPoseAmbiguity();
                     
                     if (ambiguity < VisionConstants.MAX_AMBIGUITY) {
-                        targetTable.getEntry("ID").setDouble(target.getFiducialId());
-                        targetTable.getEntry("Yaw").setDouble(target.getYaw());
-                        targetTable.getEntry("Pitch").setDouble(target.getPitch());
-                        targetTable.getEntry("Ambiguity").setDouble(ambiguity);
+                        // Batch update target information
+                        NetworkTableInstance.getDefault().startBatch();
+                        try {
+                            targetIdEntry.setDouble(target.getFiducialId());
+                            targetYawEntry.setDouble(target.getYaw());
+                            targetPitchEntry.setDouble(target.getPitch());
+                            targetAmbiguityEntry.setDouble(ambiguity);
+                        } finally {
+                            NetworkTableInstance.getDefault().endBatch();
+                        }
                         
                         updatePoseEstimation();
                     }
                 }
             } else {
-                // Clear target data when no target is visible
-                targetTable.getEntry("ID").setDouble(-1);
-                targetTable.getEntry("Yaw").setDouble(0.0);
-                targetTable.getEntry("Pitch").setDouble(0.0);
-                targetTable.getEntry("Ambiguity").setDouble(-1);
+                // Batch clear target data
+                NetworkTableInstance.getDefault().startBatch();
+                try {
+                    targetIdEntry.setDouble(-1);
+                    targetYawEntry.setDouble(0.0);
+                    targetPitchEntry.setDouble(0.0);
+                    targetAmbiguityEntry.setDouble(-1);
+                } finally {
+                    NetworkTableInstance.getDefault().endBatch();
+                }
             }
         } catch (Exception e) {
             System.err.println("Error in VisionSubsystem periodic: " + e.toString());
@@ -189,11 +234,15 @@ public class VisionSubsystem extends SubsystemBase {
             Pose2d currentPose = getCurrentPose();
             m_field.setRobotPose(currentPose);
             
-            // Update pose data in NetworkTables
-            NetworkTable poseTable = visionTable.getSubTable("Pose");
-            poseTable.getEntry("X").setDouble(currentPose.getX());
-            poseTable.getEntry("Y").setDouble(currentPose.getY());
-            poseTable.getEntry("Rotation").setDouble(currentPose.getRotation().getDegrees());
+            // Batch update pose data
+            NetworkTableInstance.getDefault().startBatch();
+            try {
+                poseXEntry.setDouble(currentPose.getX());
+                poseYEntry.setDouble(currentPose.getY());
+                poseRotEntry.setDouble(currentPose.getRotation().getDegrees());
+            } finally {
+                NetworkTableInstance.getDefault().endBatch();
+            }
             
             lastPose = currentPose;
         } catch (Exception e) {
@@ -223,8 +272,7 @@ public class VisionSubsystem extends SubsystemBase {
             visionSim.update(lastPose);
             
             var result = camera.getLatestResult();
-            NetworkTable simTable = visionTable.getSubTable("Simulation");
-            simTable.getEntry("TargetCount").setDouble(
+            simTargetCountEntry.setDouble(
                 result != null && result.hasTargets() ? result.getTargets().size() : 0
             );
         } catch (Exception e) {
