@@ -13,9 +13,10 @@ public final class VisionConstants {
 
     // Camera configuration
     public static final String CAMERA_NAME = "Arducam_OV9782_USB_Camera";
-    public static final int CAMERA_RESOLUTION_WIDTH = 640;
-    public static final int CAMERA_RESOLUTION_HEIGHT = 480;
-    public static final double CAMERA_FOV_DEGREES = 100;
+    public static final int CAMERA_RESOLUTION_WIDTH = 800;
+    public static final int CAMERA_RESOLUTION_HEIGHT = 600;
+    public static final double CAMERA_FOV_DEGREES = 100;  // Verify this value matches your camera
+    public static final int CAMERA_FPS = 90;  // Added to document actual frame rate
     
     // Vision processing constants
     public static final double MAX_AMBIGUITY = 0.2;  // Maximum allowed pose ambiguity
