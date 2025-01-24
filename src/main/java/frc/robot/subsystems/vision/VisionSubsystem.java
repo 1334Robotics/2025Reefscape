@@ -274,7 +274,12 @@ public class VisionSubsystem extends SubsystemBase {
                 return;
             }
             
-            Optional<EstimatedRobotPose> estimatedPose = poseEstimator.update();
+            var result = camera.getLatestResult();
+            if (result == null) {
+                return;
+            }
+
+            Optional<EstimatedRobotPose> estimatedPose = poseEstimator.update(result);
             if (estimatedPose.isPresent()) {
                 Pose2d currentPose = estimatedPose.get().estimatedPose.toPose2d();
                 m_field.setRobotPose(currentPose);
@@ -292,14 +297,19 @@ public class VisionSubsystem extends SubsystemBase {
         }
     }
 
-    private Pose2d getCurrentPose() {
+    public Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
         try {
-            Optional<EstimatedRobotPose> result = getEstimatedGlobalPose(lastPose);
-            return result.map(pose -> pose.estimatedPose.toPose2d()).orElse(lastPose);
+            if (poseEstimator == null) {
+                return Optional.empty();
+            }
+            var result = camera.getLatestResult();
+            if (result == null) {
+                return Optional.empty();
+            }
+            return poseEstimator.update(result);
         } catch (Exception e) {
-            System.err.println("Error getting current pose: " + e.toString());
-            e.printStackTrace();
-            return lastPose;
+            System.err.println("Error getting estimated global pose: " + e.getMessage());
+            return Optional.empty();
         }
     }
 
@@ -330,24 +340,6 @@ public class VisionSubsystem extends SubsystemBase {
         } catch (Exception e) {
             System.err.println("Error in vision simulation: " + e.getMessage());
             e.printStackTrace();
-        }
-    }
-
-    public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
-        try {
-            if (poseEstimator == null || camera == null) {
-                return Optional.empty();
-            }
-            poseEstimator.setReferencePose(prevEstimatedRobotPose);
-            var result = camera.getLatestResult();
-            if (result == null) {
-                return Optional.empty();
-            }
-            return poseEstimator.update(result);
-        } catch (Exception e) {
-            System.err.println("Error getting estimated global pose: " + e.toString());
-            e.printStackTrace();
-            return Optional.empty();
         }
     }
 
