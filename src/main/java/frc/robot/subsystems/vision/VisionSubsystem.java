@@ -5,6 +5,7 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.math.geometry.Pose2d;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -15,6 +16,7 @@ import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import frc.robot.constants.VisionConstants;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -51,9 +53,28 @@ public class VisionSubsystem extends SubsystemBase {
         camera = new PhotonCamera(VisionConstants.CAMERA_NAME);
         System.out.println("Camera created: " + VisionConstants.CAMERA_NAME);
         
+        // Verify camera configuration
+        System.out.println("\nCamera Configuration:");
+        System.out.println("Expected:");
+        System.out.println("- Resolution: " + VisionConstants.CAMERA_RESOLUTION_WIDTH + "x" + 
+                          VisionConstants.CAMERA_RESOLUTION_HEIGHT);
+        System.out.println("- FPS: " + VisionConstants.CAMERA_FPS);
+        System.out.println("- FOV: " + VisionConstants.CAMERA_FOV_DEGREES + " degrees");
+        
+        // Get actual camera configuration from PhotonVision
+        var cameraConfig = NetworkTableInstance.getDefault()
+            .getTable("photonvision")
+            .getSubTable(VisionConstants.CAMERA_NAME);
+            
+        System.out.println("\nActual (from NetworkTables):");
+        System.out.println("- Resolution: " + 
+            cameraConfig.getEntry("inputImageWidth").getDouble(0) + "x" +
+            cameraConfig.getEntry("inputImageHeight").getDouble(0));
+        System.out.println("- FPS: " + cameraConfig.getEntry("fps").getDouble(0));
+        
         // Check if camera is connected
         var result = camera.getLatestResult();
-        System.out.println("Initial camera connection test:");
+        System.out.println("\nInitial camera connection test:");
         System.out.println("- Result null? " + (result == null));
         if (result != null) {
             System.out.println("- Timestamp: " + result.getTimestampSeconds());
