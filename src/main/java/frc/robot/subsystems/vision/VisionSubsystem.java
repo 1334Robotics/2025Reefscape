@@ -43,13 +43,31 @@ public class VisionSubsystem extends SubsystemBase {
 
     public VisionSubsystem() {
         System.out.println("Initializing VisionSubsystem");
+        
+        // Print NetworkTables debug info
+        System.out.println("PhotonVision Camera Name: " + VisionConstants.CAMERA_NAME);
+        System.out.println("Checking PhotonVision NetworkTables entries at: /photonvision/" + VisionConstants.CAMERA_NAME);
+        
         camera = new PhotonCamera(VisionConstants.CAMERA_NAME);
         System.out.println("Camera created: " + VisionConstants.CAMERA_NAME);
+        
+        // Check if camera is connected
+        var result = camera.getLatestResult();
+        System.out.println("Initial camera connection test:");
+        System.out.println("- Result null? " + (result == null));
+        if (result != null) {
+            System.out.println("- Timestamp: " + result.getTimestampSeconds());
+            System.out.println("- Has targets? " + result.hasTargets());
+            if (result.hasTargets()) {
+                System.out.println("- Number of targets: " + result.getTargets().size());
+            }
+        }
 
         try {
             // Load field layout
             tagLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
             System.out.println("AprilTag layout loaded successfully");
+            System.out.println("Number of tags in layout: " + tagLayout.getTags().size());
             
             // Initialize pose estimator
             poseEstimator = new PhotonPoseEstimator(
@@ -57,6 +75,7 @@ public class VisionSubsystem extends SubsystemBase {
                 PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                 VisionConstants.ROBOT_TO_CAMERA
             );
+            System.out.println("Pose estimator initialized with strategy: " + PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR);
 
             // Initialize simulation if needed
             if (RobotBase.isSimulation()) {
@@ -65,17 +84,19 @@ public class VisionSubsystem extends SubsystemBase {
                 visionSim = simComponents.visionSim;
                 cameraSim = simComponents.cameraSim;
             } else {
+                System.out.println("Running on real robot - simulation disabled");
                 visionSim = null;
                 cameraSim = null;
             }
             
             // Initialize SmartDashboard entries
             initializeSmartDashboard();
+            System.out.println("SmartDashboard entries initialized under: " + SD_PATH);
             
         } catch (Exception e) {
             System.err.println("Error initializing vision subsystem: " + e.getMessage());
             e.printStackTrace();
-            throw new RuntimeException("Failed to load AprilTag layout: " + e.getMessage());
+            throw new RuntimeException("Failed to initialize vision subsystem: " + e.getMessage());
         }
     }
 
@@ -153,8 +174,25 @@ public class VisionSubsystem extends SubsystemBase {
             var result = camera.getLatestResult();
             boolean hasTarget = false;
             
+            // Detailed result logging
+            System.out.println("\nVision Update:");
+            System.out.println("- Result null? " + (result == null));
+            if (result != null) {
+                System.out.println("- Timestamp: " + result.getTimestampSeconds());
+                System.out.println("- Latency: " + result.getLatencyMillis() + "ms");
+            }
+            
             try {
                 hasTarget = result != null && result.hasTargets() && !result.getTargets().isEmpty();
+                if (result != null && result.hasTargets()) {
+                    var targets = result.getTargets();
+                    System.out.println("- Target list size: " + targets.size());
+                    if (!targets.isEmpty()) {
+                        var firstTarget = targets.get(0);
+                        System.out.println("- First target ID: " + firstTarget.getFiducialId());
+                        System.out.println("- First target pose ambiguity: " + firstTarget.getPoseAmbiguity());
+                    }
+                }
             } catch (Exception e) {
                 System.err.println("Error checking targets: " + e.getMessage());
             }
