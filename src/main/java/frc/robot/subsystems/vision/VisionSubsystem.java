@@ -72,7 +72,7 @@ public class VisionSubsystem extends SubsystemBase {
         System.out.println("- FPS: " + cameraConfig.getEntry("fps").getDouble(0));
         
         // Check if camera is connected
-        var result = PhotonCamera.getLatestResult();
+        var result = camera.getLatestResult();
         System.out.println("\nInitial camera connection test:");
         System.out.println("- Result null? " + (result == null));
         if (result != null) {
@@ -191,7 +191,7 @@ public class VisionSubsystem extends SubsystemBase {
                 return;
             }
 
-            var result = PhotonCamera.getLatestResult();
+            var result = camera.getLatestResult();
             boolean hasTarget = false;
             
             // Detailed result logging
@@ -199,7 +199,7 @@ public class VisionSubsystem extends SubsystemBase {
             System.out.println("- Result null? " + (result == null));
             if (result != null) {
                 System.out.println("- Timestamp: " + result.getTimestampSeconds());
-                System.out.println("- Latency: " + result.getLatency() + "ms");
+                System.out.println("- Latency: " + result.getLatencyMillis() + "ms");
             }
             
             try {
@@ -273,7 +273,12 @@ public class VisionSubsystem extends SubsystemBase {
                 return;
             }
             
-            Optional<EstimatedRobotPose> estimatedPose = PhotonPoseEstimator.update();
+            var result = camera.getLatestResult();
+            if (result == null) {
+                return;
+            }
+            
+            Optional<EstimatedRobotPose> estimatedPose = poseEstimator.update(result);
             if (estimatedPose.isPresent()) {
                 Pose2d currentPose = estimatedPose.get().estimatedPose.toPose2d();
                 m_field.setRobotPose(currentPose);
@@ -311,7 +316,7 @@ public class VisionSubsystem extends SubsystemBase {
         try {
             visionSim.update(lastPose);
             
-            var result = PhotonCamera.getLatestResult();
+            var result = camera.getLatestResult();
             int targetCount = 0;
             
             try {
@@ -334,14 +339,14 @@ public class VisionSubsystem extends SubsystemBase {
 
     public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
         try {
-            if (poseEstimator == null || camera == null) {
+            if (poseEstimator == null) {
                 return Optional.empty();
             }
-            poseEstimator.setReferencePose(prevEstimatedRobotPose);
-            var result = PhotonCamera.getLatestResult();
+            var result = camera.getLatestResult();
             if (result == null) {
                 return Optional.empty();
             }
+            poseEstimator.setReferencePose(prevEstimatedRobotPose);
             return poseEstimator.update(result);
         } catch (Exception e) {
             System.err.println("Error getting estimated global pose: " + e.toString());
@@ -364,11 +369,10 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     public double getLatencyMillis() {
-        var result = PhotonCamera.getLatestResult();
+        var result = camera.getLatestResult();
         if (result == null) {
             return 0.0;
         }
-        var currentTime = edu.wpi.first.wpilibj.Timer.getFPGATimestamp();
-        return (currentTime - result.getTimestampSeconds()) * 1000.0;
+        return result.getLatencyMillis();
     }
 }
