@@ -18,10 +18,6 @@ import frc.robot.constants.VisionConstants;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
-
 import java.util.Optional;
 
 public class VisionSubsystem extends SubsystemBase {
@@ -30,18 +26,6 @@ public class VisionSubsystem extends SubsystemBase {
     private final PhotonPoseEstimator poseEstimator;
     private final Field2d m_field = new Field2d();
     
-    // NetworkTables structure
-    private final NetworkTable visionTable;
-    private final NetworkTableEntry hasTargetEntry;
-    private final NetworkTableEntry targetIdEntry;
-    private final NetworkTableEntry targetYawEntry;
-    private final NetworkTableEntry targetPitchEntry;
-    private final NetworkTableEntry targetAmbiguityEntry;
-    private final NetworkTableEntry poseXEntry;
-    private final NetworkTableEntry poseYEntry;
-    private final NetworkTableEntry poseRotEntry;
-    private final NetworkTableEntry latencyMsEntry;
-    
     // Mutable state
     private Pose2d lastPose = new Pose2d();
     private boolean hasLoggedSimWarning = false;
@@ -49,37 +33,15 @@ public class VisionSubsystem extends SubsystemBase {
     // Simulation-specific components
     private final VisionSystemSim visionSim;
     private final PhotonCameraSim cameraSim;
-    private final NetworkTableEntry simTargetCountEntry;
+
+    // Constants for SmartDashboard paths
+    private static final String SD_PATH = "Vision/";
+    private static final String TARGET_PATH = SD_PATH + "Target/";
+    private static final String POSE_PATH = SD_PATH + "Pose/";
+    private static final String METRICS_PATH = SD_PATH + "Metrics/";
+    private static final String SIM_PATH = SD_PATH + "Simulation/";
 
     public VisionSubsystem() {
-        // Initialize NetworkTables with hierarchical structure
-        visionTable = NetworkTableInstance.getDefault().getTable("Vision");
-        
-        // Target detection entries
-        NetworkTable targetTable = visionTable.getSubTable("target");
-        hasTargetEntry = targetTable.getEntry("hasTarget");
-        targetIdEntry = targetTable.getEntry("id");
-        targetYawEntry = targetTable.getEntry("yaw");
-        targetPitchEntry = targetTable.getEntry("pitch");
-        targetAmbiguityEntry = targetTable.getEntry("ambiguity");
-        
-        // Pose estimation entries
-        NetworkTable poseTable = visionTable.getSubTable("pose");
-        poseXEntry = poseTable.getEntry("x");
-        poseYEntry = poseTable.getEntry("y");
-        poseRotEntry = poseTable.getEntry("rotation");
-        
-        // Performance metrics
-        NetworkTable metricsTable = visionTable.getSubTable("metrics");
-        latencyMsEntry = metricsTable.getEntry("latencyMs");
-        
-        // Simulation entries
-        NetworkTable simTable = visionTable.getSubTable("sim");
-        simTargetCountEntry = simTable.getEntry("targetCount");
-        
-        // Initialize all entries with default values
-        initializeNetworkTableEntries();
-        
         System.out.println("Initializing VisionSubsystem");
         camera = new PhotonCamera(VisionConstants.CAMERA_NAME);
         System.out.println("Camera created: " + VisionConstants.CAMERA_NAME);
@@ -107,8 +69,9 @@ public class VisionSubsystem extends SubsystemBase {
                 cameraSim = null;
             }
             
-            // Add Field2d widget to SmartDashboard
-            SmartDashboard.putData("Field", m_field);
+            // Initialize SmartDashboard entries
+            initializeSmartDashboard();
+            
         } catch (Exception e) {
             System.err.println("Error initializing vision subsystem: " + e.getMessage());
             e.printStackTrace();
@@ -116,23 +79,29 @@ public class VisionSubsystem extends SubsystemBase {
         }
     }
 
-    private void initializeNetworkTableEntries() {
-        // Initialize with default values
-        hasTargetEntry.setBoolean(false);
-        targetIdEntry.setDouble(-1);
-        targetYawEntry.setDouble(0.0);
-        targetPitchEntry.setDouble(0.0);
-        targetAmbiguityEntry.setDouble(-1);
+    private void initializeSmartDashboard() {
+        // Initialize target tracking entries
+        SmartDashboard.putBoolean(TARGET_PATH + "HasTarget", false);
+        SmartDashboard.putNumber(TARGET_PATH + "ID", -1);
+        SmartDashboard.putNumber(TARGET_PATH + "Yaw", 0.0);
+        SmartDashboard.putNumber(TARGET_PATH + "Pitch", 0.0);
+        SmartDashboard.putNumber(TARGET_PATH + "Ambiguity", -1);
         
-        poseXEntry.setDouble(0.0);
-        poseYEntry.setDouble(0.0);
-        poseRotEntry.setDouble(0.0);
+        // Initialize pose estimation entries
+        SmartDashboard.putNumber(POSE_PATH + "X", 0.0);
+        SmartDashboard.putNumber(POSE_PATH + "Y", 0.0);
+        SmartDashboard.putNumber(POSE_PATH + "Rotation", 0.0);
         
-        latencyMsEntry.setDouble(0.0);
+        // Initialize metrics entries
+        SmartDashboard.putNumber(METRICS_PATH + "LatencyMS", 0.0);
         
+        // Initialize simulation entries if needed
         if (RobotBase.isSimulation()) {
-            simTargetCountEntry.setDouble(0);
+            SmartDashboard.putNumber(SIM_PATH + "TargetCount", 0);
         }
+        
+        // Add Field2d widget
+        SmartDashboard.putData(SD_PATH + "Field", m_field);
     }
 
     private static class SimComponents {
@@ -183,42 +152,43 @@ public class VisionSubsystem extends SubsystemBase {
 
             var result = camera.getLatestResult();
             boolean hasTarget = result != null && result.hasTargets();
-            hasTargetEntry.setBoolean(hasTarget);
             
-            // Update latency metrics
-            latencyMsEntry.setDouble(getLatencyMillis());
+            // Debug logging
+            System.out.println("Vision Result - Has Target: " + hasTarget);
+            if (result != null) {
+                System.out.println("Number of targets: " + (result.hasTargets() ? result.getTargets().size() : 0));
+            }
+            
+            // Update target status
+            SmartDashboard.putBoolean(TARGET_PATH + "HasTarget", hasTarget);
+            SmartDashboard.putNumber(METRICS_PATH + "LatencyMS", getLatencyMillis());
             
             if (hasTarget) {
                 PhotonTrackedTarget target = result.getBestTarget();
                 if (target != null) {
                     double ambiguity = target.getPoseAmbiguity();
                     
+                    // Debug logging
+                    System.out.println("Best Target - ID: " + target.getFiducialId() + 
+                                     " Yaw: " + target.getYaw() +
+                                     " Pitch: " + target.getPitch() +
+                                     " Ambiguity: " + ambiguity);
+                    
                     if (ambiguity < VisionConstants.MAX_AMBIGUITY) {
-                        // Batch update target information
-                        NetworkTableInstance.getDefault().startBatch();
-                        try {
-                            targetIdEntry.setDouble(target.getFiducialId());
-                            targetYawEntry.setDouble(target.getYaw());
-                            targetPitchEntry.setDouble(target.getPitch());
-                            targetAmbiguityEntry.setDouble(ambiguity);
-                        } finally {
-                            NetworkTableInstance.getDefault().endBatch();
-                        }
+                        SmartDashboard.putNumber(TARGET_PATH + "ID", target.getFiducialId());
+                        SmartDashboard.putNumber(TARGET_PATH + "Yaw", target.getYaw());
+                        SmartDashboard.putNumber(TARGET_PATH + "Pitch", target.getPitch());
+                        SmartDashboard.putNumber(TARGET_PATH + "Ambiguity", ambiguity);
                         
                         updatePoseEstimation();
                     }
                 }
             } else {
-                // Batch clear target data
-                NetworkTableInstance.getDefault().startBatch();
-                try {
-                    targetIdEntry.setDouble(-1);
-                    targetYawEntry.setDouble(0.0);
-                    targetPitchEntry.setDouble(0.0);
-                    targetAmbiguityEntry.setDouble(-1);
-                } finally {
-                    NetworkTableInstance.getDefault().endBatch();
-                }
+                // Clear target data
+                SmartDashboard.putNumber(TARGET_PATH + "ID", -1);
+                SmartDashboard.putNumber(TARGET_PATH + "Yaw", 0.0);
+                SmartDashboard.putNumber(TARGET_PATH + "Pitch", 0.0);
+                SmartDashboard.putNumber(TARGET_PATH + "Ambiguity", -1);
             }
         } catch (Exception e) {
             System.err.println("Error in VisionSubsystem periodic: " + e.toString());
@@ -234,15 +204,10 @@ public class VisionSubsystem extends SubsystemBase {
             Pose2d currentPose = getCurrentPose();
             m_field.setRobotPose(currentPose);
             
-            // Batch update pose data
-            NetworkTableInstance.getDefault().startBatch();
-            try {
-                poseXEntry.setDouble(currentPose.getX());
-                poseYEntry.setDouble(currentPose.getY());
-                poseRotEntry.setDouble(currentPose.getRotation().getDegrees());
-            } finally {
-                NetworkTableInstance.getDefault().endBatch();
-            }
+            // Update pose data
+            SmartDashboard.putNumber(POSE_PATH + "X", currentPose.getX());
+            SmartDashboard.putNumber(POSE_PATH + "Y", currentPose.getY());
+            SmartDashboard.putNumber(POSE_PATH + "Rotation", currentPose.getRotation().getDegrees());
             
             lastPose = currentPose;
         } catch (Exception e) {
@@ -272,7 +237,7 @@ public class VisionSubsystem extends SubsystemBase {
             visionSim.update(lastPose);
             
             var result = camera.getLatestResult();
-            simTargetCountEntry.setDouble(
+            SmartDashboard.putNumber(SIM_PATH + "TargetCount",
                 result != null && result.hasTargets() ? result.getTargets().size() : 0
             );
         } catch (Exception e) {
