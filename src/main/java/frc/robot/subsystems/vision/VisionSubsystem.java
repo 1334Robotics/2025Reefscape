@@ -20,7 +20,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import java.util.List;
 import java.util.Optional;
 
 public class VisionSubsystem extends SubsystemBase {
@@ -74,15 +73,14 @@ public class VisionSubsystem extends SubsystemBase {
         System.out.println("- FPS: " + cameraConfig.getEntry("fps").getDouble(0));
         
         // Check if camera is connected
-        List<PhotonPipelineResult> results = camera.getAllUnreadResults();
+        var result = PhotonCamera.getLatestResult();
         System.out.println("\nInitial camera connection test:");
-        System.out.println("- Results empty? " + results.isEmpty());
-        if (!results.isEmpty()) {
-            var latestResult = results.get(results.size() - 1);
-            System.out.println("- Timestamp: " + latestResult.getTimestampSeconds());
-            System.out.println("- Has targets? " + latestResult.hasTargets());
-            if (latestResult.hasTargets()) {
-                System.out.println("- Number of targets: " + latestResult.getTargets().size());
+        System.out.println("- Result null? " + (result == null));
+        if (result != null) {
+            System.out.println("- Timestamp: " + result.getTimestampSeconds());
+            System.out.println("- Has targets? " + result.hasTargets());
+            if (result.hasTargets()) {
+                System.out.println("- Number of targets: " + result.getTargets().size());
             }
         }
 
@@ -194,26 +192,21 @@ public class VisionSubsystem extends SubsystemBase {
                 return;
             }
 
-            List<PhotonPipelineResult> results = camera.getAllUnreadResults();
+            var result = PhotonCamera.getLatestResult();
             boolean hasTarget = false;
-            PhotonPipelineResult latestResult = null;
             
-            if (!results.isEmpty()) {
-                latestResult = results.get(results.size() - 1);
-                hasTarget = latestResult.hasTargets() && !latestResult.getTargets().isEmpty();
-            }
-            
-            // Debug logging
+            // Detailed result logging
             System.out.println("\nVision Update:");
-            System.out.println("- Results empty? " + results.isEmpty());
-            if (latestResult != null) {
-                System.out.println("- Timestamp: " + latestResult.getTimestampSeconds());
-                System.out.println("- Latency: " + latestResult.getLatencyMillis() + "ms");
+            System.out.println("- Result null? " + (result == null));
+            if (result != null) {
+                System.out.println("- Timestamp: " + result.getTimestampSeconds());
+                System.out.println("- Latency: " + result.getLatency() + "ms");
             }
             
             try {
-                if (latestResult != null && latestResult.hasTargets()) {
-                    var targets = latestResult.getTargets();
+                hasTarget = result != null && result.hasTargets() && !result.getTargets().isEmpty();
+                if (result != null && result.hasTargets()) {
+                    var targets = result.getTargets();
                     System.out.println("- Target list size: " + targets.size());
                     if (!targets.isEmpty()) {
                         var firstTarget = targets.get(0);
@@ -225,13 +218,19 @@ public class VisionSubsystem extends SubsystemBase {
                 System.err.println("Error checking targets: " + e.getMessage());
             }
             
+            // Debug logging
+            System.out.println("Vision Result - Has Target: " + hasTarget);
+            if (result != null) {
+                System.out.println("Number of targets: " + (hasTarget ? result.getTargets().size() : 0));
+            }
+            
             // Update target status
             SmartDashboard.putBoolean(TARGET_PATH + "HasTarget", hasTarget);
-            SmartDashboard.putNumber(METRICS_PATH + "LatencyMS", latestResult != null ? latestResult.getLatencyMillis() : 0.0);
+            SmartDashboard.putNumber(METRICS_PATH + "LatencyMS", getLatencyMillis());
             
-            if (hasTarget && latestResult != null) {
+            if (hasTarget && result != null) {
                 try {
-                    var targets = latestResult.getTargets();
+                    var targets = result.getTargets();
                     if (!targets.isEmpty()) {
                         PhotonTrackedTarget target = targets.get(0);  // Get first target safely
                         if (target != null) {
@@ -249,7 +248,7 @@ public class VisionSubsystem extends SubsystemBase {
                                 SmartDashboard.putNumber(TARGET_PATH + "Pitch", target.getPitch());
                                 SmartDashboard.putNumber(TARGET_PATH + "Ambiguity", ambiguity);
                                 
-                                updatePoseEstimation(latestResult);
+                                updatePoseEstimation();
                             }
                         }
                     }
@@ -269,13 +268,13 @@ public class VisionSubsystem extends SubsystemBase {
         }
     }
 
-    private void updatePoseEstimation(PhotonPipelineResult result) {
+    private void updatePoseEstimation() {
         try {
-            if (poseEstimator == null || result == null) {
+            if (poseEstimator == null) {
                 return;
             }
-
-            Optional<EstimatedRobotPose> estimatedPose = poseEstimator.update(result);
+            
+            Optional<EstimatedRobotPose> estimatedPose = PhotonPoseEstimator.update();
             if (estimatedPose.isPresent()) {
                 Pose2d currentPose = estimatedPose.get().estimatedPose.toPose2d();
                 m_field.setRobotPose(currentPose);
@@ -293,19 +292,14 @@ public class VisionSubsystem extends SubsystemBase {
         }
     }
 
-    public Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
+    private Pose2d getCurrentPose() {
         try {
-            if (poseEstimator == null) {
-                return Optional.empty();
-            }
-            List<PhotonPipelineResult> results = camera.getAllUnreadResults();
-            if (results.isEmpty()) {
-                return Optional.empty();
-            }
-            return poseEstimator.update(results.get(results.size() - 1));
+            Optional<EstimatedRobotPose> result = getEstimatedGlobalPose(lastPose);
+            return result.map(pose -> pose.estimatedPose.toPose2d()).orElse(lastPose);
         } catch (Exception e) {
-            System.err.println("Error getting estimated global pose: " + e.getMessage());
-            return Optional.empty();
+            System.err.println("Error getting current pose: " + e.toString());
+            e.printStackTrace();
+            return lastPose;
         }
     }
 
@@ -318,17 +312,14 @@ public class VisionSubsystem extends SubsystemBase {
         try {
             visionSim.update(lastPose);
             
-            List<PhotonPipelineResult> results = camera.getAllUnreadResults();
+            var result = PhotonCamera.getLatestResult();
             int targetCount = 0;
             
             try {
-                if (!results.isEmpty()) {
-                    var latestResult = results.get(results.size() - 1);
-                    if (latestResult.hasTargets()) {
-                        var targets = latestResult.getTargets();
-                        if (targets != null) {
-                            targetCount = targets.size();
-                        }
+                if (result != null && result.hasTargets()) {
+                    var targets = result.getTargets();
+                    if (targets != null) {
+                        targetCount = targets.size();
                     }
                 }
             } catch (Exception e) {
@@ -342,16 +333,43 @@ public class VisionSubsystem extends SubsystemBase {
         }
     }
 
+    public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
+        try {
+            if (poseEstimator == null || camera == null) {
+                return Optional.empty();
+            }
+            poseEstimator.setReferencePose(prevEstimatedRobotPose);
+            var result = PhotonCamera.getLatestResult();
+            if (result == null) {
+                return Optional.empty();
+            }
+            return poseEstimator.update(result);
+        } catch (Exception e) {
+            System.err.println("Error getting estimated global pose: " + e.toString());
+            e.printStackTrace();
+            return Optional.empty();
+        }
+    }
+
     public void updateCameraPosition(Transform3d newTransform) {
         if (poseEstimator != null) {
             poseEstimator.setRobotToCameraTransform(newTransform);
         }
+        if (RobotBase.isSimulation() && visionSim != null) {
+            visionSim.adjustCamera(cameraSim, newTransform);
+        }
+    }
+
+    public boolean isConnected() {
+        return camera.isConnected();
     }
 
     public double getLatencyMillis() {
-        if (camera == null) {
+        var result = PhotonCamera.getLatestResult();
+        if (result == null) {
             return 0.0;
         }
-        return camera.getLatency();
+        var currentTime = edu.wpi.first.wpilibj.Timer.getFPGATimestamp();
+        return (currentTime - result.getTimestampSeconds()) * 1000.0;
     }
 }
