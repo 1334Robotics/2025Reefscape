@@ -151,37 +151,50 @@ public class VisionSubsystem extends SubsystemBase {
             }
 
             var result = camera.getLatestResult();
-            boolean hasTarget = result != null && result.hasTargets();
+            boolean hasTarget = false;
+            
+            try {
+                hasTarget = result != null && result.hasTargets() && !result.getTargets().isEmpty();
+            } catch (Exception e) {
+                System.err.println("Error checking targets: " + e.getMessage());
+            }
             
             // Debug logging
             System.out.println("Vision Result - Has Target: " + hasTarget);
             if (result != null) {
-                System.out.println("Number of targets: " + (result.hasTargets() ? result.getTargets().size() : 0));
+                System.out.println("Number of targets: " + (hasTarget ? result.getTargets().size() : 0));
             }
             
             // Update target status
             SmartDashboard.putBoolean(TARGET_PATH + "HasTarget", hasTarget);
             SmartDashboard.putNumber(METRICS_PATH + "LatencyMS", getLatencyMillis());
             
-            if (hasTarget) {
-                PhotonTrackedTarget target = result.getBestTarget();
-                if (target != null) {
-                    double ambiguity = target.getPoseAmbiguity();
-                    
-                    // Debug logging
-                    System.out.println("Best Target - ID: " + target.getFiducialId() + 
-                                     " Yaw: " + target.getYaw() +
-                                     " Pitch: " + target.getPitch() +
-                                     " Ambiguity: " + ambiguity);
-                    
-                    if (ambiguity < VisionConstants.MAX_AMBIGUITY) {
-                        SmartDashboard.putNumber(TARGET_PATH + "ID", target.getFiducialId());
-                        SmartDashboard.putNumber(TARGET_PATH + "Yaw", target.getYaw());
-                        SmartDashboard.putNumber(TARGET_PATH + "Pitch", target.getPitch());
-                        SmartDashboard.putNumber(TARGET_PATH + "Ambiguity", ambiguity);
-                        
-                        updatePoseEstimation();
+            if (hasTarget && result != null) {
+                try {
+                    var targets = result.getTargets();
+                    if (!targets.isEmpty()) {
+                        PhotonTrackedTarget target = targets.get(0);  // Get first target safely
+                        if (target != null) {
+                            double ambiguity = target.getPoseAmbiguity();
+                            
+                            // Debug logging
+                            System.out.println("Best Target - ID: " + target.getFiducialId() + 
+                                             " Yaw: " + target.getYaw() +
+                                             " Pitch: " + target.getPitch() +
+                                             " Ambiguity: " + ambiguity);
+                            
+                            if (ambiguity < VisionConstants.MAX_AMBIGUITY) {
+                                SmartDashboard.putNumber(TARGET_PATH + "ID", target.getFiducialId());
+                                SmartDashboard.putNumber(TARGET_PATH + "Yaw", target.getYaw());
+                                SmartDashboard.putNumber(TARGET_PATH + "Pitch", target.getPitch());
+                                SmartDashboard.putNumber(TARGET_PATH + "Ambiguity", ambiguity);
+                                
+                                updatePoseEstimation();
+                            }
+                        }
                     }
+                } catch (Exception e) {
+                    System.err.println("Error processing target data: " + e.getMessage());
                 }
             } else {
                 // Clear target data
@@ -201,17 +214,21 @@ public class VisionSubsystem extends SubsystemBase {
             if (poseEstimator == null) {
                 return;
             }
-            Pose2d currentPose = getCurrentPose();
-            m_field.setRobotPose(currentPose);
             
-            // Update pose data
-            SmartDashboard.putNumber(POSE_PATH + "X", currentPose.getX());
-            SmartDashboard.putNumber(POSE_PATH + "Y", currentPose.getY());
-            SmartDashboard.putNumber(POSE_PATH + "Rotation", currentPose.getRotation().getDegrees());
-            
-            lastPose = currentPose;
+            Optional<EstimatedRobotPose> estimatedPose = poseEstimator.update();
+            if (estimatedPose.isPresent()) {
+                Pose2d currentPose = estimatedPose.get().estimatedPose.toPose2d();
+                m_field.setRobotPose(currentPose);
+                
+                // Update pose data
+                SmartDashboard.putNumber(POSE_PATH + "X", currentPose.getX());
+                SmartDashboard.putNumber(POSE_PATH + "Y", currentPose.getY());
+                SmartDashboard.putNumber(POSE_PATH + "Rotation", currentPose.getRotation().getDegrees());
+                
+                lastPose = currentPose;
+            }
         } catch (Exception e) {
-            System.err.println("Error updating pose estimation: " + e.toString());
+            System.err.println("Error updating pose estimation: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -237,11 +254,22 @@ public class VisionSubsystem extends SubsystemBase {
             visionSim.update(lastPose);
             
             var result = camera.getLatestResult();
-            SmartDashboard.putNumber(SIM_PATH + "TargetCount",
-                result != null && result.hasTargets() ? result.getTargets().size() : 0
-            );
+            int targetCount = 0;
+            
+            try {
+                if (result != null && result.hasTargets()) {
+                    var targets = result.getTargets();
+                    if (targets != null) {
+                        targetCount = targets.size();
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Error counting targets in simulation: " + e.getMessage());
+            }
+            
+            SmartDashboard.putNumber(SIM_PATH + "TargetCount", targetCount);
         } catch (Exception e) {
-            System.err.println("Error in vision simulation: " + e.toString());
+            System.err.println("Error in vision simulation: " + e.getMessage());
             e.printStackTrace();
         }
     }
