@@ -12,6 +12,7 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
+import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import frc.robot.constants.VisionConstants;
 
@@ -19,6 +20,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+import java.util.List;
 import java.util.Optional;
 
 public class VisionSubsystem extends SubsystemBase {
@@ -72,7 +74,7 @@ public class VisionSubsystem extends SubsystemBase {
         System.out.println("- FPS: " + cameraConfig.getEntry("fps").getDouble(0));
         
         // Check if camera is connected
-        var results = camera.getAllLatestResults();
+        List<PhotonPipelineResult> results = camera.getAllUnreadResults();
         System.out.println("\nInitial camera connection test:");
         System.out.println("- Results empty? " + results.isEmpty());
         if (!results.isEmpty()) {
@@ -192,7 +194,7 @@ public class VisionSubsystem extends SubsystemBase {
                 return;
             }
 
-            var results = camera.getAllLatestResults();
+            List<PhotonPipelineResult> results = camera.getAllUnreadResults();
             boolean hasTarget = false;
             PhotonPipelineResult latestResult = null;
             
@@ -279,7 +281,7 @@ public class VisionSubsystem extends SubsystemBase {
                 return;
             }
             
-            var results = camera.getAllLatestResults();
+            List<PhotonPipelineResult> results = camera.getAllUnreadResults();
             if (results.isEmpty()) {
                 return;
             }
@@ -323,7 +325,7 @@ public class VisionSubsystem extends SubsystemBase {
         try {
             visionSim.update(lastPose);
             
-            var results = camera.getAllLatestResults();
+            List<PhotonPipelineResult> results = camera.getAllUnreadResults();
             int targetCount = 0;
             
             try {
@@ -352,7 +354,7 @@ public class VisionSubsystem extends SubsystemBase {
             if (poseEstimator == null) {
                 return Optional.empty();
             }
-            var results = camera.getAllLatestResults();
+            List<PhotonPipelineResult> results = camera.getAllUnreadResults();
             if (results.isEmpty()) {
                 return Optional.empty();
             }
@@ -380,7 +382,7 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     public double getLatencyMillis() {
-        var results = camera.getAllLatestResults();
+        List<PhotonPipelineResult> results = camera.getAllUnreadResults();
         if (results.isEmpty()) {
             return 0.0;
         }
