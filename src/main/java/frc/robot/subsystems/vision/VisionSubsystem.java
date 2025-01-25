@@ -208,7 +208,7 @@ public class VisionSubsystem extends SubsystemBase {
             System.out.println("- Results empty? " + results.isEmpty());
             if (latestResult != null) {
                 System.out.println("- Timestamp: " + latestResult.getTimestampSeconds());
-                System.out.println("- Latency: " + (latestResult.getLatencySeconds() * 1000.0) + "ms");
+                System.out.println("- Latency: " + latestResult.getLatencyMillis() + "ms");
             }
             
             try {
@@ -387,6 +387,6 @@ public class VisionSubsystem extends SubsystemBase {
             return 0.0;
         }
         var result = results.get(results.size() - 1);
-        return result.getLatencySeconds() * 1000.0;
+        return result.getLatencyMillis();
     }
 }
