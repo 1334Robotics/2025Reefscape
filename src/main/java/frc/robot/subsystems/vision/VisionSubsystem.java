@@ -72,10 +72,11 @@ public class VisionSubsystem extends SubsystemBase {
         System.out.println("- FPS: " + cameraConfig.getEntry("fps").getDouble(0));
         
         // Check if camera is connected
-        var result = camera.getLatestResult();
+        var results = camera.getAllLatestResults();
         System.out.println("\nInitial camera connection test:");
-        System.out.println("- Result null? " + (result == null));
-        if (result != null) {
+        System.out.println("- Results empty? " + results.isEmpty());
+        if (!results.isEmpty()) {
+            var result = results.get(results.size() - 1);
             System.out.println("- Timestamp: " + result.getTimestampSeconds());
             System.out.println("- Has targets? " + result.hasTargets());
             if (result.hasTargets()) {
@@ -191,21 +192,26 @@ public class VisionSubsystem extends SubsystemBase {
                 return;
             }
 
-            var result = camera.getLatestResult();
+            var results = camera.getAllLatestResults();
             boolean hasTarget = false;
+            PhotonPipelineResult latestResult = null;
+            
+            if (!results.isEmpty()) {
+                latestResult = results.get(results.size() - 1);
+                hasTarget = latestResult.hasTargets() && !latestResult.getTargets().isEmpty();
+            }
             
             // Detailed result logging
             System.out.println("\nVision Update:");
-            System.out.println("- Result null? " + (result == null));
-            if (result != null) {
-                System.out.println("- Timestamp: " + result.getTimestampSeconds());
-                System.out.println("- Latency: " + result.getLatencyMillis() + "ms");
+            System.out.println("- Results empty? " + results.isEmpty());
+            if (latestResult != null) {
+                System.out.println("- Timestamp: " + latestResult.getTimestampSeconds());
+                System.out.println("- Latency: " + (latestResult.getLatencySeconds() * 1000.0) + "ms");
             }
             
             try {
-                hasTarget = result != null && result.hasTargets() && !result.getTargets().isEmpty();
-                if (result != null && result.hasTargets()) {
-                    var targets = result.getTargets();
+                if (latestResult != null && latestResult.hasTargets()) {
+                    var targets = latestResult.getTargets();
                     System.out.println("- Target list size: " + targets.size());
                     if (!targets.isEmpty()) {
                         var firstTarget = targets.get(0);
@@ -219,17 +225,17 @@ public class VisionSubsystem extends SubsystemBase {
             
             // Debug logging
             System.out.println("Vision Result - Has Target: " + hasTarget);
-            if (result != null) {
-                System.out.println("Number of targets: " + (hasTarget ? result.getTargets().size() : 0));
+            if (latestResult != null) {
+                System.out.println("Number of targets: " + (hasTarget ? latestResult.getTargets().size() : 0));
             }
             
             // Update target status
             SmartDashboard.putBoolean(TARGET_PATH + "HasTarget", hasTarget);
             SmartDashboard.putNumber(METRICS_PATH + "LatencyMS", getLatencyMillis());
             
-            if (hasTarget && result != null) {
+            if (hasTarget && latestResult != null) {
                 try {
-                    var targets = result.getTargets();
+                    var targets = latestResult.getTargets();
                     if (!targets.isEmpty()) {
                         PhotonTrackedTarget target = targets.get(0);  // Get first target safely
                         if (target != null) {
@@ -273,10 +279,11 @@ public class VisionSubsystem extends SubsystemBase {
                 return;
             }
             
-            var result = camera.getLatestResult();
-            if (result == null) {
+            var results = camera.getAllLatestResults();
+            if (results.isEmpty()) {
                 return;
             }
+            var result = results.get(results.size() - 1);
             
             Optional<EstimatedRobotPose> estimatedPose = poseEstimator.update(result);
             if (estimatedPose.isPresent()) {
@@ -316,14 +323,17 @@ public class VisionSubsystem extends SubsystemBase {
         try {
             visionSim.update(lastPose);
             
-            var result = camera.getLatestResult();
+            var results = camera.getAllLatestResults();
             int targetCount = 0;
             
             try {
-                if (result != null && result.hasTargets()) {
-                    var targets = result.getTargets();
-                    if (targets != null) {
-                        targetCount = targets.size();
+                if (!results.isEmpty()) {
+                    var latestResult = results.get(results.size() - 1);
+                    if (latestResult.hasTargets()) {
+                        var targets = latestResult.getTargets();
+                        if (targets != null) {
+                            targetCount = targets.size();
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -342,10 +352,11 @@ public class VisionSubsystem extends SubsystemBase {
             if (poseEstimator == null) {
                 return Optional.empty();
             }
-            var result = camera.getLatestResult();
-            if (result == null) {
+            var results = camera.getAllLatestResults();
+            if (results.isEmpty()) {
                 return Optional.empty();
             }
+            var result = results.get(results.size() - 1);
             poseEstimator.setReferencePose(prevEstimatedRobotPose);
             return poseEstimator.update(result);
         } catch (Exception e) {
@@ -369,10 +380,11 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     public double getLatencyMillis() {
-        var result = camera.getLatestResult();
-        if (result == null) {
+        var results = camera.getAllLatestResults();
+        if (results.isEmpty()) {
             return 0.0;
         }
-        return result.getLatencyMillis();
+        var result = results.get(results.size() - 1);
+        return result.getLatencySeconds() * 1000.0;
     }
 }
