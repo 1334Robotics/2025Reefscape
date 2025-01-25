@@ -10,8 +10,6 @@ import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.simulation.PhotonCameraSim;
-import org.photonvision.simulation.SimCameraProperties;
-import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import frc.robot.constants.VisionConstants;
@@ -25,17 +23,12 @@ import java.util.Optional;
 
 public class VisionSubsystem extends SubsystemBase {
     private final PhotonCamera camera;
-    private final AprilTagFieldLayout tagLayout;
     private final PhotonPoseEstimator poseEstimator;
-    private final Field2d m_field = new Field2d();
-    
-    // Mutable state
+    private final AprilTagFieldLayout tagLayout;
+    private final PhotonCameraSim cameraSim;
+    private final Field2d m_field;
     private Pose2d lastPose = new Pose2d();
     private boolean hasLoggedSimWarning = false;
-    
-    // Simulation-specific components
-    private final VisionSystemSim visionSim;
-    private final PhotonCameraSim cameraSim;
 
     // Constants for SmartDashboard paths
     private static final String SD_PATH = "Vision/";
@@ -45,41 +38,72 @@ public class VisionSubsystem extends SubsystemBase {
     private static final String SIM_PATH = SD_PATH + "Simulation/";
 
     public VisionSubsystem() {
-        System.out.println("Initializing VisionSubsystem");
-        
-        // Print NetworkTables debug info
+        System.out.println("\nInitializing VisionSubsystem");
         System.out.println("PhotonVision Camera Name: " + VisionConstants.CAMERA_NAME);
-        System.out.println("Checking PhotonVision NetworkTables entries at: /photonvision/" + VisionConstants.CAMERA_NAME);
-        
+
+        // Check if camera exists in NetworkTables
+        var instance = NetworkTableInstance.getDefault();
+        var cameraTable = instance.getTable("photonvision").getSubTable(VisionConstants.CAMERA_NAME);
+
+        if (!cameraTable.getKeys().contains("connected")) {
+            System.err.println("ERROR: Camera not found in NetworkTables!");
+            System.err.println("Available tables:");
+            instance.getTable("photonvision").getSubTables().forEach(table ->
+                System.err.println("- " + table));
+            camera = null;
+            poseEstimator = null;
+            tagLayout = null;
+            cameraSim = null;
+            m_field = null;
+            return;
+        }
+
+        // Initialize camera
         camera = new PhotonCamera(VisionConstants.CAMERA_NAME);
         System.out.println("Camera created: " + VisionConstants.CAMERA_NAME);
-        
-        // Verify camera configuration
+
+        // Wait for camera to initialize
+        int attempts = 0;
+        while (attempts < 10) {
+            if (camera.isConnected()) {
+                System.out.println("Camera connected successfully!");
+                break;
+            }
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+            attempts++;
+        }
+
+        if (!camera.isConnected()) {
+            System.err.println("WARNING: Camera failed to connect after " + attempts + " attempts");
+        }
+
+        // Print camera configuration
         System.out.println("\nCamera Configuration:");
         System.out.println("Expected:");
-        System.out.println("- Resolution: " + VisionConstants.CAMERA_RESOLUTION_WIDTH + "x" + 
+        System.out.println("- Resolution: " + VisionConstants.CAMERA_RESOLUTION_WIDTH + "x" +
                           VisionConstants.CAMERA_RESOLUTION_HEIGHT);
         System.out.println("- FPS: " + VisionConstants.CAMERA_FPS);
         System.out.println("- FOV: " + VisionConstants.CAMERA_FOV_DEGREES + " degrees");
-        
-        // Get actual camera configuration from PhotonVision
-        var cameraConfig = NetworkTableInstance.getDefault()
-            .getTable("photonvision")
-            .getSubTable(VisionConstants.CAMERA_NAME);
-            
+
         System.out.println("\nActual (from NetworkTables):");
-        System.out.println("- Resolution: " + 
-            cameraConfig.getEntry("inputImageWidth").getDouble(0) + "x" +
-            cameraConfig.getEntry("inputImageHeight").getDouble(0));
-        System.out.println("- FPS: " + cameraConfig.getEntry("fps").getDouble(0));
-        
-        // Check if camera is connected
-        List<PhotonPipelineResult> results = camera.getAllUnreadResults();
+        var resolutionWidth = cameraTable.getEntry("resolution_width").getDouble(0);
+        var resolutionHeight = cameraTable.getEntry("resolution_height").getDouble(0);
+        var fps = cameraTable.getEntry("fps").getDouble(0);
+        System.out.println("- Resolution: " + resolutionWidth + "x" + resolutionHeight);
+        System.out.println("- FPS: " + fps);
+        System.out.println("- Connected: " + cameraTable.getEntry("connected").getBoolean(false));
+
+        // Initial connection test
         System.out.println("\nInitial camera connection test:");
+        var results = camera.getAllUnreadResults();
         System.out.println("- Results empty? " + results.isEmpty());
         if (!results.isEmpty()) {
             var result = results.get(results.size() - 1);
-            System.out.println("- Timestamp: " + result.getTimestampSeconds());
             System.out.println("- Has targets? " + result.hasTargets());
             if (result.hasTargets()) {
                 System.out.println("- Number of targets: " + result.getTargets().size());
@@ -91,35 +115,29 @@ public class VisionSubsystem extends SubsystemBase {
             tagLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
             System.out.println("AprilTag layout loaded successfully");
             System.out.println("Number of tags in layout: " + tagLayout.getTags().size());
-            
+
             // Initialize pose estimator
             poseEstimator = new PhotonPoseEstimator(
-                tagLayout, 
+                tagLayout,
                 PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                 VisionConstants.ROBOT_TO_CAMERA
             );
             System.out.println("Pose estimator initialized with strategy: " + PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR);
 
-            // Initialize simulation if needed
-            if (RobotBase.isSimulation()) {
-                System.out.println("Initializing vision simulation");
-                var simComponents = initializeSimulation();
-                visionSim = simComponents.visionSim;
-                cameraSim = simComponents.cameraSim;
-            } else {
-                System.out.println("Running on real robot - simulation disabled");
-                visionSim = null;
-                cameraSim = null;
-            }
-            
-            // Initialize SmartDashboard entries
+            // Initialize simulation
+            System.out.println("Initializing vision simulation");
+            m_field = new Field2d();
+            cameraSim = new PhotonCameraSim(camera);
+
+            System.out.println("Vision simulation initialized successfully");
+
+            // Initialize SmartDashboard
             initializeSmartDashboard();
             System.out.println("SmartDashboard entries initialized under: " + SD_PATH);
-            
         } catch (Exception e) {
             System.err.println("Error initializing vision subsystem: " + e.getMessage());
             e.printStackTrace();
-            throw new RuntimeException("Failed to initialize vision subsystem: " + e.getMessage());
+            throw new RuntimeException("Failed to initialize vision subsystem", e);
         }
     }
 
@@ -130,57 +148,22 @@ public class VisionSubsystem extends SubsystemBase {
         SmartDashboard.putNumber(TARGET_PATH + "Yaw", 0.0);
         SmartDashboard.putNumber(TARGET_PATH + "Pitch", 0.0);
         SmartDashboard.putNumber(TARGET_PATH + "Ambiguity", -1);
-        
+
         // Initialize pose estimation entries
         SmartDashboard.putNumber(POSE_PATH + "X", 0.0);
         SmartDashboard.putNumber(POSE_PATH + "Y", 0.0);
         SmartDashboard.putNumber(POSE_PATH + "Rotation", 0.0);
-        
+
         // Initialize metrics entries
         SmartDashboard.putNumber(METRICS_PATH + "LatencyMS", 0.0);
-        
+
         // Initialize simulation entries if needed
         if (RobotBase.isSimulation()) {
             SmartDashboard.putNumber(SIM_PATH + "TargetCount", 0);
         }
-        
+
         // Add Field2d widget
         SmartDashboard.putData(SD_PATH + "Field", m_field);
-    }
-
-    private static class SimComponents {
-        final VisionSystemSim visionSim;
-        final PhotonCameraSim cameraSim;
-
-        SimComponents(VisionSystemSim visionSim, PhotonCameraSim cameraSim) {
-            this.visionSim = visionSim;
-            this.cameraSim = cameraSim;
-        }
-    }
-
-    private SimComponents initializeSimulation() {
-        var visionSim = new VisionSystemSim("main");
-        
-        var cameraProp = new SimCameraProperties();
-        cameraProp.setCalibration(
-            VisionConstants.CAMERA_RESOLUTION_WIDTH,
-            VisionConstants.CAMERA_RESOLUTION_HEIGHT,
-            Rotation2d.fromDegrees(VisionConstants.CAMERA_FOV_DEGREES)
-        );
-        cameraProp.setCalibError(
-            VisionConstants.SIM_ERROR_MEAN,
-            VisionConstants.SIM_ERROR_STD_DEV
-        );
-        cameraProp.setFPS(VisionConstants.SIM_CAMERA_FPS);
-        cameraProp.setAvgLatencyMs(VisionConstants.SIM_AVERAGE_LATENCY_MS);
-        cameraProp.setLatencyStdDevMs(VisionConstants.SIM_LATENCY_STD_DEV_MS);
-
-        var cameraSim = new PhotonCameraSim(camera, cameraProp);
-        visionSim.addCamera(cameraSim, VisionConstants.ROBOT_TO_CAMERA);
-        visionSim.addAprilTags(tagLayout);
-        
-        System.out.println("Vision simulation initialized successfully");
-        return new SimComponents(visionSim, cameraSim);
     }
 
     @Override
@@ -188,88 +171,79 @@ public class VisionSubsystem extends SubsystemBase {
         try {
             if (camera == null) {
                 if (!hasLoggedSimWarning) {
-                    System.out.println("Camera not initialized in VisionSubsystem");
+                    System.err.println("ERROR: Camera not initialized in VisionSubsystem");
                     hasLoggedSimWarning = true;
                 }
                 return;
             }
 
-            List<PhotonPipelineResult> results = camera.getAllUnreadResults();
-            boolean hasTarget = false;
-            PhotonPipelineResult latestResult = null;
-            
-            if (!results.isEmpty()) {
-                latestResult = results.get(results.size() - 1);
-                hasTarget = latestResult.hasTargets() && !latestResult.getTargets().isEmpty();
+            if (!camera.isConnected()) {
+                System.err.println("WARNING: Camera disconnected");
+                return;
             }
-            
-            // Detailed result logging
-            System.out.println("\nVision Update:");
-            System.out.println("- Results empty? " + results.isEmpty());
-            if (latestResult != null) {
-                System.out.println("- Timestamp: " + latestResult.getTimestampSeconds());
-                System.out.println("- Latency: " + latestResult.getLatency() + "ms");
-            }
-            
+
+            PhotonPipelineResult result = null;
             try {
-                if (latestResult != null && latestResult.hasTargets()) {
-                    var targets = latestResult.getTargets();
-                    System.out.println("- Target list size: " + targets.size());
-                    if (!targets.isEmpty()) {
-                        var firstTarget = targets.get(0);
-                        System.out.println("- First target ID: " + firstTarget.getFiducialId());
-                        System.out.println("- First target pose ambiguity: " + firstTarget.getPoseAmbiguity());
-                    }
+                // Get latest results safely
+                var results = camera.getAllUnreadResults();
+                if (!results.isEmpty()) {
+                    result = results.get(results.size() - 1);
                 }
             } catch (Exception e) {
-                System.err.println("Error checking targets: " + e.getMessage());
+                System.err.println("Error getting vision results: " + e.getMessage());
+                e.printStackTrace();
+                return;
             }
-            
-            // Debug logging
-            System.out.println("Vision Result - Has Target: " + hasTarget);
-            if (latestResult != null) {
-                System.out.println("Number of targets: " + (hasTarget ? latestResult.getTargets().size() : 0));
+
+            if (result == null) {
+                return;
             }
-            
-            // Update target status
-            SmartDashboard.putBoolean(TARGET_PATH + "HasTarget", hasTarget);
-            if (latestResult != null) {
-                SmartDashboard.putNumber(METRICS_PATH + "LatencyMS", latestResult.getLatency());
-            }
-            
-            if (hasTarget && latestResult != null) {
-                try {
-                    var targets = latestResult.getTargets();
-                    if (!targets.isEmpty()) {
-                        PhotonTrackedTarget target = targets.get(0);  // Get first target safely
-                        if (target != null) {
-                            double ambiguity = target.getPoseAmbiguity();
-                            
-                            // Debug logging
-                            System.out.println("Best Target - ID: " + target.getFiducialId() + 
-                                             " Yaw: " + target.getYaw() +
-                                             " Pitch: " + target.getPitch() +
-                                             " Ambiguity: " + ambiguity);
-                            
-                            if (ambiguity < VisionConstants.MAX_AMBIGUITY) {
-                                SmartDashboard.putNumber(TARGET_PATH + "ID", target.getFiducialId());
-                                SmartDashboard.putNumber(TARGET_PATH + "Yaw", target.getYaw());
-                                SmartDashboard.putNumber(TARGET_PATH + "Pitch", target.getPitch());
-                                SmartDashboard.putNumber(TARGET_PATH + "Ambiguity", ambiguity);
-                                
-                                updatePoseEstimation();
-                            }
-                        }
+
+            try {
+                // Debug logging
+                System.out.println("\nVision Update:");
+                System.out.println("- Has targets? " + result.hasTargets());
+                if (result.hasTargets()) {
+                    var targets = result.getTargets();
+                    System.out.println("- Number of targets: " + targets.size());
+                    for (var target : targets) {
+                        System.out.println("  Target ID: " + target.getFiducialId() +
+                                         " (Ambiguity: " + target.getPoseAmbiguity() + ")");
+                        System.out.println("    Yaw: " + target.getYaw());
+                        System.out.println("    Pitch: " + target.getPitch());
+                        System.out.println("    Area: " + target.getArea());
                     }
-                } catch (Exception e) {
-                    System.err.println("Error processing target data: " + e.getMessage());
                 }
-            } else {
-                // Clear target data
-                SmartDashboard.putNumber(TARGET_PATH + "ID", -1);
-                SmartDashboard.putNumber(TARGET_PATH + "Yaw", 0.0);
-                SmartDashboard.putNumber(TARGET_PATH + "Pitch", 0.0);
-                SmartDashboard.putNumber(TARGET_PATH + "Ambiguity", -1);
+
+                // Update SmartDashboard
+                boolean hasTarget = result.hasTargets();
+                SmartDashboard.putBoolean(TARGET_PATH + "HasTarget", hasTarget);
+
+                if (hasTarget) {
+                    try {
+                        var bestTarget = result.getBestTarget();
+                        SmartDashboard.putNumber(TARGET_PATH + "ID", bestTarget.getFiducialId());
+                        SmartDashboard.putNumber(TARGET_PATH + "Yaw", bestTarget.getYaw());
+                        SmartDashboard.putNumber(TARGET_PATH + "Pitch", bestTarget.getPitch());
+                        SmartDashboard.putNumber(TARGET_PATH + "Ambiguity", bestTarget.getPoseAmbiguity());
+
+                        // Update pose estimation if we have a valid target
+                        if (bestTarget.getPoseAmbiguity() < VisionConstants.MAX_AMBIGUITY) {
+                            updatePoseEstimation(result);
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Error processing best target: " + e.getMessage());
+                    }
+                } else {
+                    // Clear target data
+                    SmartDashboard.putNumber(TARGET_PATH + "ID", -1);
+                    SmartDashboard.putNumber(TARGET_PATH + "Yaw", 0.0);
+                    SmartDashboard.putNumber(TARGET_PATH + "Pitch", 0.0);
+                    SmartDashboard.putNumber(TARGET_PATH + "Ambiguity", -1);
+                }
+            } catch (Exception e) {
+                System.err.println("Error in vision processing: " + e.getMessage());
+                e.printStackTrace();
             }
         } catch (Exception e) {
             System.err.println("Error in VisionSubsystem periodic: " + e.toString());
@@ -277,28 +251,22 @@ public class VisionSubsystem extends SubsystemBase {
         }
     }
 
-    private void updatePoseEstimation() {
+    private void updatePoseEstimation(PhotonPipelineResult result) {
         try {
             if (poseEstimator == null) {
                 return;
             }
-            
-            List<PhotonPipelineResult> results = camera.getAllUnreadResults();
-            if (results.isEmpty()) {
-                return;
-            }
-            var result = results.get(results.size() - 1);
-            
+
             Optional<EstimatedRobotPose> estimatedPose = poseEstimator.update(result);
             if (estimatedPose.isPresent()) {
                 Pose2d currentPose = estimatedPose.get().estimatedPose.toPose2d();
                 m_field.setRobotPose(currentPose);
-                
+
                 // Update pose data
                 SmartDashboard.putNumber(POSE_PATH + "X", currentPose.getX());
                 SmartDashboard.putNumber(POSE_PATH + "Y", currentPose.getY());
                 SmartDashboard.putNumber(POSE_PATH + "Rotation", currentPose.getRotation().getDegrees());
-                
+
                 lastPose = currentPose;
             }
         } catch (Exception e) {
@@ -309,30 +277,27 @@ public class VisionSubsystem extends SubsystemBase {
 
     @Override
     public void simulationPeriodic() {
-        if (!RobotBase.isSimulation() || visionSim == null || cameraSim == null) {
+        if (!RobotBase.isSimulation() || cameraSim == null) {
             return;
         }
 
         try {
-            visionSim.update(lastPose);
-            
-            List<PhotonPipelineResult> results = camera.getAllUnreadResults();
-            int targetCount = 0;
-            
+            PhotonPipelineResult result = null;
             try {
+                var results = camera.getAllUnreadResults();
                 if (!results.isEmpty()) {
-                    var latestResult = results.get(results.size() - 1);
-                    if (latestResult.hasTargets()) {
-                        var targets = latestResult.getTargets();
-                        if (targets != null) {
-                            targetCount = targets.size();
-                        }
-                    }
+                    result = results.get(results.size() - 1);
                 }
             } catch (Exception e) {
-                System.err.println("Error counting targets in simulation: " + e.getMessage());
+                System.err.println("Error getting vision results in simulation: " + e.getMessage());
+                return;
             }
-            
+
+            int targetCount = 0;
+            if (result != null && result.hasTargets()) {
+                targetCount = result.getTargets().size();
+            }
+
             SmartDashboard.putNumber(SIM_PATH + "TargetCount", targetCount);
         } catch (Exception e) {
             System.err.println("Error in vision simulation: " + e.getMessage());
@@ -345,15 +310,26 @@ public class VisionSubsystem extends SubsystemBase {
             if (poseEstimator == null) {
                 return Optional.empty();
             }
-            List<PhotonPipelineResult> results = camera.getAllUnreadResults();
-            if (results.isEmpty()) {
+
+            PhotonPipelineResult result = null;
+            try {
+                var results = camera.getAllUnreadResults();
+                if (!results.isEmpty()) {
+                    result = results.get(results.size() - 1);
+                }
+            } catch (Exception e) {
+                System.err.println("Error getting vision results for pose estimation: " + e.getMessage());
                 return Optional.empty();
             }
-            var result = results.get(results.size() - 1);
+
+            if (result == null || !result.hasTargets()) {
+                return Optional.empty();
+            }
+
             poseEstimator.setReferencePose(prevEstimatedRobotPose);
             return poseEstimator.update(result);
         } catch (Exception e) {
-            System.err.println("Error getting estimated global pose: " + e.toString());
+            System.err.println("Error getting estimated global pose: " + e.getMessage());
             e.printStackTrace();
             return Optional.empty();
         }
@@ -362,9 +338,6 @@ public class VisionSubsystem extends SubsystemBase {
     public void updateCameraPosition(Transform3d newTransform) {
         if (poseEstimator != null) {
             poseEstimator.setRobotToCameraTransform(newTransform);
-        }
-        if (RobotBase.isSimulation() && visionSim != null) {
-            visionSim.adjustCamera(cameraSim, newTransform);
         }
     }
 }
