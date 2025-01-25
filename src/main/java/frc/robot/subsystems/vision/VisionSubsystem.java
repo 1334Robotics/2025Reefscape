@@ -307,17 +307,6 @@ public class VisionSubsystem extends SubsystemBase {
         }
     }
 
-    private Pose2d getCurrentPose() {
-        try {
-            Optional<EstimatedRobotPose> result = getEstimatedGlobalPose(lastPose);
-            return result.map(pose -> pose.estimatedPose.toPose2d()).orElse(lastPose);
-        } catch (Exception e) {
-            System.err.println("Error getting current pose: " + e.toString());
-            e.printStackTrace();
-            return lastPose;
-        }
-    }
-
     @Override
     public void simulationPeriodic() {
         if (!RobotBase.isSimulation() || visionSim == null || cameraSim == null) {
@@ -377,9 +366,5 @@ public class VisionSubsystem extends SubsystemBase {
         if (RobotBase.isSimulation() && visionSim != null) {
             visionSim.adjustCamera(cameraSim, newTransform);
         }
-    }
-
-    public boolean isConnected() {
-        return camera.isConnected();
     }
 }
