@@ -208,7 +208,7 @@ public class VisionSubsystem extends SubsystemBase {
             System.out.println("- Results empty? " + results.isEmpty());
             if (latestResult != null) {
                 System.out.println("- Timestamp: " + latestResult.getTimestampSeconds());
-                System.out.println("- Latency: " + latestResult.getLatencyMillis() + "ms");
+                System.out.println("- Latency: " + latestResult.getLatency() + "ms");
             }
             
             try {
@@ -233,7 +233,7 @@ public class VisionSubsystem extends SubsystemBase {
             
             // Update target status
             SmartDashboard.putBoolean(TARGET_PATH + "HasTarget", hasTarget);
-            SmartDashboard.putNumber(METRICS_PATH + "LatencyMS", getLatencyMillis());
+            SmartDashboard.putNumber(METRICS_PATH + "LatencyMS", getLatency());
             
             if (hasTarget && latestResult != null) {
                 try {
@@ -381,12 +381,12 @@ public class VisionSubsystem extends SubsystemBase {
         return camera.isConnected();
     }
 
-    public double getLatencyMillis() {
+    public double getLatency() {
         List<PhotonPipelineResult> results = camera.getAllUnreadResults();
         if (results.isEmpty()) {
             return 0.0;
         }
         var result = results.get(results.size() - 1);
-        return result.getLatencyMillis();
+        return result.getLatency();
     }
 }
