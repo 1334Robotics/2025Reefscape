@@ -1,6 +1,8 @@
 package frc.robot;
 
 import frc.robot.commands.drive.DriveCommand;
+import frc.robot.commands.drive.FollowAprilTagCommand;
+import frc.robot.commands.drive.TrackAprilTagCommand;
 import frc.robot.commands.mailbox.InputCommand;
 import frc.robot.commands.mailbox.OutputCommand;
 import frc.robot.commands.mailbox.StopCommand;
@@ -88,7 +90,10 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new PrintTargetInfo(visionSubsystem);
+    //return new PrintTargetInfo(visionSubsystem);
+    //return new TrackAprilTagCommand(visionSubsystem, swerveSubsystem);
+    return new FollowAprilTagCommand(visionSubsystem, swerveSubsystem, 2); // Follow tag ID 2
+
     //return null;
   }
 }

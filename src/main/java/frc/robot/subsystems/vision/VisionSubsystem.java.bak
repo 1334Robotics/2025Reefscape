@@ -109,44 +109,56 @@ public class VisionSubsystem extends SubsystemBase {
         }
         return null;
     }
-//NEW CAL
-    /**
-     * Get ID of best visible target
-     * @return target ID or -1 if no target
-     */
-    public int getBestTargetId() {
-        if (latestResult != null && latestResult.hasTargets()) {
-            return latestResult.getBestTarget().getFiducialId();
-        }
-        return -1;
-    }
-//NEW CAL
-    /**
-     * Check if specific tag ID is visible
-     * @param targetId desired tag ID
-     * @return true if tag is visible
-     */
-    public boolean isSpecificTargetVisible(int targetId) {
-        if (latestResult != null && latestResult.hasTargets()) {
-            return latestResult.getBestTarget().getFiducialId() == targetId;
-        }
-        return false;
-    }
 
     @Override
     public void periodic() {
-        // Get the latest pipeline result
-        latestResult = cameraPhotonCamera.getLatestResult();
-        
-        // Debug output
-        SmartDashboard.putBoolean("Vision/HasResult", latestResult != null);
-        if (latestResult != null) {
-            SmartDashboard.putBoolean("Vision/HasTargets", latestResult.hasTargets());
-            if (latestResult.hasTargets()) {
-                var target = latestResult.getBestTarget();
-                SmartDashboard.putNumber("Vision/TargetID", target.getFiducialId());
-                SmartDashboard.putNumber("Vision/TimestampSeconds", latestResult.getTimestampSeconds());
-            }
+        // 1) Grab all unread results once per loop
+        List<PhotonPipelineResult> results = cameraPhotonCamera.getAllUnreadResults();
+
+        // 2) If we got anything new, take the last (most recent) one
+        if (!results.isEmpty()) {
+            latestResult = results.get(results.size() - 1);
+        }
+
+        // 3) Update the dashboard
+        boolean hasTarget = (latestResult != null) && latestResult.hasTargets();
+        SmartDashboard.putBoolean("[VISION] Has Target", hasTarget);
+
+        // Show pipeline latency
+        // this compiles but always returns -1.0
+        //*double latencyMs = -1.0;
+        //if (cameraMetadata != null && latestResult != null) {
+        //    latencyMs = cameraMetadata.getLatencyMillis();
+        //}
+        // (1) Robot's current time in seconds
+        double currentTimeSeconds = edu.wpi.first.wpilibj.Timer.getFPGATimestamp();
+
+        // (2) The camera capture time (in seconds). 
+        //     Check for a method like getTimestampSeconds(), getFrameTimestampSeconds(), etc.
+        double captureTimeSeconds = latestResult.getTimestampSeconds(); 
+
+        // (3) Convert to milliseconds
+        double imageAgeMs = (currentTimeSeconds - captureTimeSeconds) * 1000;
+
+        // (4) Send to dashboard
+        SmartDashboard.putNumber("[VISION] Image Age (ms)", imageAgeMs);
+
+        if (hasTarget) {
+            PhotonTrackedTarget target = latestResult.getBestTarget();
+            SmartDashboard.putNumber("[VISION] Target ID", target.getFiducialId());
+            SmartDashboard.putNumber("[VISION] Yaw", target.getYaw());
+            SmartDashboard.putNumber("[VISION] Pitch", target.getPitch());
+            SmartDashboard.putNumber("[VISION] Area", target.getArea());
+            SmartDashboard.putNumber("[VISION] Pose Ambiguity", target.getPoseAmbiguity());
+            SmartDashboard.putNumber("[VISION] Skew", target.getSkew());
+        } else {
+            // Clear values when no target is visible
+            SmartDashboard.putNumber("[VISION] Target ID", -1);
+            SmartDashboard.putNumber("[VISION] Yaw", 0.0);
+            SmartDashboard.putNumber("[VISION] Pitch", 0.0);
+            SmartDashboard.putNumber("[VISION] Area", 0.0);
+            SmartDashboard.putNumber("[VISION] Pose Ambiguity", 0.0);
+            SmartDashboard.putNumber("[VISION] Skew", 0.0);
         }
     }
 }
