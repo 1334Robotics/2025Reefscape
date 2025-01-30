@@ -42,7 +42,7 @@ public class RobotContainer {
 
 
   // Subsystems
-  public static final GyroSubsystem gyroSubsystem = new GyroSubsystem();
+  public static final GyroSubsystem gyroSubsystem = new GyroSubsystem("CANivore");
   public static final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(RobotContainerConstants.ELEVATOR_PRIMARY_MOTOR_ID,
                                                                                   RobotContainerConstants.ELEVATOR_SECONDARY_MOTOR_ID);
   public static final MailboxSubsystem mailboxSubsystem = new MailboxSubsystem();

@@ -20,6 +20,10 @@ public class GyroSubsystem extends SubsystemBase {
         pigeon = new Pigeon2(deviceId);
     }
 
+    public GyroSubsystem(String canBus) {
+        pigeon = new Pigeon2(GyroConstants.DEVICEID, canBus);
+    }
+
     public GyroSubsystem(int deviceId, String canBus) {
         pigeon = new Pigeon2(deviceId, canBus);
     }
