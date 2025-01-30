@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.SwerveConstants;
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
+import swervelib.SwerveModule;
 import swervelib.parser.SwerveParser;
 
 import java.io.File;
@@ -32,6 +33,16 @@ public class SwerveSubsystem extends SubsystemBase {
         // Turn off heading correction and cosine compensation
         this.swerveDrive.setHeadingCorrection(false);
         this.swerveDrive.setCosineCompensator(false);
+    }
+
+    @Override
+    public void periodic() {
+        // Update the encoder positions
+        SwerveModule[] modules = this.swerveDrive.getModules();
+        SmartDashboard.putNumber("[SWERVE] Front Left Encoder Position", modules[0].getAbsolutePosition());
+        SmartDashboard.putNumber("[SWERVE] Front Right Encoder Position", modules[1].getAbsolutePosition());
+        SmartDashboard.putNumber("[SWERVE] Back Left Encoder Position", modules[2].getAbsolutePosition());
+        SmartDashboard.putNumber("[SWERVE] Back Right Encoder Position", modules[3].getAbsolutePosition());
     }
 
     public SwerveController getSwerveController() {
