@@ -6,6 +6,7 @@ import frc.robot.commands.mailbox.OutputCommand;
 import frc.robot.commands.mailbox.StopCommand;
 import frc.robot.commands.solenoid.ExtendCommand;
 import frc.robot.commands.solenoid.RetractCommand;
+import frc.robot.commands.elevator.ManualElevatorCommand;
 import frc.robot.constants.RobotContainerConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
@@ -59,6 +60,11 @@ public class RobotContainer {
                                                      () -> MathUtil.applyDeadband(-driverController.getRightX(), RobotContainerConstants.CONTROLLER_ROTATION_DEADBAND));
 
     swerveSubsystem.setDefaultCommand(xboxDriveCommand);
+    
+    // Add manual elevator control using operator controller POV
+    elevatorSubsystem.setDefaultCommand(
+        new ManualElevatorCommand(elevatorSubsystem, () -> operatorController.getPOV())
+    );
   }
 
 

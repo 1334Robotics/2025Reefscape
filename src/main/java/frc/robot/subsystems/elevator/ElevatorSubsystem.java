@@ -176,9 +176,22 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     // Add this method to enable manual control
     public void setManualControl(double power) {
+        // Add safety limits
+        if (primaryPositionInches >= ElevatorConstants.PRIMARY_MAX_HEIGHT_INCHES && power > 0) {
+            power = 0;
+        }
+        if (primaryPositionInches <= ElevatorConstants.PRIMARY_MIN_HEIGHT_INCHES && power < 0) {
+            power = 0;
+        }
+        
         manualPower = power;
+        // Disable motion magic when in manual mode
         primaryMotor.set(power);
         secondaryMotor.set(power);
+        
+        // Debug output
+        SmartDashboard.putNumber("[ELEVATOR] Manual Power Input", power);
+        SmartDashboard.putBoolean("[ELEVATOR] Manual Control Active", power != 0);
     }
 
     public enum ElevatorPosition {
