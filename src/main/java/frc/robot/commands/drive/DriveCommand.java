@@ -29,7 +29,7 @@ public class DriveCommand extends Command {
         // This math is from previous years
         double xVelocity = Math.pow(this.vX.getAsDouble(), 3) * SwerveConstants.DRIVE_SPEED;
         double yVelocity = Math.pow(this.vY.getAsDouble(), 3) * SwerveConstants.DRIVE_SPEED;
-        double angularVelocity = Math.pow(this.omega.getAsDouble(), 3);
+        double angularVelocity = Math.pow(this.omega.getAsDouble(), 3) * SwerveConstants.DRIVE_SPEED;
 
         // Update the values within SmartDashboard
         SmartDashboard.putNumber("[SWERVE] X Velocity", xVelocity);
