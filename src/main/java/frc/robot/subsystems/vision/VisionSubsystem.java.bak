@@ -162,3 +162,22 @@ public class VisionSubsystem extends SubsystemBase {
         }
     }
 }
+
+
+
+    @Override
+    public void periodic() {
+        // Get the latest pipeline result
+        latestResult = cameraPhotonCamera.getLatestResult();
+        
+        // Debug output
+        SmartDashboard.putBoolean("Vision/HasResult", latestResult != null);
+        if (latestResult != null) {
+            SmartDashboard.putBoolean("Vision/HasTargets", latestResult.hasTargets());
+            if (latestResult.hasTargets()) {
+                var target = latestResult.getBestTarget();
+                SmartDashboard.putNumber("Vision/TargetID", target.getFiducialId());
+                SmartDashboard.putNumber("Vision/TimestampSeconds", latestResult.getTimestampSeconds());
+            }
+        }
+    }

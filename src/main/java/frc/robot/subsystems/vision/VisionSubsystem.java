@@ -135,18 +135,55 @@ public class VisionSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // Get the latest pipeline result
-        latestResult = cameraPhotonCamera.getLatestResult();
-        
-        // Debug output
-        SmartDashboard.putBoolean("Vision/HasResult", latestResult != null);
-        if (latestResult != null) {
-            SmartDashboard.putBoolean("Vision/HasTargets", latestResult.hasTargets());
-            if (latestResult.hasTargets()) {
-                var target = latestResult.getBestTarget();
-                SmartDashboard.putNumber("Vision/TargetID", target.getFiducialId());
-                SmartDashboard.putNumber("Vision/TimestampSeconds", latestResult.getTimestampSeconds());
-            }
+        // 1) Grab all unread results once per loop using the new getAllUnreadResults() method
+        List<PhotonPipelineResult> results = cameraPhotonCamera.getAllUnreadResults();
+
+        // 2) If we got anything new, take the last (most recent) one
+        if (!results.isEmpty()) {
+            latestResult = results.get(results.size() - 1);
+        }
+
+        // 3) Update the dashboard
+        boolean hasTarget = (latestResult != null) && latestResult.hasTargets();
+        SmartDashboard.putBoolean("[VISION] Has Target", hasTarget);
+
+        // Show pipeline latency
+        // this compiles but always returns -1.0 need to dig into why this is not working 
+        //for now we will comment it out and calculate image age by hand this adds about 15-20ms onto the actual latency
+        //CAL
+        //*double latencyMs = -1.0;
+        //if (cameraMetadata != null && latestResult != null) {
+        //    latencyMs = cameraMetadata.getLatencyMillis();
+        //}
+        // (1) Robot's current time in seconds
+        double currentTimeSeconds = edu.wpi.first.wpilibj.Timer.getFPGATimestamp();
+
+        // (2) The camera capture time (in seconds). 
+        //     Check for a method like getTimestampSeconds(), getFrameTimestampSeconds(), etc.
+        double captureTimeSeconds = latestResult.getTimestampSeconds(); 
+
+        // (3) Convert to milliseconds
+        double imageAgeMs = (currentTimeSeconds - captureTimeSeconds) * 1000;
+
+        // (4) Send to dashboard
+        SmartDashboard.putNumber("[VISION] Image Age (ms)", imageAgeMs);
+
+        if (hasTarget) {
+            PhotonTrackedTarget target = latestResult.getBestTarget();
+            SmartDashboard.putNumber("VisionDetail/Target ID", target.getFiducialId());
+            SmartDashboard.putNumber("VisionDetail/Yaw", target.getYaw());
+            SmartDashboard.putNumber("VisionDetail/Pitch", target.getPitch());
+            SmartDashboard.putNumber("VisionDetail/Area", target.getArea());
+            SmartDashboard.putNumber("VisionDetail/Pose Ambiguity", target.getPoseAmbiguity());
+            SmartDashboard.putNumber("VisionDetail/Skew", target.getSkew());
+        } else {
+            // Clear values when no target is visible
+            SmartDashboard.putNumber("VisionDetail/Target ID", -1);
+            SmartDashboard.putNumber("VisionDetail/Yaw", 0.0);
+            SmartDashboard.putNumber("VisionDetail/Pitch", 0.0);
+            SmartDashboard.putNumber("VisionDetail/Area", 0.0);
+            SmartDashboard.putNumber("VisionDetail/Pose Ambiguity", 0.0);
+            SmartDashboard.putNumber("VisionDetail/Skew", 0.0);
         }
     }
 }
