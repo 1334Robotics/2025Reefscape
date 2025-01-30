@@ -32,9 +32,9 @@ public class DriveCommand extends Command {
         double angularVelocity = Math.pow(this.omega.getAsDouble(), 3) * SwerveConstants.DRIVE_SPEED;
 
         // Update the values within SmartDashboard
-        SmartDashboard.putNumber("[SWERVE] X Velocity", xVelocity);
-        SmartDashboard.putNumber("[SWERVE] Y Velocity", yVelocity);
-        SmartDashboard.putNumber("[SWERVE] Angular Velocity", angularVelocity);
+        SmartDashboard.putNumber("[DRIVE] X Velocity", xVelocity);
+        SmartDashboard.putNumber("[DRIVE] Y Velocity", yVelocity);
+        SmartDashboard.putNumber("[DRIVE] Angular Velocity", angularVelocity);
 
         // Drive
         RobotContainer.swerveSubsystem.drive(new Translation2d(xVelocity * SwerveConstants.MAX_SPEED,
