@@ -10,6 +10,7 @@ import frc.robot.constants.RobotContainerConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
+import frc.robot.commands.vision.PrintTargetInfo;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.math.MathUtil;
@@ -87,6 +88,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return null;
+    return new PrintTargetInfo(visionSubsystem);
+    //return null;
   }
 }
