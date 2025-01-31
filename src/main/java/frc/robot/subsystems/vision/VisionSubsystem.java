@@ -135,8 +135,8 @@ public class VisionSubsystem extends SubsystemBase {
 
         // (2) The camera capture time (in seconds). 
         //     Check for a method like getTimestampSeconds(), getFrameTimestampSeconds(), etc.
-        double captureTimeSeconds = latestResult.getTimestampSeconds(); 
-
+        //double captureTimeSeconds = latestResult.getTimestampSeconds(); 
+        double captureTimeSeconds = (latestResult != null ? latestResult.getTimestampSeconds() : currentTimeSeconds);
         // (3) Convert to milliseconds
         double imageAgeMs = (currentTimeSeconds - captureTimeSeconds) * 1000;
 
