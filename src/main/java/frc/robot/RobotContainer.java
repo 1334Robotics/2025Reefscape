@@ -46,6 +46,7 @@ public class RobotContainer {
                                                                                   RobotContainerConstants.ELEVATOR_SECONDARY_MOTOR_ID);
   public static final MailboxSubsystem mailboxSubsystem = new MailboxSubsystem();
   public static final SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
+  public static final SolenoidSubsystem solenoidSubsystem = new SolenoidSubsystem();
   public static final VisionSubsystem visionSubsystem = new VisionSubsystem();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
