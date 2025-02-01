@@ -21,8 +21,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-
-
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -43,13 +41,13 @@ public class RobotContainer {
 
 
   // Subsystems
-  public static final GyroSubsystem gyroSubsystem = new GyroSubsystem();
+  public static final GyroSubsystem gyroSubsystem = new GyroSubsystem("CANivore");
   public static final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(RobotContainerConstants.ELEVATOR_PRIMARY_MOTOR_ID,
                                                                                   RobotContainerConstants.ELEVATOR_SECONDARY_MOTOR_ID);
   public static final MailboxSubsystem mailboxSubsystem = new MailboxSubsystem();
   public static final SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
-  public static final VisionSubsystem visionSubsystem = new VisionSubsystem(); 
   public static final SolenoidSubsystem solenoidSubsystem = new SolenoidSubsystem();
+  public static final VisionSubsystem visionSubsystem = new VisionSubsystem();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {

@@ -1,6 +1,5 @@
 package frc.robot.constants;
 
 public class SolenoidConstants {
-    // unsure
-    public static int DEVICE_ID = 1;
+    public static final int DEVICE_ID = 0;
 }
