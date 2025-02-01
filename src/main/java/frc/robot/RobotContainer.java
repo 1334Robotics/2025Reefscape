@@ -10,6 +10,7 @@ import frc.robot.constants.RobotContainerConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
+import frc.robot.commands.vision.PrintTargetInfo;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.math.MathUtil;
@@ -45,7 +46,6 @@ public class RobotContainer {
                                                                                   RobotContainerConstants.ELEVATOR_SECONDARY_MOTOR_ID);
   public static final MailboxSubsystem mailboxSubsystem = new MailboxSubsystem();
   public static final SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
-  public static final SolenoidSubsystem solenoidSubsystem = new SolenoidSubsystem();
   public static final VisionSubsystem visionSubsystem = new VisionSubsystem();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -85,6 +85,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return null;
+    return new PrintTargetInfo(visionSubsystem);
+    //return null;
   }
 }
