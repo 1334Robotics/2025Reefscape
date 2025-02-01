@@ -10,9 +10,14 @@ import frc.robot.constants.RobotContainerConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
+import pabeles.concurrency.ConcurrencyOps.NewInstance;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
+
+import org.ironmaple.simulation.SimulatedArena;
+
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.optimization.SimulatedAnnealing;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.subsystems.solenoid.SolenoidSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -50,10 +55,13 @@ public class RobotContainer {
   public static final VisionSubsystem visionSubsystem = new VisionSubsystem(); 
   public static final SolenoidSubsystem solenoidSubsystem = new SolenoidSubsystem();
 
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
+
+    SimulatedArena.getInstance(); // Initialize the simulation arena
 
     DriveCommand xboxDriveCommand = new DriveCommand(() -> MathUtil.applyDeadband(driverController.getLeftX(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
                                                      () -> MathUtil.applyDeadband(driverController.getLeftY(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
