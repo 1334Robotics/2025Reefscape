@@ -63,6 +63,10 @@ public class SwerveSubsystem extends SubsystemBase {
         swerveDrive.drive(translation, rotation, this.fieldRelative, false);
     }
 
+    public void steer(double steer) {
+        swerveDrive.drive(new Translation2d(0, 0), steer, false, false);
+    }
+
     public void zeroGyro() {
         this.swerveDrive.zeroGyro();
     }
