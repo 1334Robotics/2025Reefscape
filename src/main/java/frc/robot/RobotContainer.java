@@ -12,7 +12,6 @@ import frc.robot.subsystems.mailbox.MailboxSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import swervelib.SwerveDrive;
 import frc.robot.commands.vision.PrintTargetInfo;
-import frc.robot.subsystems.drive.MapleSimSwerve;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.math.MathUtil;
@@ -59,10 +58,10 @@ public class RobotContainer {
   public RobotContainer() {
 
     if (Robot.isReal()) {
-        this.drive = new TalonSwerve(); // Real implementation
+        this.drive = swerveSubsystem.getSwerveDrive(); // Real implementation
     }
     else {
-        this.drive = new MapleSimSwerve(); // Simulation implementation
+        this.drive = swerveSubsystem.getSwerveDrive(); // Simulation implementation
     }
 
     // Configure the trigger bindings
