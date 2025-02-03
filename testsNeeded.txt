@@ -1,4 +1,5 @@
-Test if the zero gyro button works
--> X on the driver controller should set the yaw of the gyro to 0
-
 Test all the direction snaps
+-> Forwards
+-> Backwards
+-> Left
+-> Right

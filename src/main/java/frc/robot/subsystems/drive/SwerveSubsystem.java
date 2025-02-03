@@ -17,9 +17,11 @@ import java.io.IOException;
 public class SwerveSubsystem extends SubsystemBase {
     private final SwerveDrive swerveDrive;
     private boolean fieldRelative;
+    private boolean allowDrive;
     
     public SwerveSubsystem() {
         this.fieldRelative = false;
+        this.allowDrive = true;
         SmartDashboard.putBoolean("[SWERVE] Field Relative", this.fieldRelative);
         
         // Create the swerve drive
@@ -39,10 +41,10 @@ public class SwerveSubsystem extends SubsystemBase {
     public void periodic() {
         // Update the encoder positions
         SwerveModule[] modules = this.swerveDrive.getModules();
-        SmartDashboard.putNumber("[SWERVE] Front Left Encoder Position",  modules[0].getAbsolutePosition());
-        SmartDashboard.putNumber("[SWERVE] Front Right Encoder Position", modules[1].getAbsolutePosition());
-        SmartDashboard.putNumber("[SWERVE] Back Left Encoder Position",   modules[2].getAbsolutePosition());
-        SmartDashboard.putNumber("[SWERVE] Back Right Encoder Position",  modules[3].getAbsolutePosition());
+        SmartDashboard.putNumber("[SWERVE] Front Left Encoder Position",  modules[0].getRawAbsolutePosition());
+        SmartDashboard.putNumber("[SWERVE] Front Right Encoder Position", modules[1].getRawAbsolutePosition());
+        SmartDashboard.putNumber("[SWERVE] Back Left Encoder Position",   modules[2].getRawAbsolutePosition());
+        SmartDashboard.putNumber("[SWERVE] Back Right Encoder Position",  modules[3].getRawAbsolutePosition());
 
         // Update the true velocities of all the motors
         SmartDashboard.putNumber("[SWERVE] Front Left Drive Velocity",  modules[0].getDriveMotor().getVelocity());
@@ -60,11 +62,13 @@ public class SwerveSubsystem extends SubsystemBase {
     }
     
     public void drive(Translation2d translation, double rotation) {
+        if(!this.allowDrive) return;
         swerveDrive.drive(translation, rotation, this.fieldRelative, false);
     }
 
     public void steer(double steer) {
-        swerveDrive.drive(new Translation2d(0, 0), steer, false, false);
+        swerveDrive.drive(new Translation2d(0, 0), steer * swerveDrive.swerveController.config.maxAngularVelocity,
+                          false, false);
     }
 
     public void zeroGyro() {
@@ -86,5 +90,13 @@ public class SwerveSubsystem extends SubsystemBase {
     
     public boolean isFieldRelative() {
         return fieldRelative;
+    }
+
+    public void lockDrive() {
+        this.allowDrive = false;
+    }
+
+    public void unlockDrive() {
+        this.allowDrive = true;
     }
 }
