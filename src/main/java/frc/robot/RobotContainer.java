@@ -10,7 +10,9 @@ import frc.robot.constants.RobotContainerConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
+import swervelib.SwerveDrive;
 import frc.robot.commands.vision.PrintTargetInfo;
+import frc.robot.subsystems.drive.MapleSimSwerve;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.math.MathUtil;
@@ -51,9 +53,18 @@ public class RobotContainer {
   public static final SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
   public static final SolenoidSubsystem solenoidSubsystem = new SolenoidSubsystem();
   public static final VisionSubsystem visionSubsystem = new VisionSubsystem();
+  private final SwerveDrive drive;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+
+    if (Robot.isReal()) {
+        this.drive = new TalonSwerve(); // Real implementation
+    }
+    else {
+        this.drive = new MapleSimSwerve(); // Simulation implementation
+    }
+
     // Configure the trigger bindings
     configureBindings();
 
