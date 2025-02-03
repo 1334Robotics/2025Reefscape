@@ -14,6 +14,8 @@ import swervelib.SwerveDrive;
 import swervelib.SwerveModule;
 import swervelib.parser.SwerveParser;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Unit;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,26 +31,6 @@ public class SwerveSubsystem extends SubsystemBase {
     private boolean fieldRelative;
     private SwerveDriveSimulation swerveDriveSimulation;
 
-    // Create and configure a drivetrain simulation configuration
-    final DriveTrainSimulationConfig driveTrainSimulationConfig = DriveTrainSimulationConfig.Default()
-        // Specify gyro type (for realistic gyro drifting and error simulation)
-        .withGyro(COTS.ofPigeon2())
-        // Specify swerve module (for realistic swerve dynamics)
-        .withSwerveModule(new SwerveModuleSimulationConfig(
-                DCMotor.getKrakenX60(1), // Drive motor is a Kraken X60
-                DCMotor.getKrakenX60(1), // Steer motor is a Falcon 500
-                6.12, // Drive motor gear ratio.
-                12.8, // Steer motor gear ratio.
-                0.1, // Drive friction voltage.
-                0.1, // Steer friction voltage
-                Units.inchesToMeters(2), // Wheel radius
-                0.03, // Steer MOI
-                1.2)) // Wheel COF
-        // Configures the track length and track width (spacing between swerve modules)
-        .withTrackLengthTrackWidth(Units.inchesToMeters(24), Units.inchesToMeters(24))
-        // Configures the bumper size (dimensions of the robot bumper)
-        .withBumperSize(Units.inchesToMeters(30), Units.inchesToMeters(30));
-    
     public SwerveSubsystem() {
         this.fieldRelative = false;
         SmartDashboard.putBoolean("[SWERVE] Field Relative", this.fieldRelative);
@@ -67,6 +49,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
         // Simulation initialization - only do this in simulation mode
         if (RobotBase.isSimulation()) {
+            DriveTrainSimulationConfig basicConfig = DriveTrainSimulationConfig.Default();
             this.swerveDriveSimulation = new SwerveDriveSimulation(
                 driveTrainSimulationConfig,
                 new Pose2d(3, 3, new Rotation2d())
@@ -124,5 +107,9 @@ public class SwerveSubsystem extends SubsystemBase {
     
     public boolean isFieldRelative() {
         return fieldRelative;
+    }
+
+    public SwerveDrive getSwerveDrive() {
+        return this.swerveDrive;
     }
 }

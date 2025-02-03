@@ -16,9 +16,6 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeAlgaeOnField;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralAlgaeStack;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnField;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeReefSimulation;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeAlgaeOnFly;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -46,7 +43,7 @@ public class Robot extends TimedRobot {
       // Get the default instance of the simulation world
       SimulatedArena.getInstance();
 
-      SimulatedArena.getInstance().addGamePiece(new ReefscapeCoral(
+      SimulatedArena.getInstance().addGamePiece(new ReefscapeCoralOnField(
     // We must specify a heading since the coral is a tube
     new Pose2d(2, 2, Rotation2d.fromDegrees(90))));
     SimulatedArena.getInstance().addGamePiece(new ReefscapeAlgaeOnField(new Translation2d(2,2)));
