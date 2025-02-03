@@ -20,6 +20,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import org.ironmaple.simulation.SimulatedArena;
+import edu.wpi.first.math.geometry.Pose3d;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -88,5 +91,10 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     return new PrintTargetInfo(visionSubsystem);
     //return null;
+  }
+
+  public void periodic() {
+    Pose3d[] notesPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Note");
+    Logger.recordOutput("FieldSimulation/NotesPositions", notesPoses);
   }
 }
