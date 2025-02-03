@@ -1,8 +1,11 @@
 package frc.robot.subsystems.drive;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.SwerveConstants;
@@ -10,14 +13,24 @@ import swervelib.SwerveController;
 import swervelib.SwerveDrive;
 import swervelib.SwerveModule;
 import swervelib.parser.SwerveParser;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Unit;
 
 import java.io.File;
 import java.io.IOException;
 
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.COTS;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
+
 public class SwerveSubsystem extends SubsystemBase {
     private final SwerveDrive swerveDrive;
     private boolean fieldRelative;
-    
+    private SwerveDriveSimulation swerveDriveSimulation;
+
     public SwerveSubsystem() {
         this.fieldRelative = false;
         SmartDashboard.putBoolean("[SWERVE] Field Relative", this.fieldRelative);
@@ -33,6 +46,18 @@ public class SwerveSubsystem extends SubsystemBase {
         // Turn off heading correction and cosine compensation
         this.swerveDrive.setHeadingCorrection(false);
         this.swerveDrive.setCosineCompensator(false);
+
+        // Simulation initialization - only do this in simulation mode
+        if (RobotBase.isSimulation()) {
+            DriveTrainSimulationConfig basicConfig = DriveTrainSimulationConfig.Default();
+            this.swerveDriveSimulation = new SwerveDriveSimulation(
+                driveTrainSimulationConfig,
+                new Pose2d(3, 3, new Rotation2d())
+            );
+            
+            // Register with simulation world
+            SimulatedArena.getInstance().addDriveTrainSimulation(swerveDriveSimulation);
+        }
     }
 
     @Override
@@ -82,5 +107,9 @@ public class SwerveSubsystem extends SubsystemBase {
     
     public boolean isFieldRelative() {
         return fieldRelative;
+    }
+
+    public SwerveDrive getSwerveDrive() {
+        return this.swerveDrive;
     }
 }

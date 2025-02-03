@@ -10,9 +10,7 @@ import frc.robot.constants.RobotContainerConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
-<<<<<<< HEAD
-import pabeles.concurrency.ConcurrencyOps.NewInstance;
-=======
+import swervelib.SwerveDrive;
 import frc.robot.commands.vision.PrintTargetInfo;
 >>>>>>> 9c49c65ee57d6b68ff22c73db0f425e79533113b
 import frc.robot.subsystems.drive.SwerveSubsystem;
@@ -59,10 +57,18 @@ public class RobotContainer {
   public static final SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
   public static final SolenoidSubsystem solenoidSubsystem = new SolenoidSubsystem();
   public static final VisionSubsystem visionSubsystem = new VisionSubsystem();
-
+  private final SwerveDrive drive;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+
+    if (Robot.isReal()) {
+        this.drive = swerveSubsystem.getSwerveDrive(); // Real implementation
+    }
+    else {
+        this.drive = swerveSubsystem.getSwerveDrive(); // Simulation implementation
+    }
+
     // Configure the trigger bindings
     configureBindings();
 
