@@ -10,7 +10,7 @@ public class DirectionSnapBackwards extends Command {
     }
 
     @Override
-    public void initialize() {
+    public void execute() {
         RobotContainer.directionSnapSubsystem.snap(Direction.BACKWARDS);
     }
 

@@ -29,16 +29,16 @@ public class DriveCommand extends Command {
         // This math is from previous years
         double xVelocity = Math.pow(this.vX.getAsDouble(), 3) * SwerveConstants.DRIVE_SPEED;
         double yVelocity = Math.pow(this.vY.getAsDouble(), 3) * SwerveConstants.DRIVE_SPEED;
-        double angularVelocity = Math.pow(this.omega.getAsDouble(), 3);
+        double angularVelocity = Math.pow(this.omega.getAsDouble(), 3) * SwerveConstants.DRIVE_SPEED;
 
-        // Update the values within SmartDashboard
-        SmartDashboard.putNumber("[DRIVE] X Velocity", xVelocity);
-        SmartDashboard.putNumber("[DRIVE] Y Velocity", yVelocity);
+        // Update the values within SmartDashboard (The config is off 90 degrees, so this is what needs to happen)
+        SmartDashboard.putNumber("[DRIVE] X Velocity", -yVelocity);
+        SmartDashboard.putNumber("[DRIVE] Y Velocity", -xVelocity);
         SmartDashboard.putNumber("[DRIVE] Angular Velocity", angularVelocity);
 
         // Drive
-        RobotContainer.swerveSubsystem.drive(new Translation2d(xVelocity * SwerveConstants.MAX_SPEED,
-                                                               yVelocity * SwerveConstants.MAX_SPEED),
+        RobotContainer.swerveSubsystem.drive(new Translation2d(-yVelocity * SwerveConstants.MAX_SPEED,
+                                                               -xVelocity * SwerveConstants.MAX_SPEED),
                                             angularVelocity * controller.config.maxAngularVelocity);
     }
 

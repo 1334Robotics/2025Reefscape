@@ -10,7 +10,7 @@ public class DirectionSnapRight extends Command {
     }
 
     @Override
-    public void initialize() {
+    public void execute() {
         RobotContainer.directionSnapSubsystem.snap(Direction.RIGHT);
     }
 

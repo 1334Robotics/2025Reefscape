@@ -28,6 +28,7 @@ public class DirectionSnapSubsystem extends SubsystemBase {
     public void snap(Direction direction) {
         this.targetYaw = direction.degrees;
         this.hitTargetYaw = false;
+        RobotContainer.swerveSubsystem.lockDrive();
     }
 
     public boolean isAtTarget() {
@@ -36,6 +37,7 @@ public class DirectionSnapSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        return;/*
         // Rotate towards the target yaw
         if(!hitTargetYaw) {
             SmartDashboard.putBoolean("[DIRECTIONSNAP] Turning", true);
@@ -52,12 +54,14 @@ public class DirectionSnapSubsystem extends SubsystemBase {
             RobotContainer.swerveSubsystem.steer(steer);
 
             // Check if the yaw is within acceptable range
-            if(Math.abs(error) <= DirectionSnapConstants.MAX_ACCEPTABLE_YAW_ERROR)
+            if(Math.abs(error) <= DirectionSnapConstants.MAX_ACCEPTABLE_YAW_ERROR) {
+                RobotContainer.swerveSubsystem.unlockDrive();
                 this.hitTargetYaw = true;
+            }
         } else {
             SmartDashboard.putBoolean("[DIRECTIONSNAP] Turning", false);
             SmartDashboard.putNumber("[DIRECTIONSNAP] Error", 0);
             SmartDashboard.putNumber("[DIRECTIONSNAP] Steer", 0);
-        }
+        }*/
     }
 }
