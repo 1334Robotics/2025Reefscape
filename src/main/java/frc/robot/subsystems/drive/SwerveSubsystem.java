@@ -126,21 +126,7 @@ public class SwerveSubsystem extends SubsystemBase {
     public Pose2d getOdometryPose() {
         return swerveDrive.getPose();
     }
-//NEW CAL
-    /**
-     * Drive the robot with given speeds
-     * @param xSpeed Forward/backward speed (m/s)
-     * @param ySpeed Left/right speed (m/s)
-     * @param rot Angular speed (rad/s)
-     * @param fieldRelative Whether speeds are field-relative
-     */
-    public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
-        swerveDrive.drive(
-            new Translation2d(xSpeed, ySpeed),
-            rot,
-            fieldRelative,
-            false  // Open loop
-        );
-    }
+
+
 
 }
