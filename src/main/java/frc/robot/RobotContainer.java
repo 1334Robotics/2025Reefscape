@@ -10,7 +10,11 @@ import frc.robot.constants.RobotContainerConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
+<<<<<<< HEAD
 import pabeles.concurrency.ConcurrencyOps.NewInstance;
+=======
+import frc.robot.commands.vision.PrintTargetInfo;
+>>>>>>> 9c49c65ee57d6b68ff22c73db0f425e79533113b
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 
@@ -24,8 +28,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-
-
+import org.ironmaple.simulation.SimulatedArena;
+import edu.wpi.first.math.geometry.Pose3d;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -47,13 +52,13 @@ public class RobotContainer {
 
 
   // Subsystems
-  public static final GyroSubsystem gyroSubsystem = new GyroSubsystem();
+  public static final GyroSubsystem gyroSubsystem = new GyroSubsystem("CANivore");
   public static final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(RobotContainerConstants.ELEVATOR_PRIMARY_MOTOR_ID,
                                                                                   RobotContainerConstants.ELEVATOR_SECONDARY_MOTOR_ID);
   public static final MailboxSubsystem mailboxSubsystem = new MailboxSubsystem();
   public static final SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
-  public static final VisionSubsystem visionSubsystem = new VisionSubsystem(); 
   public static final SolenoidSubsystem solenoidSubsystem = new SolenoidSubsystem();
+  public static final VisionSubsystem visionSubsystem = new VisionSubsystem();
 
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -95,6 +100,12 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return null;
+    return new PrintTargetInfo(visionSubsystem);
+    //return null;
+  }
+
+  public void periodic() {
+    Pose3d[] notesPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Note");
+    Logger.recordOutput("FieldSimulation/NotesPositions", notesPoses);
   }
 }
