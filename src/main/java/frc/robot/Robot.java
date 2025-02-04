@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
+import org.ironmaple.simulation.SimulatedArena;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -50,7 +51,15 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically whilst in simulation. */
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+    //Updating MapleSim simulation should NOT be done when the robot is not in simulation
+    if (Robot.isReal()){
+      return;
+    } else {
+      SimulatedArena.getInstance().simulationPeriodic();
+    }
+    
+  }
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
