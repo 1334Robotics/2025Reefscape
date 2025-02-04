@@ -60,7 +60,7 @@ public class RobotContainer {
   public static final MailboxSubsystem mailboxSubsystem             = new MailboxSubsystem();
   public static final SwerveSubsystem swerveSubsystem               = new SwerveSubsystem();
   public static final SolenoidSubsystem solenoidSubsystem           = new SolenoidSubsystem();
-  //public static final VisionSubsystem visionSubsystem               = new VisionSubsystem();
+  public static final VisionSubsystem visionSubsystem               = new VisionSubsystem();
   public static final DirectionSnapSubsystem directionSnapSubsystem = new DirectionSnapSubsystem();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -68,8 +68,7 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
 
-    DriveCommand xboxDriveCommand = new DriveCommand(swerveSubsystem,
-                                                     () -> MathUtil.applyDeadband(driverController.getLeftX(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
+    DriveCommand xboxDriveCommand = new DriveCommand(() -> MathUtil.applyDeadband(driverController.getLeftX(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
                                                      () -> MathUtil.applyDeadband(driverController.getLeftY(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
                                                      () -> MathUtil.applyDeadband(-driverController.getRightX(), RobotContainerConstants.CONTROLLER_ROTATION_DEADBAND));
 
@@ -106,7 +105,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    //return new PrintTargetInfo(visionSubsystem);
-    return null;
+    return new PrintTargetInfo(visionSubsystem);
   }
 }

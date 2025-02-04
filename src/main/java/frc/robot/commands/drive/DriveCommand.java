@@ -11,20 +11,18 @@ import frc.robot.subsystems.drive.SwerveSubsystem;
 import swervelib.SwerveController;
 
 public class DriveCommand extends Command {
-    private final SwerveSubsystem swerve;  // Reference to drive system
     private final DoubleSupplier   vX;
     private final DoubleSupplier   vY;
     private final DoubleSupplier   omega;
     private final SwerveController controller;
 
-    public DriveCommand(SwerveSubsystem swerveSubsystem, DoubleSupplier vX, DoubleSupplier vY, DoubleSupplier omega) {
-        this.swerve = swerveSubsystem;     // Store reference
+    public DriveCommand(DoubleSupplier vX, DoubleSupplier vY, DoubleSupplier omega) {
         this.vX = vX;
         this.vY = vY;
         this.omega = omega;
         this.controller = RobotContainer.swerveSubsystem.getSwerveController();
 
-        addRequirements(swerveSubsystem);   // Declare usage
+        addRequirements(RobotContainer.swerveSubsystem);
     }
 
     @Override
