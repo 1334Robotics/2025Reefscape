@@ -25,4 +25,5 @@ public class RobotContainerConstants {
     public static final int SNAP_LEFT_DIRECTION      = XboxMappings.DPad.Left;
     public static final int SNAP_RIGHT_DIRECTION     = XboxMappings.DPad.Right;
     public static final int SNAP_BACKWARDS_DIRECTION = XboxMappings.DPad.Down;
+    public static final int SNAP_STOP_BUTTON         = XboxMappings.Button.B;
 }

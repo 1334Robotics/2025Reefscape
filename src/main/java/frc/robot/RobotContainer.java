@@ -4,6 +4,7 @@ import frc.robot.commands.directionSnaps.DirectionSnapBackwards;
 import frc.robot.commands.directionSnaps.DirectionSnapForwards;
 import frc.robot.commands.directionSnaps.DirectionSnapLeft;
 import frc.robot.commands.directionSnaps.DirectionSnapRight;
+import frc.robot.commands.directionSnaps.StopSnap;
 import frc.robot.commands.drive.DriveCommand;
 import frc.robot.commands.gyro.GyroZeroCommand;
 import frc.robot.commands.mailbox.InputCommand;
@@ -50,6 +51,7 @@ public class RobotContainer {
   private final POVButton      leftSnapButton      = new POVButton(driverController, RobotContainerConstants.SNAP_LEFT_DIRECTION);
   private final POVButton      rightSnapButton     = new POVButton(driverController, RobotContainerConstants.SNAP_RIGHT_DIRECTION);
   private final POVButton      backwardsSnapButton = new POVButton(driverController, RobotContainerConstants.SNAP_BACKWARDS_DIRECTION);
+  private final JoystickButton stopSnapButton      = new JoystickButton(driverController, RobotContainerConstants.SNAP_STOP_BUTTON);
 
   // Subsystems
   public static final GyroSubsystem gyroSubsystem                   = new GyroSubsystem("CANivore");
@@ -94,6 +96,7 @@ public class RobotContainer {
     leftSnapButton.onTrue(new DirectionSnapLeft());
     rightSnapButton.onTrue(new DirectionSnapRight());
     backwardsSnapButton.onTrue(new DirectionSnapBackwards());
+    stopSnapButton.onTrue(new StopSnap());
   }
 
   /**
