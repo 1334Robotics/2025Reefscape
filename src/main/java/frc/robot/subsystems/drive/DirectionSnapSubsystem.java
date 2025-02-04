@@ -13,7 +13,7 @@ public class DirectionSnapSubsystem extends SubsystemBase {
     public DirectionSnapSubsystem() {
         this.hitTargetYaw = true; // This should disable it until it is requested
         pidController = new PID(
-            DirectionSnapConstants.PID_KD,
+            DirectionSnapConstants.PID_KP,
             DirectionSnapConstants.PID_KI,
             DirectionSnapConstants.PID_KD,
             DirectionSnapConstants.PID_TAU,
@@ -29,6 +29,7 @@ public class DirectionSnapSubsystem extends SubsystemBase {
         this.targetYaw = direction.degrees;
         this.hitTargetYaw = false;
         RobotContainer.swerveSubsystem.lockDrive();
+        pidController.zero();
     }
 
     public boolean isAtTarget() {
@@ -37,13 +38,14 @@ public class DirectionSnapSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        return;/*
         // Rotate towards the target yaw
-        if(!hitTargetYaw) {
+        if(!this.hitTargetYaw) {
             SmartDashboard.putBoolean("[DIRECTIONSNAP] Turning", true);
 
             // Calculate the error
             double yaw = RobotContainer.gyroSubsystem.getData().yaw;
+            if(targetYaw < yaw) targetYaw += 360;
+            if(targetYaw - yaw > 180) targetYaw -= 360;
             double error = targetYaw - yaw;
             SmartDashboard.putNumber("[DIRECTIONSNAP] Error", error);
 
@@ -62,6 +64,12 @@ public class DirectionSnapSubsystem extends SubsystemBase {
             SmartDashboard.putBoolean("[DIRECTIONSNAP] Turning", false);
             SmartDashboard.putNumber("[DIRECTIONSNAP] Error", 0);
             SmartDashboard.putNumber("[DIRECTIONSNAP] Steer", 0);
-        }*/
+        }
+    }
+
+    public void stop() {
+        this.hitTargetYaw = true;
+        this.pidController.zero();
+        RobotContainer.swerveSubsystem.unlockDrive();
     }
 }

@@ -36,7 +36,7 @@ public class PID {
         this.proportionalTerm = this.kP * error;
 
         // Calculate and clamp the integral term
-        this.integralTerm = this.integralTerm + (0.5 * this.kI * this.sampleTime + (error + this.prevError));
+        this.integralTerm += 0.5 * this.kI * this.sampleTime * (error + this.prevError);
         if(this.integralTerm > this.limMaxInt) this.integralTerm = this.limMaxInt;
         if(this.integralTerm < this.limMinInt) this.integralTerm = this.limMinInt;
 
@@ -56,5 +56,13 @@ public class PID {
         if(output < this.limMin) output = this.limMin;
 
         return output;
+    }
+
+    public void zero() {
+        this.prevError        = 0;
+        this.prevMeasurement  = 0;
+        this.proportionalTerm = 0;
+        this.integralTerm     = 0;
+        this.differentialTerm = 0;
     }
 }
