@@ -19,6 +19,7 @@ import edu.wpi.first.units.Unit;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInputFilter.Config;
 
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.COTS;
@@ -51,7 +52,7 @@ public class SwerveSubsystem extends SubsystemBase {
         if (RobotBase.isSimulation()) {
             DriveTrainSimulationConfig basicConfig = DriveTrainSimulationConfig.Default();
             this.swerveDriveSimulation = new SwerveDriveSimulation(
-                driveTrainSimulationConfig,
+                MapleSimSwerve.driveTrainSimulationConfig,
                 new Pose2d(3, 3, new Rotation2d())
             );
             

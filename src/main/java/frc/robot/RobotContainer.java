@@ -12,7 +12,7 @@ import frc.robot.subsystems.mailbox.MailboxSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import swervelib.SwerveDrive;
 import frc.robot.commands.vision.PrintTargetInfo;
->>>>>>> 9c49c65ee57d6b68ff22c73db0f425e79533113b
+import frc.robot.subsystems.drive.MapleSimSwerve;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 
@@ -57,6 +57,7 @@ public class RobotContainer {
   public static final SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
   public static final SolenoidSubsystem solenoidSubsystem = new SolenoidSubsystem();
   public static final VisionSubsystem visionSubsystem = new VisionSubsystem();
+  public static final MapleSimSwerve mapleSimSwerve = new MapleSimSwerve();
   private final SwerveDrive drive;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -111,7 +112,8 @@ public class RobotContainer {
   }
 
   public void periodic() {
-    Pose3d[] notesPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Note");
-    Logger.recordOutput("FieldSimulation/NotesPositions", notesPoses);
+    //Pose3d[] notesPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Note");
+    //Logger.recordOutput("FieldSimulation/NotesPositions", notesPoses);
+    Logger.recordOutput("FieldSimulation/RobotPose", swerveSubsystem.getPose());
   }
 }
