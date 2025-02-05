@@ -73,6 +73,7 @@ public class RobotContainer {
                                                      () -> MathUtil.applyDeadband(-driverController.getRightX(), RobotContainerConstants.CONTROLLER_ROTATION_DEADBAND));
 
     swerveSubsystem.setDefaultCommand(xboxDriveCommand);
+    swerveSubsystem.setFieldRelative(false);
   }
 
 
@@ -105,6 +106,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new PrintTargetInfo(visionSubsystem);
+    // Using PrintTargetInfo causes a command scheduler loop overrun when fieldRelative is enabled
+    return null; // new PrintTargetInfo(visionSubsystem);
   }
 }
