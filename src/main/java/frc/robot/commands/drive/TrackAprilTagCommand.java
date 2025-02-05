@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.constants.SwerveConstants;
+import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import swervelib.SwerveController;
@@ -26,23 +27,26 @@ public class TrackAprilTagCommand extends Command {
     public void execute() {
         boolean hasTarget = visionSubsystem.isTargetVisible();
         
-        if (hasTarget) {
-            // Get vision data
+        if (hasTarget && visionSubsystem.getTargetId() == VisionConstants.TARGET_TAG_ID) {
             double yaw = visionSubsystem.getTargetYaw();
             double area = visionSubsystem.getTargetArea();
             
             // Calculate drive commands
-            double rotationSpeed = -yaw * 0.1; // Adjust constant for response
-            double forwardSpeed = (2.0 - area) * 0.5; // Adjust for desired distance
+            double rotationSpeed = -yaw * VisionConstants.ROTATION_P;
+            double forwardSpeed = (VisionConstants.TARGET_FOLLOW_DISTANCE - area) * VisionConstants.DISTANCE_P;
             
             // Drive robot
             swerveSubsystem.drive(
                 new Translation2d(forwardSpeed, 0),
                 rotationSpeed
             );
+            
+            // Log status
+            SmartDashboard.putString("Vision/Status", "FOLLOWING TAG " + VisionConstants.TARGET_TAG_ID);
         } else {
-            // Stop if no target
+            // Stop if wrong tag or no target
             swerveSubsystem.drive(new Translation2d(0, 0), 0);
+            SmartDashboard.putString("Vision/Status", "NO TARGET");
         }
     }
 
