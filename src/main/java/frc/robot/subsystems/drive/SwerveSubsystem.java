@@ -35,7 +35,7 @@ public class SwerveSubsystem extends SubsystemBase {
         }
         
         // Turn off heading correction and cosine compensation
-        this.swerveDrive.setHeadingCorrection(false);
+        this.swerveDrive.setHeadingCorrection(true);
         this.swerveDrive.setCosineCompensator(false);
     }
 
@@ -80,8 +80,6 @@ public class SwerveSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("Swerve/Module" + i + "/Speed", states[i].speedMetersPerSecond);
             SmartDashboard.putNumber("Swerve/Module" + i + "/Angle", states[i].angle.getDegrees());
         }
-    
-    
     }
 
     public SwerveController getSwerveController() {
