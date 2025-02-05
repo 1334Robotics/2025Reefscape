@@ -5,12 +5,13 @@ import frc.robot.RobotContainer;
 
 public class GyroZeroCommand extends Command {
     public GyroZeroCommand() {
-        addRequirements(RobotContainer.gyroSubsystem);
+        addRequirements(RobotContainer.gyroSubsystem, RobotContainer.swerveSubsystem);
     }
 
     @Override
     public void initialize() {
         RobotContainer.gyroSubsystem.zero();
+        RobotContainer.swerveSubsystem.zeroGyro();
     }
 
     @Override
