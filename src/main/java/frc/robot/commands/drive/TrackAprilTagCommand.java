@@ -24,23 +24,25 @@ public class TrackAprilTagCommand extends Command {
 
     @Override
     public void execute() {
-        // Get vision data
         boolean hasTarget = visionSubsystem.isTargetVisible();
-        SmartDashboard.putBoolean("[TRACKING] Has Target", hasTarget);
-
+        
         if (hasTarget) {
+            // Get vision data
             double yaw = visionSubsystem.getTargetYaw();
-            double pitch = visionSubsystem.getTargetPitch();
             double area = visionSubsystem.getTargetArea();
             
-            // Log tracking data
-            SmartDashboard.putNumber("[TRACKING] Target Yaw", yaw);
-            SmartDashboard.putNumber("[TRACKING] Target Pitch", pitch);
-            SmartDashboard.putNumber("[TRACKING] Target Area", area);
+            // Calculate drive commands
+            double rotationSpeed = -yaw * 0.1; // Adjust constant for response
+            double forwardSpeed = (2.0 - area) * 0.5; // Adjust for desired distance
             
-            // Get current robot pose for reference
-            SmartDashboard.putString("[TRACKING] Robot Pose", 
-                swerveSubsystem.getPose().toString());
+            // Drive robot
+            swerveSubsystem.drive(
+                new Translation2d(forwardSpeed, 0),
+                rotationSpeed
+            );
+        } else {
+            // Stop if no target
+            swerveSubsystem.drive(new Translation2d(0, 0), 0);
         }
     }
 
