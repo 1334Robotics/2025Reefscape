@@ -103,6 +103,7 @@ public class SwerveSubsystem extends SubsystemBase {
         Pose2d currentPose = swerveDrive.getPose();
         Logger.recordOutput("Drive/Pose", currentPose);
         Logger.recordOutput("FieldSimulation/RobotPose", new Pose3d(currentPose));
+        Logger.recordOutput("FieldSimulation/RobotPose", new Pose3d(swerveDrive.getPose()));
 
         // Update the encoder positions
         SwerveModule[] modules = this.swerveDrive.getModules();
