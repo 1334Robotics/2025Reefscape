@@ -1,6 +1,7 @@
 package frc.robot.subsystems.simulation;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,6 +24,8 @@ public class SimulationSubsystem extends SubsystemBase {
         //🔴 Warning: DO NOT call this method on a real robot, as it can drain the roboRIO’s resources.
         SimulatedArena.getInstance().simulationPeriodic();
 
+        Pose2d robotPose = RobotContainer.swerveSubsystem.getPose();
+        Logger.recordOutput("FieldSimulation/RobotPose", new Pose3d(robotPose));
         // Get the positions of the notes (both on the field and in the air)
         Pose3d[] notesPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Note");
 
