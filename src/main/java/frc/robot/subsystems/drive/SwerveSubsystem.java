@@ -1,6 +1,7 @@
 package frc.robot.subsystems.drive;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -22,6 +23,7 @@ import org.ironmaple.simulation.drivesims.GyroSimulation;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
+import org.littletonrobotics.junction.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,7 +55,7 @@ public class SwerveSubsystem extends SubsystemBase {
                         // Specify swerve module (for realistic swerve dynamics)
                         .withSwerveModule(new SwerveModuleSimulationConfig(
                                 DCMotor.getKrakenX60(4), // Drive motor is a Kraken X60
-                                DCMotor.getKrakenX60(1), // Steer motor is a Falcon 500
+                                DCMotor.getKrakenX60(2), // Steer motor is a Kraken X60
                                 6.12, // Drive motor gear ratio.
                                 12.8, // Steer motor gear ratio.
                                 Units.Volts.of(0.1), // Drive friction voltage.
@@ -96,6 +98,11 @@ public class SwerveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+
+        Logger.recordOutput("Drive/Pose", swerveDrive.getPose());
+        Pose2d currentPose = swerveDrive.getPose();
+        Logger.recordOutput("Drive/Pose", currentPose);
+        Logger.recordOutput("FieldSimulation/RobotPose", new Pose3d(currentPose));
 
         // Update the encoder positions
         SwerveModule[] modules = this.swerveDrive.getModules();

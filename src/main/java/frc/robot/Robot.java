@@ -4,19 +4,21 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.ironmaple.simulation.SimulatedArena;
+import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
  * the TimedRobot documentation. If you change the name of this class or the package after creating
  * this project, you must also update the Main.java file in the project.
  */
-public class Robot extends TimedRobot {
+public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
@@ -33,9 +35,10 @@ public class Robot extends TimedRobot {
   }
   @Override
   public void robotInit() {
+      Logger.addDataReceiver(new NT4Publisher());
+      Logger.start();
       SmartDashboard.putData("Field", m_field);
       // Get the default instance of the simulation world
-      SimulatedArena.getInstance();
   }
 
   /**
@@ -56,7 +59,9 @@ public class Robot extends TimedRobot {
   }
    /** This function is called once when the robot is first started up. */
   @Override
-  public void simulationInit() {}
+  public void simulationInit() {
+    SimulatedArena.getInstance();
+  }
 
   /** This function is called periodically whilst in simulation. */
   @Override
