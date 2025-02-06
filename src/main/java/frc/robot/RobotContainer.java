@@ -9,6 +9,7 @@ import frc.robot.commands.solenoid.RetractCommand;
 import frc.robot.constants.RobotContainerConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
+import frc.robot.subsystems.simulation.SimulationSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import swervelib.SwerveDrive;
 import frc.robot.commands.vision.PrintTargetInfo;
@@ -21,9 +22,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import org.ironmaple.simulation.SimulatedArena;
-import edu.wpi.first.math.geometry.Pose3d;
-import org.littletonrobotics.junction.Logger;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -52,17 +50,11 @@ public class RobotContainer {
   public static final SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
   public static final SolenoidSubsystem solenoidSubsystem = new SolenoidSubsystem();
   public static final VisionSubsystem visionSubsystem = new VisionSubsystem();
-  private final SwerveDrive drive;
+  public static final SimulationSubsystem simulationSubsystem = new SimulationSubsystem();
+
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-
-    if (Robot.isReal()) {
-        this.drive = swerveSubsystem.getSwerveDrive(); // Real implementation
-    }
-    else {
-        this.drive = swerveSubsystem.getSwerveDrive(); // Simulation implementation
-    }
 
     // Configure the trigger bindings
     configureBindings();
@@ -101,10 +93,5 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     return new PrintTargetInfo(visionSubsystem);
     //return null;
-  }
-
-  public void periodic() {
-    Pose3d[] notesPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Note");
-    Logger.recordOutput("FieldSimulation/NotesPositions", notesPoses);
   }
 }
