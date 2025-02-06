@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.constants.SwerveConstants;
+import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import swervelib.SwerveController;
@@ -24,23 +25,28 @@ public class TrackAprilTagCommand extends Command {
 
     @Override
     public void execute() {
-        // Get vision data
         boolean hasTarget = visionSubsystem.isTargetVisible();
-        SmartDashboard.putBoolean("[TRACKING] Has Target", hasTarget);
-
-        if (hasTarget) {
+        
+        if (hasTarget && visionSubsystem.getTargetId() == VisionConstants.TARGET_TAG_ID) {
             double yaw = visionSubsystem.getTargetYaw();
-            double pitch = visionSubsystem.getTargetPitch();
             double area = visionSubsystem.getTargetArea();
             
-            // Log tracking data
-            SmartDashboard.putNumber("[TRACKING] Target Yaw", yaw);
-            SmartDashboard.putNumber("[TRACKING] Target Pitch", pitch);
-            SmartDashboard.putNumber("[TRACKING] Target Area", area);
+            // Calculate drive commands
+            double rotationSpeed = -yaw * VisionConstants.ROTATION_P;
+            double forwardSpeed = (VisionConstants.TARGET_FOLLOW_DISTANCE - area) * VisionConstants.DISTANCE_P;
             
-            // Get current robot pose for reference
-            SmartDashboard.putString("[TRACKING] Robot Pose", 
-                swerveSubsystem.getPose().toString());
+            // Drive robot
+            swerveSubsystem.drive(
+                new Translation2d(forwardSpeed, 0),
+                rotationSpeed
+            );
+            
+            // Log status
+            SmartDashboard.putString("Vision/Status", "FOLLOWING TAG " + VisionConstants.TARGET_TAG_ID);
+        } else {
+            // Stop if wrong tag or no target
+            swerveSubsystem.drive(new Translation2d(0, 0), 0);
+            SmartDashboard.putString("Vision/Status", "NO TARGET");
         }
     }
 
