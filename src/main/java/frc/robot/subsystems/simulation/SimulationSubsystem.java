@@ -31,15 +31,16 @@ public class SimulationSubsystem extends SubsystemBase {
 
         // Publish to telemetry using AdvantageKit
         Logger.recordOutput("FieldSimulation/NotesPositions", notesPoses);
+
+        Logger.recordOutput("FieldSimulation/Algae", 
+        SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+        Logger.recordOutput("FieldSimulation/Coral", 
+        SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
     }
 
         public void addGamePiece(Translation2d position) {
-            SimulatedArena.getInstance().addGamePiece(new ReefscapeCoralOnField(new Pose2d(2, 2, Rotation2d.fromDegrees(90))));
-            SimulatedArena.getInstance().addGamePiece(new ReefscapeAlgaeOnField(new Translation2d(3,2)));
+            SimulatedArena.getInstance().addGamePiece(new ReefscapeCoralOnField(new Pose2d(4, 6, Rotation2d.fromDegrees(90))));
+            SimulatedArena.getInstance().addGamePiece(new ReefscapeAlgaeOnField(new Translation2d(5,5)));
             SimulatedArena.getInstance().addGamePiece(new ReefscapeCoralAlgaeStack(new Translation2d(4,4)));
-    }
-
-    public void clearGamePieces() {
-        SimulatedArena.getInstance().clearGamePieces();
     }
 }
