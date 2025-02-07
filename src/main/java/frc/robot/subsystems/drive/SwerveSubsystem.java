@@ -74,7 +74,7 @@ public class SwerveSubsystem extends SubsystemBase {
                 // Specify Configuration
                 driveTrainSimulationConfig,
                 // Specify starting pose
-                new Pose2d(3, 3, new Rotation2d())
+                new Pose2d(4, 4, new Rotation2d())
                 );
 
                 // Register with simulation world

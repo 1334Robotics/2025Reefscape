@@ -4,14 +4,20 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeAlgaeOnField;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralAlgaeStack;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnField;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -61,12 +67,23 @@ public class Robot extends LoggedRobot {
   @Override
   public void simulationInit() {
     SimulatedArena.getInstance();
+    // Add CORAL and ALGAE to the field
+    SimulatedArena.getInstance().addGamePiece(new ReefscapeCoralOnField(
+    new Pose2d(2, 2, Rotation2d.fromDegrees(90))));
+    SimulatedArena.getInstance().addGamePiece(new ReefscapeAlgaeOnField(new Translation2d(2,2)));
+    // Add CORAL-ALGAE stack
+    SimulatedArena.getInstance().addGamePiece(new ReefscapeCoralAlgaeStack(new Translation2d(2,2)));
   }
 
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {
     SimulatedArena.getInstance().simulationPeriodic();
+    // Log game piece positions
+    Logger.recordOutput("FieldSimulation/Algae", 
+    SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+    Logger.recordOutput("FieldSimulation/Coral", 
+    SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
