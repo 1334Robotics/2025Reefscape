@@ -58,7 +58,6 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("[SWERVE] Back Right Drive Velocity",  modules[3].getDriveMotor().getVelocity());
         SmartDashboard.putNumber("[SWERVE] Back Right Angle Velocity",  modules[3].getAngleMotor().getVelocity());
     
-        //NEW CAL
         // Debug swerve state
         SmartDashboard.putNumber("Swerve/UpdateCount", count++);
 
@@ -119,10 +118,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public ChassisSpeeds getChassisSpeeds() {
         return swerveDrive.getRobotVelocity();
-    }
-
-    public Pose2d getOdometryPose() {
-        return swerveDrive.getPose();
     }
 
     public void lockDrive() {
