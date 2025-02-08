@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;//NEW CAL
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -31,9 +32,12 @@ public class SwerveSubsystem extends SubsystemBase {
     private final SwerveDrive swerveDrive;
     private boolean fieldRelative;
     private SwerveDriveSimulation swerveDriveSimulation;
+    private int count = 0;
+    private boolean allowDrive;
 
     public SwerveSubsystem() {
         this.fieldRelative = false;
+        this.allowDrive = true;
         final GyroIO gyroIO;
         final GyroSimulation gyroSimulation;
         final ModuleIO[] moduleIOs;
@@ -88,7 +92,7 @@ public class SwerveSubsystem extends SubsystemBase {
         }
         
         // Turn off heading correction and cosine compensation
-        this.swerveDrive.setHeadingCorrection(false);
+        this.swerveDrive.setHeadingCorrection(true);
         this.swerveDrive.setCosineCompensator(false);
         }
 
@@ -103,10 +107,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
         // Update the encoder positions
         SwerveModule[] modules = this.swerveDrive.getModules();
-        SmartDashboard.putNumber("[SWERVE] Front Left Encoder Position",  modules[0].getAbsolutePosition());
-        SmartDashboard.putNumber("[SWERVE] Front Right Encoder Position", modules[1].getAbsolutePosition());
-        SmartDashboard.putNumber("[SWERVE] Back Left Encoder Position",   modules[2].getAbsolutePosition());
-        SmartDashboard.putNumber("[SWERVE] Back Right Encoder Position",  modules[3].getAbsolutePosition());
+        SmartDashboard.putNumber("[SWERVE] Front Left Encoder Position",  modules[0].getRawAbsolutePosition());
+        SmartDashboard.putNumber("[SWERVE] Front Right Encoder Position", modules[1].getRawAbsolutePosition());
+        SmartDashboard.putNumber("[SWERVE] Back Left Encoder Position",   modules[2].getRawAbsolutePosition());
+        SmartDashboard.putNumber("[SWERVE] Back Right Encoder Position",  modules[3].getRawAbsolutePosition());
 
         // Update the true velocities of all the motors
         SmartDashboard.putNumber("[SWERVE] Front Left Drive Velocity",  modules[0].getDriveMotor().getVelocity());
@@ -117,6 +121,28 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("[SWERVE] Back Left Angle Velocity",   modules[2].getAngleMotor().getVelocity());
         SmartDashboard.putNumber("[SWERVE] Back Right Drive Velocity",  modules[3].getDriveMotor().getVelocity());
         SmartDashboard.putNumber("[SWERVE] Back Right Angle Velocity",  modules[3].getAngleMotor().getVelocity());
+    
+        // Debug swerve state
+        SmartDashboard.putNumber("Swerve/UpdateCount", count++);
+
+        var pose = getPose();
+        SmartDashboard.putString("Swerve/Pose", 
+            String.format("X: %.2f, Y: %.2f, Rot: %.2f",
+                pose.getX(),
+                pose.getY(),
+                pose.getRotation().getDegrees()));
+
+        var speeds = getChassisSpeeds();
+        SmartDashboard.putNumber("Swerve/VX", speeds.vxMetersPerSecond);
+        SmartDashboard.putNumber("Swerve/VY", speeds.vyMetersPerSecond);
+        SmartDashboard.putNumber("Swerve/Omega", speeds.omegaRadiansPerSecond);
+
+        // Debug module states
+        var states = swerveDrive.getStates();
+        for (int i = 0; i < states.length; i++) {
+            SmartDashboard.putNumber("Swerve/Module" + i + "/Speed", states[i].speedMetersPerSecond);
+            SmartDashboard.putNumber("Swerve/Module" + i + "/Angle", states[i].angle.getDegrees());
+        }
     }
 
     public SwerveController getSwerveController() {
@@ -124,7 +150,13 @@ public class SwerveSubsystem extends SubsystemBase {
     }
     
     public void drive(Translation2d translation, double rotation) {
+        if(!this.allowDrive) return;
         swerveDrive.drive(translation, rotation, this.fieldRelative, false);
+    }
+
+    public void steer(double steer) {
+        swerveDrive.drive(new Translation2d(0, 0), steer * swerveDrive.swerveController.config.maxAngularVelocity,
+                          false, false);
     }
 
     public void zeroGyro() {
@@ -146,6 +178,18 @@ public class SwerveSubsystem extends SubsystemBase {
     
     public boolean isFieldRelative() {
         return fieldRelative;
+    }
+
+    public ChassisSpeeds getChassisSpeeds() {
+        return swerveDrive.getRobotVelocity();
+    }
+
+    public void lockDrive() {
+        this.allowDrive = false;
+    }
+
+    public void unlockDrive() {
+        this.allowDrive = true;
     }
 
     public SwerveDrive getSwerveDrive() {
