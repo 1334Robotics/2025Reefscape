@@ -16,8 +16,12 @@ public class RobotContainerConstants {
     public static final double CONTROLLER_MOVEMENT_DEADBAND = 0.1;
     public static final double CONTROLLER_ROTATION_DEADBAND = 0.3;
     
+    // SOLENOID- REPLACED WITH GEARBOX FOR NOW
     public static final int SOLENOID_EXTEND_BUTTON  = XboxMappings.Button.RightBumper;
     public static final int SOLENOID_RETRACT_BUTTON = XboxMappings.Button.LeftBumper;
+    
+    public static final int GEARBOX_FORWARD_BUTTON  = XboxMappings.Button.RightBumper;
+    public static final int GEARBOX_BACKWARD_BUTTON = XboxMappings.Button.LeftBumper;
 
     public static final int GYRO_ZERO_BUTON = XboxMappings.Button.X;
 
