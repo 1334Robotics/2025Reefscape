@@ -11,11 +11,12 @@ import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
 import frc.robot.subsystems.simulation.SimulationSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
-import swervelib.SwerveDrive;
 import frc.robot.commands.vision.PrintTargetInfo;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.subsystems.solenoid.SolenoidSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -50,7 +51,9 @@ public class RobotContainer {
   public static final SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
   public static final SolenoidSubsystem solenoidSubsystem = new SolenoidSubsystem();
   public static final VisionSubsystem visionSubsystem = new VisionSubsystem();
-  public static final SimulationSubsystem simulationSubsystem = new SimulationSubsystem();
+
+     //Conditionally create SimulationSubsystem
+     public final SimulationSubsystem simulationSubsystem;
 
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -64,6 +67,14 @@ public class RobotContainer {
                                                      () -> MathUtil.applyDeadband(-driverController.getRightX(), RobotContainerConstants.CONTROLLER_ROTATION_DEADBAND));
 
     swerveSubsystem.setDefaultCommand(xboxDriveCommand);
+
+    //Conditionally initialize the simulation subsystem
+    if (Robot.isSimulation()) {
+      simulationSubsystem = new SimulationSubsystem(swerveSubsystem.getSwerveDriveSimulation(), swerveSubsystem);
+      simulationSubsystem.setInitialPose(new Pose2d(1.25, 2.25, Rotation2d.fromDegrees(0)));
+    } else {
+      simulationSubsystem = null;
+    }
   }
 
 

@@ -1,4 +1,4 @@
-package frc.robot.subsystems.simulation.intake;
+package frc.robot.subsystems.intake;
 
 public interface IntakeIO {
 
