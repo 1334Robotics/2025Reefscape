@@ -43,7 +43,7 @@ public class DirectionSnapSubsystem extends SubsystemBase {
             SmartDashboard.putBoolean("[DIRECTIONSNAP] Turning", true);
 
             // Calculate the error
-            double yaw = RobotContainer.gyroSubsystem.getData().yaw;
+            double yaw = Math.IEEEremainder(RobotContainer.gyroSubsystem.getData().yaw, 360);
             if(targetYaw < yaw) targetYaw += 360;
             if(targetYaw - yaw > 180) targetYaw -= 360;
             double error = targetYaw - yaw;

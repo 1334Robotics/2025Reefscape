@@ -6,6 +6,7 @@ import frc.robot.commands.directionSnaps.DirectionSnapLeft;
 import frc.robot.commands.directionSnaps.DirectionSnapRight;
 import frc.robot.commands.directionSnaps.StopSnap;
 import frc.robot.commands.drive.DriveCommand;
+import frc.robot.commands.drive.TrackAprilTagCommand;
 import frc.robot.commands.gyro.GyroZeroCommand;
 import frc.robot.commands.mailbox.InputCommand;
 import frc.robot.commands.mailbox.OutputCommand;
@@ -106,6 +107,9 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new PrintTargetInfo(visionSubsystem);
+    // Using ProointTargetInfo causes a command scheduler loop overrun when fieldRelative is enabled
+    //return null; // new PrintTargetInfo(visionSubsystem);
+    return new TrackAprilTagCommand(visionSubsystem, swerveSubsystem);
+  
   }
 }
