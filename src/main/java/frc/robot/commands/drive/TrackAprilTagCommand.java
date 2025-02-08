@@ -10,7 +10,6 @@ import frc.robot.constants.SwerveConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.subsystems.drive.SwerveSubsystem;
-import swervelib.SwerveController;
 
 
 public class TrackAprilTagCommand extends Command {
@@ -34,14 +33,17 @@ public class TrackAprilTagCommand extends Command {
             if(area > 2) area = 2;
             
             // Calculate drive commands
-            double rotationSpeed = yaw * VisionConstants.ROTATION_P;
+            // rotationSpeed and forwardSpeed should be a value between 0 and SwerveConstants.DRIVE_SPEED multiplied by SwerveConstants.MAX_SPEED
+            double rotationSpeed = -yaw * VisionConstants.ROTATION_P;
             double forwardSpeed = (VisionConstants.TARGET_FOLLOW_DISTANCE / (area/2)) * VisionConstants.DISTANCE_P;
             if(rotationSpeed > SwerveConstants.DRIVE_SPEED) rotationSpeed = SwerveConstants.DRIVE_SPEED;
             if(forwardSpeed > SwerveConstants.DRIVE_SPEED) forwardSpeed = SwerveConstants.DRIVE_SPEED;
             if(rotationSpeed < -SwerveConstants.DRIVE_SPEED) rotationSpeed = -SwerveConstants.DRIVE_SPEED;
             if(forwardSpeed < -SwerveConstants.DRIVE_SPEED) forwardSpeed = -SwerveConstants.DRIVE_SPEED;
 
-            // Publish the speeds 
+            // Publish the speeds
+            SmartDashboard.putNumber("[VISION] Rotation Speed", rotationSpeed);
+            SmartDashboard.putNumber("[VISION] Forward Speed", forwardSpeed);
             
             // Drive robot
             swerveSubsystem.drive(
