@@ -1,5 +1,12 @@
 package frc.robot;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.directionSnaps.DirectionSnapBackwards;
 import frc.robot.commands.directionSnaps.DirectionSnapForwards;
 import frc.robot.commands.directionSnaps.DirectionSnapLeft;
@@ -13,6 +20,8 @@ import frc.robot.commands.mailbox.OutputCommand;
 import frc.robot.commands.mailbox.StopCommand;
 import frc.robot.commands.solenoid.ExtendCommand;
 import frc.robot.commands.solenoid.RetractCommand;
+import frc.robot.commands.gearbox.ForwardCommand;
+import frc.robot.commands.gearbox.BackwardCommand;
 import frc.robot.constants.RobotContainerConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
@@ -21,14 +30,11 @@ import frc.robot.commands.vision.PrintTargetInfo;
 import frc.robot.subsystems.drive.DirectionSnapSubsystem;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.XboxController;
+import frc.robot.subsystems.gearbox.GearboxSubsystem;
+import frc.robot.subsystems.gyro.GyroSubsystem;
+import frc.robot.subsystems.mailbox.MailboxSubsystem;
 import frc.robot.subsystems.solenoid.SolenoidSubsystem;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.vision.VisionSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -45,8 +51,11 @@ public class RobotContainer {
   private final JoystickButton mailboxInputButton  = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_INPUT_BUTTON);
   private final JoystickButton mailboxOutputButton = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_OUTPUT_BUTTON);
   private final JoystickButton mailboxStopButton   = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_STOP_BUTTON);
-  private final JoystickButton extendButton        = new JoystickButton(operatorController, RobotContainerConstants.SOLENOID_EXTEND_BUTTON);
-  private final JoystickButton retractButton       = new JoystickButton(operatorController, RobotContainerConstants.SOLENOID_RETRACT_BUTTON);
+  // SOLENOID- BUMPERS FOR GEARBOX FOR NOW
+  //private final JoystickButton extendButton        = new JoystickButton(operatorController, RobotContainerConstants.SOLENOID_EXTEND_BUTTON);
+  //private final JoystickButton retractButton       = new JoystickButton(operatorController, RobotContainerConstants.SOLENOID_RETRACT_BUTTON);
+  private final JoystickButton forwardButton        = new JoystickButton(operatorController, RobotContainerConstants.GEARBOX_FORWARD_BUTTON);
+  private final JoystickButton backwardButton       = new JoystickButton(operatorController, RobotContainerConstants.GEARBOX_BACKWARD_BUTTON);
   private final JoystickButton gyroZeroButton      = new JoystickButton(driverController, RobotContainerConstants.GYRO_ZERO_BUTON);
   private final POVButton      forwardsSnapButton  = new POVButton(driverController, RobotContainerConstants.SNAP_FORWARDS_DIRECTION);
   private final POVButton      leftSnapButton      = new POVButton(driverController, RobotContainerConstants.SNAP_LEFT_DIRECTION);
@@ -61,6 +70,7 @@ public class RobotContainer {
   public static final MailboxSubsystem mailboxSubsystem             = new MailboxSubsystem();
   public static final SwerveSubsystem swerveSubsystem               = new SwerveSubsystem();
   public static final SolenoidSubsystem solenoidSubsystem           = new SolenoidSubsystem();
+  public static final GearboxSubsystem gearboxSubsystem           = new GearboxSubsystem();
   public static final VisionSubsystem visionSubsystem               = new VisionSubsystem();
   public static final DirectionSnapSubsystem directionSnapSubsystem = new DirectionSnapSubsystem();
 
@@ -90,8 +100,11 @@ public class RobotContainer {
     mailboxInputButton.onTrue(new InputCommand());
     mailboxOutputButton.onTrue(new OutputCommand());
     mailboxStopButton.onTrue(new StopCommand());
-    extendButton.onTrue(new ExtendCommand());
-    retractButton.onTrue(new RetractCommand());
+    // SOLENOID- REPLACED WITH GEARBOX FOR NOW
+    // extendButton.onTrue(new ExtendCommand());
+    // retractButton.onTrue(new RetractCommand());
+    forwardButton.onTrue(new ForwardCommand());
+    backwardButton.onTrue(new BackwardCommand());
     gyroZeroButton.onTrue(new GyroZeroCommand()); 
     forwardsSnapButton.onTrue(new DirectionSnapForwards());
     leftSnapButton.onTrue(new DirectionSnapLeft());
