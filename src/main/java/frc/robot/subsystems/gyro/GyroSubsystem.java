@@ -61,4 +61,8 @@ public class GyroSubsystem extends SubsystemBase {
     public void reset() {
         pigeon.reset();
     }
+    
+    public void zero() {
+        pigeon.setYaw(0);
+    }
 }

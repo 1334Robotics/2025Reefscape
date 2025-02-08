@@ -1,6 +1,13 @@
 package frc.robot;
 
+import frc.robot.commands.directionSnaps.DirectionSnapBackwards;
+import frc.robot.commands.directionSnaps.DirectionSnapForwards;
+import frc.robot.commands.directionSnaps.DirectionSnapLeft;
+import frc.robot.commands.directionSnaps.DirectionSnapRight;
+import frc.robot.commands.directionSnaps.StopSnap;
 import frc.robot.commands.drive.DriveCommand;
+import frc.robot.commands.drive.TrackAprilTagCommand;
+import frc.robot.commands.gyro.GyroZeroCommand;
 import frc.robot.commands.mailbox.InputCommand;
 import frc.robot.commands.mailbox.OutputCommand;
 import frc.robot.commands.mailbox.StopCommand;
@@ -11,6 +18,7 @@ import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.commands.vision.PrintTargetInfo;
+import frc.robot.subsystems.drive.DirectionSnapSubsystem;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import edu.wpi.first.math.MathUtil;
@@ -22,6 +30,7 @@ import frc.robot.subsystems.solenoid.SolenoidSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import static edu.wpi.first.units.Units.Inches;
@@ -48,45 +57,43 @@ public class RobotContainer {
   private final JoystickButton mailboxStopButton   = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_STOP_BUTTON);
   private final JoystickButton extendButton = new JoystickButton(operatorController, RobotContainerConstants.SOLENOID_EXTEND_BUTTON);
   private final JoystickButton retractButton = new JoystickButton(operatorController, RobotContainerConstants.SOLENOID_RETRACT_BUTTON);
-  
-  
-    // Subsystems
-    public static final GyroSubsystem gyroSubsystem = new GyroSubsystem("CANivore");
-    public static final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(RobotContainerConstants.ELEVATOR_PRIMARY_MOTOR_ID,
-                                                                                    RobotContainerConstants.ELEVATOR_SECONDARY_MOTOR_ID);
-    public static final MailboxSubsystem mailboxSubsystem = new MailboxSubsystem();
-    public static final SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
-    public static final SolenoidSubsystem solenoidSubsystem = new SolenoidSubsystem();
-    public static final VisionSubsystem visionSubsystem = new VisionSubsystem();
-    //MapleSim simulation
-    private SwerveDriveSimulation swerveDriveSimulation;
-      
-        /** The container for the robot. Contains subsystems, OI devices, and commands. */
-        public RobotContainer() {
-          // Configure the trigger bindings
-          configureBindings();
-      
-          SimulatedArena.getInstance();
+
+
+  // Subsystems
+  public static final GyroSubsystem gyroSubsystem = new GyroSubsystem("CANivore");
+  public static final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(RobotContainerConstants.ELEVATOR_PRIMARY_MOTOR_ID,
+                                                                                  RobotContainerConstants.ELEVATOR_SECONDARY_MOTOR_ID);
+  public static final MailboxSubsystem mailboxSubsystem = new MailboxSubsystem();
+  public static final SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
+  public static final SolenoidSubsystem solenoidSubsystem = new SolenoidSubsystem();
+  public static final VisionSubsystem visionSubsystem = new VisionSubsystem();
+  //MapleSim simulation
+  private SwerveDriveSimulation swerveDriveSimulation;
+  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  public RobotContainer() {
+    // Configure the trigger bindings
+    configureBindings();
+    SimulatedArena.getInstance();
           
-          final DriveTrainSimulationConfig driveTrainSimulationConfig = DriveTrainSimulationConfig.Default()
-                  .withGyro(COTS.ofPigeon2()) //Gyro
-                  .withSwerveModule(COTS.ofMark4( //Mark4 Swerve Module
-                    DCMotor.getKrakenX60(1), //Drive Motor
-                    DCMotor.getKrakenX60(1), //Steer Motor
-                    COTS.WHEELS.COLSONS.cof, //Coefficient of Friction (?) based on Colson Wheels (I think)
-                    3 //Gear Ratio
-                  ))
-                  .withBumperSize(Inches.of(30), Inches.of(30)); //Bumper Size (length and width)
-          
+    final DriveTrainSimulationConfig driveTrainSimulationConfig = DriveTrainSimulationConfig.Default()
+            .withGyro(COTS.ofPigeon2()) //Gyro
+            .withSwerveModule(COTS.ofMark4( //Mark4 Swerve Module
+              DCMotor.getKrakenX60(1), //Drive Motor
+              DCMotor.getKrakenX60(1), //Steer Motor
+              COTS.WHEELS.COLSONS.cof, //Coefficient of Friction (?) based on Colson Wheels (I think)
+              3 //Gear Ratio
+            ))
+            .withBumperSize(Inches.of(30), Inches.of(30)); //Bumper Size (length and width)
+    
     this.swerveDriveSimulation = new SwerveDriveSimulation(driveTrainSimulationConfig, new Pose2d(3, 3, new Rotation2d()));
     SimulatedArena.getInstance().addDriveTrainSimulation(swerveDriveSimulation);
 
-    DriveCommand xboxDriveCommand = new DriveCommand(swerveSubsystem,
-                                                     () -> MathUtil.applyDeadband(driverController.getLeftX(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
+    DriveCommand xboxDriveCommand = new DriveCommand(() -> MathUtil.applyDeadband(driverController.getLeftX(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
                                                      () -> MathUtil.applyDeadband(driverController.getLeftY(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
                                                      () -> MathUtil.applyDeadband(-driverController.getRightX(), RobotContainerConstants.CONTROLLER_ROTATION_DEADBAND));
 
     swerveSubsystem.setDefaultCommand(xboxDriveCommand);
+    swerveSubsystem.setFieldRelative(false);
   }
 
 
@@ -105,7 +112,12 @@ public class RobotContainer {
     mailboxStopButton.onTrue(new StopCommand());
     extendButton.onTrue(new ExtendCommand());
     retractButton.onTrue(new RetractCommand());
-    
+    gyroZeroButton.onTrue(new GyroZeroCommand()); 
+    forwardsSnapButton.onTrue(new DirectionSnapForwards());
+    leftSnapButton.onTrue(new DirectionSnapLeft());
+    rightSnapButton.onTrue(new DirectionSnapRight());
+    backwardsSnapButton.onTrue(new DirectionSnapBackwards());
+    stopSnapButton.onTrue(new StopSnap());
   }
 
   /**
@@ -114,7 +126,9 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new PrintTargetInfo(visionSubsystem);
-    //return null;
+    // Using ProointTargetInfo causes a command scheduler loop overrun when fieldRelative is enabled
+    //return null; // new PrintTargetInfo(visionSubsystem);
+    return new TrackAprilTagCommand(visionSubsystem, swerveSubsystem);
+  
   }
 }
