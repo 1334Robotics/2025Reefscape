@@ -107,9 +107,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // Using ProointTargetInfo causes a command scheduler loop overrun when fieldRelative is enabled
-    //return null; // new PrintTargetInfo(visionSubsystem);
     return new TrackAprilTagCommand(visionSubsystem, swerveSubsystem);
-  
   }
 }

@@ -30,10 +30,18 @@ public class TrackAprilTagCommand extends Command {
         if (hasTarget && visionSubsystem.getTargetId() == VisionConstants.TARGET_TAG_ID) {
             double yaw = visionSubsystem.getTargetYaw();
             double area = visionSubsystem.getTargetArea();
+            // Cap the area at 2%
+            if(area > 2) area = 2;
             
             // Calculate drive commands
-            double rotationSpeed = -yaw * VisionConstants.ROTATION_P;
-            double forwardSpeed = (VisionConstants.TARGET_FOLLOW_DISTANCE - area) * VisionConstants.DISTANCE_P;
+            double rotationSpeed = yaw * VisionConstants.ROTATION_P;
+            double forwardSpeed = (VisionConstants.TARGET_FOLLOW_DISTANCE / (area/2)) * VisionConstants.DISTANCE_P;
+            if(rotationSpeed > SwerveConstants.DRIVE_SPEED) rotationSpeed = SwerveConstants.DRIVE_SPEED;
+            if(forwardSpeed > SwerveConstants.DRIVE_SPEED) forwardSpeed = SwerveConstants.DRIVE_SPEED;
+            if(rotationSpeed < -SwerveConstants.DRIVE_SPEED) rotationSpeed = -SwerveConstants.DRIVE_SPEED;
+            if(forwardSpeed < -SwerveConstants.DRIVE_SPEED) forwardSpeed = -SwerveConstants.DRIVE_SPEED;
+
+            // Publish the speeds 
             
             // Drive robot
             swerveSubsystem.drive(

@@ -36,5 +36,5 @@ public final class VisionConstants {
     public static final int TARGET_TAG_ID = 3;  // Target AprilTag ID
     public static final double TARGET_FOLLOW_DISTANCE = 0.25;  // Meters from tag
     public static final double ROTATION_P = 0.1;  // Rotation proportional gain
-    public static final double DISTANCE_P = 0.5;  // Distance proportional gain
+    public static final double DISTANCE_P = 80;  // Distance proportional gain
 }
