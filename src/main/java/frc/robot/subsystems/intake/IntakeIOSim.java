@@ -1,4 +1,4 @@
-package frc.robot.subsystems.simulation.intake;
+package frc.robot.subsystems.intake;
 
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;

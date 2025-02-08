@@ -17,17 +17,14 @@ import frc.robot.subsystems.gyro.GyroIO;
 import frc.robot.subsystems.gyro.GyroIOSim;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.math.geometry.Rotation2d;
-
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.littletonrobotics.junction.Logger;
-
 import java.io.File;
 import java.io.IOException;
-
 import org.ironmaple.simulation.SimulatedArena;
 
 public class SwerveSubsystem extends SubsystemBase {
@@ -55,16 +52,16 @@ public class SwerveSubsystem extends SubsystemBase {
                         // Specify swerve module (for realistic swerve dynamics)
                         .withSwerveModule(new SwerveModuleSimulationConfig(
                                 DCMotor.getKrakenX60(4), // Drive motor is a Kraken X60
-                                DCMotor.getKrakenX60(2), // Steer motor is a Kraken X60
-                                6.12, // Drive motor gear ratio.
-                                12.8, // Steer motor gear ratio.
+                                DCMotor.getKrakenX60(4), // Steer motor is a Kraken X60
+                                6.75, // Drive motor gear ratio.
+                                21.429, // Steer motor gear ratio.
                                 Units.Volts.of(0.1), // Drive friction voltage.
                                 Units.Volts.of(0.1), // Steer friction voltage
                                 Units.Inches.of(2), // Wheel radius
                                 Units.KilogramSquareMeters.of(0.03), // Steer MOI
-                                1.2)) // Wheel COF
+                                1.19)) // Wheel COF
                         // Configures the track length and track width (spacing between swerve modules)
-                        .withTrackLengthTrackWidth(Units.Inches.of(24), Units.Inches.of(24))
+                        .withTrackLengthTrackWidth(Units.Inches.of(29), Units.Inches.of(29))
                         // Configures the bumper size (dimensions of the robot bumper)
                         .withBumperSize(Units.Inches.of(30), Units.Inches.of(30));
                 
@@ -74,14 +71,13 @@ public class SwerveSubsystem extends SubsystemBase {
                 // Specify Configuration
                 driveTrainSimulationConfig,
                 // Specify starting pose
-                new Pose2d(4, 4, new Rotation2d())
+                new Pose2d(0, 0, new Rotation2d())
                 );
 
                 // Register with simulation world
                 SimulatedArena.getInstance().addDriveTrainSimulation(swerveDriveSimulation);
 
                 gyroIO = new GyroIOSim(this.swerveDriveSimulation.getGyroSimulation());
-                new GyroIOSim(this.swerveDriveSimulation.getGyroSimulation());
                 moduleIOs = new ModuleIO[4];
                 for (int i = 0; i < 4; i++) {
                     moduleIOs[i] = new ModuleIOSim(swerveDriveSimulation.getModules()[i]);
@@ -154,5 +150,9 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public SwerveDrive getSwerveDrive() {
         return this.swerveDrive;
+    }
+
+    public SwerveDriveSimulation getSwerveDriveSimulation() {
+        return swerveDriveSimulation;
     }
 }
