@@ -74,7 +74,6 @@ public class RobotContainer {
                                                      () -> MathUtil.applyDeadband(-driverController.getRightX(), RobotContainerConstants.CONTROLLER_ROTATION_DEADBAND));
 
     swerveSubsystem.setDefaultCommand(xboxDriveCommand);
-    swerveSubsystem.setFieldRelative(true);
   }
 
 
