@@ -57,8 +57,12 @@ public class RobotContainer {
   private final JoystickButton mailboxStopButton   = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_STOP_BUTTON);
   private final JoystickButton extendButton = new JoystickButton(operatorController, RobotContainerConstants.SOLENOID_EXTEND_BUTTON);
   private final JoystickButton retractButton = new JoystickButton(operatorController, RobotContainerConstants.SOLENOID_RETRACT_BUTTON);
-
-
+  private final JoystickButton gyroZeroButton = new JoystickButton(operatorController, RobotContainerConstants.GYRO_ZERO_BUTTON);
+  private final JoystickButton forwardsSnapButton = new JoystickButton(operatorController, RobotContainerConstants.SNAP_FORWARDS_DIRECTION);
+  private final JoystickButton leftSnapButton = new JoystickButton(operatorController, RobotContainerConstants.SNAP_LEFT_DIRECTION);
+  private final JoystickButton rightSnapButton = new JoystickButton(operatorController, RobotContainerConstants.SNAP_RIGHT_DIRECTION);
+  private final JoystickButton backwardsSnapButton = new JoystickButton(operatorController, RobotContainerConstants.SNAP_BACKWARDS_DIRECTION);
+  private final JoystickButton stopSnapButton = new JoystickButton(operatorController, RobotContainerConstants.SNAP_STOP_BUTTON);
   // Subsystems
   public static final GyroSubsystem gyroSubsystem = new GyroSubsystem("CANivore");
   public static final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(RobotContainerConstants.ELEVATOR_PRIMARY_MOTOR_ID,
@@ -67,6 +71,7 @@ public class RobotContainer {
   public static final SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
   public static final SolenoidSubsystem solenoidSubsystem = new SolenoidSubsystem();
   public static final VisionSubsystem visionSubsystem = new VisionSubsystem();
+  public static final DirectionSnapSubsystem directionSnapSubsystem = new DirectionSnapSubsystem();
   //MapleSim simulation
   private SwerveDriveSimulation swerveDriveSimulation;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */

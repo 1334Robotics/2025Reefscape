@@ -19,7 +19,7 @@ public class RobotContainerConstants {
     public static final int SOLENOID_EXTEND_BUTTON  = XboxMappings.Button.RightBumper;
     public static final int SOLENOID_RETRACT_BUTTON = XboxMappings.Button.LeftBumper;
 
-    public static final int GYRO_ZERO_BUTON = XboxMappings.Button.X;
+    public static final int GYRO_ZERO_BUTTON = XboxMappings.Button.X;
 
     public static final int SNAP_FORWARDS_DIRECTION  = XboxMappings.DPad.Up;
     public static final int SNAP_LEFT_DIRECTION      = XboxMappings.DPad.Left;
