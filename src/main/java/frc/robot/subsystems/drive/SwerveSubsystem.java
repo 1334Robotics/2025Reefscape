@@ -35,7 +35,7 @@ public class SwerveSubsystem extends SubsystemBase {
         }
         
         // Turn off heading correction and cosine compensation
-        this.swerveDrive.setHeadingCorrection(false);
+        this.swerveDrive.setHeadingCorrection(true);
         this.swerveDrive.setCosineCompensator(false);
     }
 
