@@ -1,4 +1,4 @@
-package frc.robot.commands.drive;
+package frc.robot.commands.vision;
 
 import java.util.function.DoubleSupplier;
 
@@ -14,15 +14,10 @@ import frc.robot.subsystems.drive.SwerveSubsystem;
 
 
 public class TrackAprilTagCommand extends Command {
-    private final VisionSubsystem visionSubsystem;
-    private final SwerveSubsystem swerveSubsystem;
     private final PIDController rotationController;
     private final PIDController speedController;
 
-    public TrackAprilTagCommand(VisionSubsystem vision, SwerveSubsystem swerve) {
-        this.visionSubsystem = vision;
-        this.swerveSubsystem = swerve;
-
+    public TrackAprilTagCommand() {
         // Initialize the PID controllers
         rotationController = new PIDController(VisionConstants.ROTATION_KP,
                                                VisionConstants.ROTATION_KI,
@@ -46,17 +41,18 @@ public class TrackAprilTagCommand extends Command {
                                               VisionConstants.DRIVE_LIM_MAX_INT,
                                               1);
 
-        addRequirements(vision, swerve);
+        addRequirements(RobotContainer.swerveSubsystem, RobotContainer.visionSubsystem);
     }
 
     @Override
     public void execute() {
-        boolean hasTarget = visionSubsystem.isTargetVisible();
+        boolean hasTarget = RobotContainer.visionSubsystem.isTargetVisible();
         
-        if (hasTarget && visionSubsystem.getTargetId() == VisionConstants.TARGET_TAG_ID) {
-            double yaw = visionSubsystem.getTargetYaw();
-            double area = visionSubsystem.getTargetArea();
-            double distance = DistanceCalculator.getDistance(area);
+        if(hasTarget && RobotContainer.visionSubsystem.getTargetId() == VisionConstants.TARGET_TAG_ID) {
+            double yaw      = RobotContainer.visionSubsystem.getTargetYaw();
+            double pitch    = RobotContainer.visionSubsystem.getTargetPitch();
+            double area     = RobotContainer.visionSubsystem.getTargetArea();
+            double distance = DistanceCalculator.getDistance(yaw, pitch, area);
             
             // Calculate drive commands
             rotationController.update(0, yaw);
@@ -70,7 +66,7 @@ public class TrackAprilTagCommand extends Command {
             SmartDashboard.putNumber("[VISION] Predicted Distance From Tag", distance);
             
             // Drive robot
-            swerveSubsystem.drive(
+            RobotContainer.swerveSubsystem.drive(
                 new Translation2d(forwardSpeed, 0),
                 rotationSpeed
             );
@@ -79,7 +75,7 @@ public class TrackAprilTagCommand extends Command {
             SmartDashboard.putString("Vision/Status", "FOLLOWING TAG " + VisionConstants.TARGET_TAG_ID);
         } else {
             // Stop if wrong tag or no target
-            swerveSubsystem.drive(new Translation2d(0, 0), 0);
+            RobotContainer.swerveSubsystem.drive(new Translation2d(0, 0), 0);
             SmartDashboard.putString("Vision/Status", "NO TARGET");
             rotationController.zero();
             speedController.zero();
