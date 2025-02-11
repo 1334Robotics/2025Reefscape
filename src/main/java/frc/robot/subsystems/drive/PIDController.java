@@ -1,6 +1,6 @@
 package frc.robot.subsystems.drive;
 
-public class PID {
+public class PIDController {
     private final double kP, kI, kD;
     private final double tau;
     private final double limMin, limMax;
@@ -9,7 +9,7 @@ public class PID {
     private double proportionalTerm, integralTerm, differentialTerm;
     private double prevError, prevMeasurement;
 
-    public PID(double kP, double kI, double kD, double tau, double limMin,
+    public PIDController(double kP, double kI, double kD, double tau, double limMin,
                double limMax, double limMinInt, double limMaxInt, double sampleTime) {
         this.kP         = kP;
         this.kI         = kI;
@@ -50,7 +50,7 @@ public class PID {
         this.prevMeasurement = measurement;
     }
 
-    public double getSteer() {
+    public double getOutput() {
         double output = this.proportionalTerm + this.integralTerm + this.differentialTerm;
         if(output > this.limMax) output = this.limMax;
         if(output < this.limMin) output = this.limMin;

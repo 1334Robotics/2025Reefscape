@@ -92,10 +92,9 @@ public class SwerveSubsystem extends SubsystemBase {
             throw new RuntimeException(e);
         }
         
-        // Turn off heading correction and cosine compensation
         this.swerveDrive.setHeadingCorrection(true);
-        this.swerveDrive.setCosineCompensator(false);
-        }
+        this.swerveDrive.setCosineCompensator(true);
+    }
 
     @Override
     public void periodic() {
