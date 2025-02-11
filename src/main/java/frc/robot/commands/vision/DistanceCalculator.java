@@ -3,6 +3,8 @@ package frc.robot.commands.vision;
 import frc.robot.constants.VisionConstants;
 
 public class DistanceCalculator {
+    public static DoubleLookupTable powerTable = null;
+
     public static double getDistance(double yaw, double pitch, double area) {
         /*
         This is written in LaTeX notation.
@@ -30,9 +32,8 @@ public class DistanceCalculator {
         \text{Now, replacing p with its value} \\ \\
         d \approx \text{AREA_10_DISTANCE}\left(\frac{\text{area}}{10}\right)^{-\frac{1}{1.6609640474437}} \\ \\
         d \approx \text{AREA_10_DISTANCE}\left(\frac{\text{area}}{10}\right)^{-0.602059991328} \\ \\
-        d \approx \text{AREA_10_DISTANCE}\left(\frac{10}{\text{area}}\right)^0.602059991328
+        d \approx \text{AREA_10_DISTANCE}\left(\frac{10}{\text{area}}\right)^{0.602059991328}
         
-
         In simple terms, d = AREA_10_DISTANCE * (10/area)^0.602059991328
         */
 
