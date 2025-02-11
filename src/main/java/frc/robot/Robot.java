@@ -4,26 +4,32 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.ironmaple.simulation.SimulatedArena;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeAlgaeOnField;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralAlgaeStack;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnField;
 
 /**
- * The methods in this class are called automatically corresponding to each mode, as described in
- * the TimedRobot documentation. If you change the name of this class or the package after creating
- * this project, you must also update the Main.java file in the project.
+ * The Virtual Machine is configured to automatically run this class, and to call the methods corresponding to
+ * each mode, as described in the LoggedRobot documentation. If you change the name of this class or
+ * the package after creating this project, you must also update the Main.java file in the project.
+ *
+ * This class extends LoggedRobot to enable advanced logging and simulation
+ * capabilities. LoggedRobot is essential for the simulation to work properly, as it integrates with
+ * the AdvantageKit logging framework to provide detailed data recording and playback functionality.
+ * This is particularly useful for debugging, testing, and analyzing robot behavior in both
+ * simulation and real-world scenarios.
+ *
+ * By using LoggedRobot, we gain access to features such as:
+ * - Real-time logging of robot state, sensor data, and command execution.
+ * - Playback of logged data for post-match analysis.
+ * - Enhanced simulation support, including logging of simulated game pieces and field elements.
  */
+
 public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
 
@@ -67,12 +73,6 @@ public class Robot extends LoggedRobot {
   @Override
   public void simulationInit() {
     SimulatedArena.getInstance();
-    // Add CORAL and ALGAE to the field
-    SimulatedArena.getInstance().addGamePiece(new ReefscapeCoralOnField(
-    new Pose2d(2, 2, Rotation2d.fromDegrees(90))));
-    SimulatedArena.getInstance().addGamePiece(new ReefscapeAlgaeOnField(new Translation2d(2,2)));
-    // Add CORAL-ALGAE stack
-    SimulatedArena.getInstance().addGamePiece(new ReefscapeCoralAlgaeStack(new Translation2d(2,2)));
   }
 
   /** This function is called periodically whilst in simulation. */

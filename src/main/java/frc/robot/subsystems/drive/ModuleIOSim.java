@@ -51,6 +51,13 @@ public class ModuleIOSim implements ModuleIO {
 
     @Override // specified by ModuleIO interface
     public Angle getSteerRelativePosition() {
+        /* 
+        Divide by 12.8 to account for the total effective gear reduction between
+        the motor and the steering mechanism. This ensures that the encoder value
+        reflects the actual physical rotation of the steering module.
+        The value 12.8 comes from combining two gear ratios, 
+        which represent stages of reduction in the system.
+        */
         return moduleSimulation.getSteerRelativeEncoderPosition().divide(12.8);
     }
 
