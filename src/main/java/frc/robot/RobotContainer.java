@@ -14,6 +14,7 @@ import frc.robot.commands.mailbox.StopCommand;
 import frc.robot.commands.solenoid.ExtendCommand;
 import frc.robot.commands.solenoid.RetractCommand;
 import frc.robot.constants.RobotContainerConstants;
+import frc.robot.constants.SimulationConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
 import frc.robot.subsystems.simulation.SimulationSubsystem;
@@ -86,7 +87,7 @@ public class RobotContainer {
     //Conditionally initialize the simulation subsystem
     if (Robot.isSimulation()) {
       simulationSubsystem = new SimulationSubsystem(swerveSubsystem.getSwerveDriveSimulation(), swerveSubsystem);
-      simulationSubsystem.setInitialPose(new Pose2d(1.25, 2.25, Rotation2d.fromDegrees(0)));
+      simulationSubsystem.setInitialPose(new Pose2d(SimulationConstants.ROBOT_STARTING_POSE_X, SimulationConstants.ROBOT_STARTING_POSE_Y, Rotation2d.fromDegrees(0)));
     } else {
       simulationSubsystem = null;
     }

@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.constants.SimulationConstants;
 import frc.robot.constants.SwerveConstants;
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
@@ -55,15 +56,15 @@ public class SwerveSubsystem extends SubsystemBase {
                         .withGyro(COTS.ofPigeon2())
                         // Specify swerve module (for realistic swerve dynamics)
                         .withSwerveModule(new SwerveModuleSimulationConfig(
-                                DCMotor.getKrakenX60(4), // Drive motor is a Kraken X60
-                                DCMotor.getKrakenX60(4), // Steer motor is a Kraken X60
-                                6.75, // Drive motor gear ratio.
-                                21.429, // Steer motor gear ratio.
-                                Units.Volts.of(0.1), // Drive friction voltage.
-                                Units.Volts.of(0.1), // Steer friction voltage
-                                Units.Inches.of(2), // Wheel radius
-                                Units.KilogramSquareMeters.of(0.03), // Steer MOI
-                                1.19)) // Wheel COF
+                                DCMotor.getKrakenX60(SwerveConstants.NUM_DRIVE_MOTORS), // Drive motor is a Kraken X60
+                                DCMotor.getKrakenX60(SwerveConstants.NUM_STEER_MOTORS), // Steer motor is a Kraken X60
+                                SwerveConstants.DRIVE_GEAR_RATIO, // Drive motor gear ratio.
+                                SwerveConstants.STEER_GEAR_RATIO, // Steer motor gear ratio.
+                                SimulationConstants.DRIVE_FRICTION_VOLTAGE, // Drive friction voltage.
+                                SimulationConstants.STEER_FRICTION_VOLTAGE, // Steer friction voltage
+                                SimulationConstants.WHEEL_RADIUS, // Wheel radius
+                                SimulationConstants.STEER_MOI, // Steer MOI
+                                SimulationConstants.WHEEL_COF)) // Wheel COF
                         // Configures the track length and track width (spacing between swerve modules)
                         .withTrackLengthTrackWidth(Units.Inches.of(29), Units.Inches.of(29))
                         // Configures the bumper size (dimensions of the robot bumper)
