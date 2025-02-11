@@ -20,6 +20,7 @@ import frc.robot.subsystems.mailbox.MailboxSubsystem;
 import frc.robot.subsystems.simulation.SimulationSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.commands.vision.PrintTargetInfo;
+import frc.robot.subsystems.lazercan.LaserCanSubsystem;
 import frc.robot.subsystems.drive.DirectionSnapSubsystem;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
