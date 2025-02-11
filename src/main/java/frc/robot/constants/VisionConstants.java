@@ -20,7 +20,8 @@ public final class VisionConstants {
     // Vision processing constants
     public static final double MAX_AMBIGUITY = 0.2;  // Maximum allowed pose ambiguity
     public static final double MIN_TARGET_AREA = 10.0;  // Minimum target area in pixels²
-    
+    public static final double MAX_ACCEPTABLE_DELAY = 100; // In milliseconds
+
     // Simulation constants
     public static final double SIM_CAMERA_FPS = 30;
     public static final double SIM_AVERAGE_LATENCY_MS = 35;
@@ -35,7 +36,9 @@ public final class VisionConstants {
     // AprilTag tracking constants
     public static final int TARGET_TAG_ID = 3;  // Target AprilTag ID
     public static final double TARGET_FOLLOW_DISTANCE = 100;  // Centimeters from tag
-    public static final double AREA_10_DISTANCE = 41.5; // In Centimeters
+    public static final double AREA_10_DISTANCE = 44.6; // In Centimeters
+    public static final double DRIVE_SPEED = 0.5;
+    public static final double POWER_TABLE_SPACE = 0.005;
 
     // Rotation PID constants
     public static final double ROTATION_KP          = 0.05;

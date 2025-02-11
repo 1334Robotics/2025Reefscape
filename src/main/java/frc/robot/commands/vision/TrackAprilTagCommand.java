@@ -1,16 +1,12 @@
 package frc.robot.commands.vision;
 
-import java.util.function.DoubleSupplier;
-
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.constants.SwerveConstants;
 import frc.robot.constants.VisionConstants;
-import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.subsystems.drive.PIDController;
-import frc.robot.subsystems.drive.SwerveSubsystem;
 
 
 public class TrackAprilTagCommand extends Command {
@@ -48,7 +44,9 @@ public class TrackAprilTagCommand extends Command {
     public void execute() {
         boolean hasTarget = RobotContainer.visionSubsystem.isTargetVisible();
         
-        if(hasTarget && RobotContainer.visionSubsystem.getTargetId() == VisionConstants.TARGET_TAG_ID) {
+        if(hasTarget
+        && RobotContainer.visionSubsystem.getTargetId() == VisionConstants.TARGET_TAG_ID
+        && RobotContainer.visionSubsystem.getImageAge() <= VisionConstants.MAX_ACCEPTABLE_DELAY) {
             double yaw      = RobotContainer.visionSubsystem.getTargetYaw();
             double pitch    = RobotContainer.visionSubsystem.getTargetPitch();
             double area     = RobotContainer.visionSubsystem.getTargetArea();
@@ -57,8 +55,8 @@ public class TrackAprilTagCommand extends Command {
             // Calculate drive commands
             rotationController.update(0, yaw);
             speedController.update(VisionConstants.TARGET_FOLLOW_DISTANCE, distance);
-            double rotationSpeed = rotationController.getOutput() * SwerveConstants.DRIVE_SPEED * SwerveConstants.MAX_SPEED;
-            double forwardSpeed = -speedController.getOutput() * SwerveConstants.DRIVE_SPEED * SwerveConstants.MAX_SPEED;
+            double rotationSpeed = rotationController.getOutput() * VisionConstants.DRIVE_SPEED * SwerveConstants.MAX_SPEED;
+            double forwardSpeed = -speedController.getOutput() * VisionConstants.DRIVE_SPEED * SwerveConstants.MAX_SPEED;
 
             // Publish the speeds
             SmartDashboard.putNumber("[VISION] Rotation Speed", rotationSpeed);
