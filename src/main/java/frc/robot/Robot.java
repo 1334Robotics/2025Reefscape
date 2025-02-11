@@ -4,21 +4,37 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.commands.vision.DistanceCalculator;
-
+import org.ironmaple.simulation.SimulatedArena;
+import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
 
 /**
- * The methods in this class are called automatically corresponding to each mode, as described in
- * the TimedRobot documentation. If you change the name of this class or the package after creating
- * this project, you must also update the Main.java file in the project.
+ * The Virtual Machine is configured to automatically run this class, and to call the methods corresponding to
+ * each mode, as described in the LoggedRobot documentation. If you change the name of this class or
+ * the package after creating this project, you must also update the Main.java file in the project.
+ *
+ * This class extends LoggedRobot to enable advanced logging and simulation
+ * capabilities. LoggedRobot is essential for the simulation to work properly, as it integrates with
+ * the AdvantageKit logging framework to provide detailed data recording and playback functionality.
+ * This is particularly useful for debugging, testing, and analyzing robot behavior in both
+ * simulation and real-world scenarios.
+ *
+ * By using LoggedRobot, we gain access to features such as:
+ * - Real-time logging of robot state, sensor data, and command execution.
+ * - Playback of logged data for post-match analysis.
+ * - Enhanced simulation support, including logging of simulated game pieces and field elements.
  */
-public class Robot extends TimedRobot {
+
+public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
+  private final Field2d m_field = new Field2d();
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -28,6 +44,13 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+  }
+  @Override
+  public void robotInit() {
+      Logger.addDataReceiver(new NT4Publisher());
+      Logger.start();
+      SmartDashboard.putData("Field", m_field);
+      // Get the default instance of the simulation world
   }
 
   /**
@@ -44,14 +67,24 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
+    m_field.setRobotPose(RobotContainer.swerveSubsystem.getPose());
   }
    /** This function is called once when the robot is first started up. */
   @Override
-  public void simulationInit() {}
+  public void simulationInit() {
+    SimulatedArena.getInstance();
+  }
 
   /** This function is called periodically whilst in simulation. */
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+    SimulatedArena.getInstance().simulationPeriodic();
+    // Log game piece positions
+    Logger.recordOutput("FieldSimulation/Algae", 
+    SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+    Logger.recordOutput("FieldSimulation/Coral", 
+    SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
+  }
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
