@@ -20,7 +20,6 @@ import frc.robot.subsystems.mailbox.MailboxSubsystem;
 import frc.robot.subsystems.simulation.SimulationSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.commands.vision.PrintTargetInfo;
-import frc.robot.subsystems.lazercan.LaserCanSubsystem;
 import frc.robot.subsystems.drive.DirectionSnapSubsystem;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
@@ -34,6 +33,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.laser.LaserCanSubsystem;
+import frc.robot.commands.laser.MonitorLaserCanCommand;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -68,6 +69,7 @@ public class RobotContainer {
   public static final SolenoidSubsystem solenoidSubsystem           = new SolenoidSubsystem();
   public static final VisionSubsystem visionSubsystem               = new VisionSubsystem();
   public static final DirectionSnapSubsystem directionSnapSubsystem = new DirectionSnapSubsystem();
+  private final LaserCanSubsystem laserCanSubsystem = new LaserCanSubsystem();
 
      //Conditionally create SimulationSubsystem
      public final SimulationSubsystem simulationSubsystem;
@@ -92,6 +94,9 @@ public class RobotContainer {
     } else {
       simulationSubsystem = null;
     }
+
+    // Configure default command if you want continuous monitoring
+    laserCanSubsystem.setDefaultCommand(new MonitorLaserCanCommand(laserCanSubsystem));
   }
 
 
