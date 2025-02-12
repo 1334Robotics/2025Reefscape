@@ -8,7 +8,7 @@ on:
   workflow_dispatch: # ALlows this action to be triggered manually
 
 jobs:
-  build:
+  Build:
     runs-on: windows-latest
 
     steps:
@@ -24,5 +24,5 @@ jobs:
       - name: Give Execute Permissions to the Gradle Wrapper
         run: chmod +x gradlew
 
-      - name: Run Gralde Build
+      - name: Run Gradle Build
         run: ./gradlew build --no-daemon
