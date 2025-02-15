@@ -69,7 +69,7 @@ public class RobotContainer {
   public static final SolenoidSubsystem solenoidSubsystem           = new SolenoidSubsystem();
   public static final VisionSubsystem visionSubsystem               = new VisionSubsystem();
   public static final DirectionSnapSubsystem directionSnapSubsystem = new DirectionSnapSubsystem();
-  private final LaserCanSubsystem laserCanSubsystem = new LaserCanSubsystem();
+  public static final LaserCanSubsystem laserCanSubsystem           = new LaserCanSubsystem();
 
      //Conditionally create SimulationSubsystem
      public final SimulationSubsystem simulationSubsystem;
@@ -96,7 +96,7 @@ public class RobotContainer {
     }
 
     // Configure default command if you want continuous monitoring
-    laserCanSubsystem.setDefaultCommand(new MonitorLaserCanCommand(laserCanSubsystem));
+    laserCanSubsystem.setDefaultCommand(new MonitorLaserCanCommand());
   }
 
 

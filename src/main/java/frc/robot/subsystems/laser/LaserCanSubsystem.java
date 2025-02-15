@@ -1,23 +1,24 @@
 package frc.robot.subsystems.laser;
 
-import au.grapplerobotics.LaserCan;
+import frc.robot.constants.LaserCanConstants;
 import au.grapplerobotics.ConfigurationFailedException;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import au.grapplerobotics.LaserCan;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class LaserCanSubsystem extends SubsystemBase {
     private final LaserCan laserCan;
     private LaserCan.Measurement lastMeasurement;
 
     public LaserCanSubsystem() {
-        laserCan = new LaserCan(0);
+        laserCan = new LaserCan(LaserCanConstants.can_id);
         configureDevice();
     }
 
     private void configureDevice() {
         try {
             laserCan.setRangingMode(LaserCan.RangingMode.SHORT);
-            laserCan.setRegionOfInterest(new LaserCan.RegionOfInterest(8, 8, 16, 16));
+            laserCan.setRegionOfInterest(new LaserCan.RegionOfInterest(LaserCanConstants.x,LaserCanConstants.y,LaserCanConstants.width,LaserCanConstants.height)); // Configure in constants
             laserCan.setTimingBudget(LaserCan.TimingBudget.TIMING_BUDGET_33MS);
             System.out.println("LaserCan configured successfully");
         } catch (ConfigurationFailedException e) {
@@ -33,7 +34,7 @@ public class LaserCanSubsystem extends SubsystemBase {
 
     private void updateDashboard() {
         SmartDashboard.putNumber("[LASERCAN] Distance (mm)", getDistance());
-        SmartDashboard.putBoolean("[LASERCAN] Valid Reading", true);
+        SmartDashboard.putBoolean("[LASERCAN] Valid Reading", isValidMeasurement());
     }
 
     public boolean isValidMeasurement() {
