@@ -32,6 +32,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.laser.LaserCanSubsystem;
+import frc.robot.commands.laser.MonitorLaserCanCommand;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -66,6 +68,7 @@ public class RobotContainer {
   public static final SolenoidSubsystem solenoidSubsystem           = new SolenoidSubsystem();
   public static final VisionSubsystem visionSubsystem               = new VisionSubsystem();
   public static final DirectionSnapSubsystem directionSnapSubsystem = new DirectionSnapSubsystem();
+  public static final LaserCanSubsystem laserCanSubsystem           = new LaserCanSubsystem();
 
      //Conditionally create SimulationSubsystem
      public final SimulationSubsystem simulationSubsystem;
@@ -90,6 +93,9 @@ public class RobotContainer {
     } else {
       simulationSubsystem = null;
     }
+
+    // Configure default command if you want continuous monitoring
+    laserCanSubsystem.setDefaultCommand(new MonitorLaserCanCommand());
   }
 
 
