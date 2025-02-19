@@ -44,7 +44,7 @@ public class SwerveSubsystem extends SubsystemBase {
         final GyroSimulation gyroSimulation;
         final ModuleIO[] moduleIOs;
         SmartDashboard.putBoolean("[SWERVE] Field Relative", this.fieldRelative);
-        this.gyroIO = gyroIO;  // Save gyroIO reference
+ 
         
         // Create the swerve drive
         File swerveDirectory = new File(Filesystem.getDeployDirectory(), SwerveConstants.SWERVE_DRIVE_DIRECTORY);
