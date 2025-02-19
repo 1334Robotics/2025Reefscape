@@ -15,6 +15,7 @@ import swervelib.SwerveController;
 import swervelib.SwerveDrive;
 import swervelib.SwerveModule;
 import swervelib.parser.SwerveParser;
+import swervelib.imu.SwerveIMU; //NEW CAL
 import frc.robot.subsystems.gyro.GyroIO;
 import frc.robot.subsystems.gyro.GyroIOSim;
 import edu.wpi.first.units.Units;
@@ -43,6 +44,7 @@ public class SwerveSubsystem extends SubsystemBase {
         final GyroSimulation gyroSimulation;
         final ModuleIO[] moduleIOs;
         SmartDashboard.putBoolean("[SWERVE] Field Relative", this.fieldRelative);
+        this.gyroIO = gyroIO;  // Save gyroIO reference
         
         // Create the swerve drive
         File swerveDirectory = new File(Filesystem.getDeployDirectory(), SwerveConstants.SWERVE_DRIVE_DIRECTORY);
@@ -98,6 +100,16 @@ public class SwerveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        // Validate gyro before updating - do we want this ? if the gyro is not valid, we should not be updating the odometry?
+        //At the very least we want to know if the gyro is bad asap.
+        if (swerveDrive.getGyro() == null) {
+            SmartDashboard.putBoolean("Swerve/GyroValid", false);
+            return;
+        }
+        SmartDashboard.putBoolean("Swerve/GyroValid", true);
+
+        // Update odometry with latest module states and gyro reading this should be run in every loop
+        swerveDrive.updateOdometry(); 
 
         Logger.recordOutput("Drive/Pose", swerveDrive.getPose());
         Pose2d currentPose = swerveDrive.getPose();
@@ -169,6 +181,12 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public void resetOdometry(Pose2d pose) {
         swerveDrive.resetOdometry(pose);
+    }
+
+    //adding odometry reset with gyro zeroing
+    public void resetPose(Pose2d pose) {
+        swerveDrive.resetOdometry(pose);
+        zeroGyro();  // Optional: zero gyro when resetting pose
     }
     
     public void setFieldRelative(boolean fieldRelative) {
