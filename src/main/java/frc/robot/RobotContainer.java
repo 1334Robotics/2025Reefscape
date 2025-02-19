@@ -64,9 +64,9 @@ public class RobotContainer {
   public static final ElevatorSubsystem elevatorSubsystem           = new ElevatorSubsystem(RobotContainerConstants.ELEVATOR_PRIMARY_MOTOR_ID,
                                                                                             RobotContainerConstants.ELEVATOR_SECONDARY_MOTOR_ID);
   public static final MailboxSubsystem mailboxSubsystem             = new MailboxSubsystem();
-  public static final SwerveSubsystem swerveSubsystem               = new SwerveSubsystem();
-  public static final SolenoidSubsystem solenoidSubsystem           = new SolenoidSubsystem();
   public static final VisionSubsystem visionSubsystem               = new VisionSubsystem();
+  public static final SwerveSubsystem swerveSubsystem               = new SwerveSubsystem(visionSubsystem);
+  public static final SolenoidSubsystem solenoidSubsystem           = new SolenoidSubsystem();
   public static final DirectionSnapSubsystem directionSnapSubsystem = new DirectionSnapSubsystem();
   public static final LaserCanSubsystem laserCanSubsystem           = new LaserCanSubsystem();
 
