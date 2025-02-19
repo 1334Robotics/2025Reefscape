@@ -55,4 +55,21 @@ public final class VisionConstants {
     public static final double DRIVE_TAU         = 0;
     public static final double DRIVE_LIM_MIN_INT = -0.3;
     public static final double DRIVE_LIM_MAX_INT = 0.3;
+
+    // Camera mounting position relative to robot center (meters)
+    public static final double CAMERA_POSITION_X = 0.25;  // Forward/back
+    public static final double CAMERA_POSITION_Y = 0.0;  // Left/right
+    public static final double CAMERA_POSITION_Z = 0.5;  // Up/down
+
+    // Camera mounting angles (radians)
+    public static final double CAMERA_PITCH_RADIANS = 0.0;  // Up/down tilt
+    public static final double CAMERA_YAW_RADIANS = 0.0;    // Left/right rotation
+    public static final double CAMERA_ROLL_RADIANS = 0.0;   // Roll around camera axis
+    
+    // Vision measurement accuracy constants
+    public static final double BASE_VISION_STD_DEV = 0.5;  // Base std dev in meters
+    public static final double MAX_VISION_STD_DEV = 3.0;   // Max std dev in meters
+    public static final double MIN_VISION_STD_DEV = 0.1;   // Min std dev in meters
+    public static final double AREA_TO_STD_DEV_FACTOR = 20.0; // Higher area = lower std dev
+
 }
