@@ -6,7 +6,6 @@ import frc.robot.commands.directionSnaps.DirectionSnapLeft;
 import frc.robot.commands.directionSnaps.DirectionSnapRight;
 import frc.robot.commands.directionSnaps.StopSnap;
 import frc.robot.commands.drive.DriveCommand;
-import frc.robot.commands.drive.TrackAprilTagCommand;
 import frc.robot.commands.gyro.GyroZeroCommand;
 import frc.robot.commands.mailbox.InputCommand;
 import frc.robot.commands.mailbox.OutputCommand;
@@ -24,7 +23,7 @@ import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
 import frc.robot.subsystems.simulation.SimulationSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
-import frc.robot.commands.vision.PrintTargetInfo;
+import frc.robot.commands.vision.TrackAprilTagCommand;
 import frc.robot.subsystems.drive.DirectionSnapSubsystem;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
@@ -38,6 +37,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.laser.LaserCanSubsystem;
+import frc.robot.commands.laser.MonitorLaserCanCommand;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -72,10 +73,11 @@ public class RobotContainer {
   public static final ElevatorSubsystem elevatorSubsystem           = new ElevatorSubsystem(RobotContainerConstants.ELEVATOR_PRIMARY_MOTOR_ID,
                                                                                             RobotContainerConstants.ELEVATOR_SECONDARY_MOTOR_ID);
   public static final MailboxSubsystem mailboxSubsystem             = new MailboxSubsystem();
-  public static final SwerveSubsystem swerveSubsystem               = new SwerveSubsystem();
-  public static final SolenoidSubsystem solenoidSubsystem           = new SolenoidSubsystem();
   public static final VisionSubsystem visionSubsystem               = new VisionSubsystem();
+  public static final SwerveSubsystem swerveSubsystem               = new SwerveSubsystem(visionSubsystem);
+  public static final SolenoidSubsystem solenoidSubsystem           = new SolenoidSubsystem();
   public static final DirectionSnapSubsystem directionSnapSubsystem = new DirectionSnapSubsystem();
+  public static final LaserCanSubsystem laserCanSubsystem           = new LaserCanSubsystem();
   public static final IntakeSubsystem intakeSubsystem = new IntakeSubsystem(new IntakeIOSim(swerveSubsystem.getSwerveDriveSimulation()));
 
   //Conditionally create SimulationSubsystem
@@ -103,6 +105,9 @@ public class RobotContainer {
     } else {
       simulationSubsystem = null;
     }
+
+    // Configure default command if you want continuous monitoring
+    laserCanSubsystem.setDefaultCommand(new MonitorLaserCanCommand());
   }
 
 
@@ -138,9 +143,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // Using ProointTargetInfo causes a command scheduler loop overrun when fieldRelative is enabled
-    //return null; // new PrintTargetInfo(visionSubsystem);
-    return new TrackAprilTagCommand(visionSubsystem, swerveSubsystem);
-  
+    return new TrackAprilTagCommand();
   }
 }
