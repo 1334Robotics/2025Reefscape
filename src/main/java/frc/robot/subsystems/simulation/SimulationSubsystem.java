@@ -7,15 +7,12 @@ import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import org.littletonrobotics.junction.Logger;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeAlgaeOnField;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralAlgaeStack;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnField;
 
 public class SimulationSubsystem extends SubsystemBase {
 
@@ -23,6 +20,8 @@ public class SimulationSubsystem extends SubsystemBase {
     private final SwerveDriveSimulation swerveDriveSimulation;
     private final SwerveSubsystem swerveSubsystem;
     private final IntakeIOSim intakeIOSim;
+    private final AIRobotInSimulation[] instances = new AIRobotInSimulation[1];
+    
 
     public SimulationSubsystem(SwerveDriveSimulation swerveDriveSimulation, SwerveSubsystem swerveSubsystem) {
         this.swerveDriveSimulation = swerveDriveSimulation;
@@ -37,11 +36,12 @@ public class SimulationSubsystem extends SubsystemBase {
             swerveDriveSimulation.setSimulationWorldPose(initialPose);
             swerveSubsystem.resetOdometry(initialPose); // Reset swerve odometry
             field.setRobotPose(initialPose);
-            SimulatedArena.getInstance().addGamePiece(new ReefscapeCoralOnField(
-                new Pose2d(2, 2, Rotation2d.fromDegrees(90))));
-            SimulatedArena.getInstance().addGamePiece(new ReefscapeAlgaeOnField(new Translation2d(2,2)));
             // Add CORAL-ALGAE stack
-            SimulatedArena.getInstance().addGamePiece(new ReefscapeCoralAlgaeStack(new Translation2d(2,2)));
+            SimulatedArena.getInstance().addGamePiece(new ReefscapeCoralAlgaeStack(new Translation2d(1.25,4)));
+            SimulatedArena.getInstance().addGamePiece(new ReefscapeCoralAlgaeStack(new Translation2d(1.2,5.85)));
+            SimulatedArena.getInstance().addGamePiece(new ReefscapeCoralAlgaeStack(new Translation2d(16.4,5.85)));
+            SimulatedArena.getInstance().addGamePiece(new ReefscapeCoralAlgaeStack(new Translation2d(16.4,4)));
+            SimulatedArena.getInstance().addGamePiece(new ReefscapeCoralAlgaeStack(new Translation2d(16.4,2.15)));
         }
     }
 
@@ -57,17 +57,20 @@ public class SimulationSubsystem extends SubsystemBase {
         Logger.recordOutput("FieldSimulation/RobotPose", new Pose3d(robotPose));
 
         // Log intake state
-        Logger.recordOutput("Simulation/IntakeRunning", intakeIOSim.isNoteInsideIntake());
-        Logger.recordOutput("Simulation/CoralInIntake", isCoralInIntake());
+        Logger.recordOutput("Simulation/CoralInIntake", intakeIOSim.isCoralInsideIntake());
 
         Logger.recordOutput("FieldSimulation/Algae", 
         SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
         Logger.recordOutput("FieldSimulation/Coral", 
         SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
+
+        Logger.recordOutput("FieldSimulation/AIRobotPoses", AIRobotInSimulation.getOpponentRobotPoses());
     }
+
 
     // Add methods to control the intake
     public void runIntake() {
+        System.out.println("DEBUG: runIntake() called");
         intakeIOSim.setRunning(true);
     }
     
@@ -76,11 +79,11 @@ public class SimulationSubsystem extends SubsystemBase {
     }
     
     public void launchCoral() {
-        intakeIOSim.launchNote();
+        intakeIOSim.launchCoral();
     }
     
     public boolean isCoralInIntake() {
-        return intakeIOSim.isNoteInsideIntake();
+        return intakeIOSim.isCoralInsideIntake();
     }
 
     public Field2d getField() {

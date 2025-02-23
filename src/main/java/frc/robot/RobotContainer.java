@@ -13,9 +13,14 @@ import frc.robot.commands.mailbox.OutputCommand;
 import frc.robot.commands.mailbox.StopCommand;
 import frc.robot.commands.solenoid.ExtendCommand;
 import frc.robot.commands.solenoid.RetractCommand;
+import frc.robot.commands.intake.LaunchCoralCommand;
+import frc.robot.commands.intake.RunIntakeCommand;
+import frc.robot.commands.intake.StopIntakeCommand;
 import frc.robot.constants.RobotContainerConstants;
 import frc.robot.constants.SimulationConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
+import frc.robot.subsystems.intake.IntakeIOSim;
+import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
 import frc.robot.subsystems.simulation.SimulationSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
@@ -58,6 +63,10 @@ public class RobotContainer {
   private final POVButton      backwardsSnapButton = new POVButton(driverController, RobotContainerConstants.SNAP_BACKWARDS_DIRECTION);
   private final JoystickButton stopSnapButton      = new JoystickButton(driverController, RobotContainerConstants.SNAP_STOP_BUTTON);
 
+  private final JoystickButton intakeRunButton = new JoystickButton(operatorController, RobotContainerConstants.INTAKE_RUN_BUTTON);
+  private final JoystickButton intakeStopButton = new JoystickButton(operatorController, RobotContainerConstants.INTAKE_STOP_BUTTON);
+  private final JoystickButton intakeLaunchButton = new JoystickButton(operatorController, RobotContainerConstants.INTAKE_LAUNCH_BUTTON);
+
   // Subsystems
   public static final GyroSubsystem gyroSubsystem                   = new GyroSubsystem("CANivore");
   public static final ElevatorSubsystem elevatorSubsystem           = new ElevatorSubsystem(RobotContainerConstants.ELEVATOR_PRIMARY_MOTOR_ID,
@@ -67,9 +76,10 @@ public class RobotContainer {
   public static final SolenoidSubsystem solenoidSubsystem           = new SolenoidSubsystem();
   public static final VisionSubsystem visionSubsystem               = new VisionSubsystem();
   public static final DirectionSnapSubsystem directionSnapSubsystem = new DirectionSnapSubsystem();
+  public static final IntakeSubsystem intakeSubsystem = new IntakeSubsystem(new IntakeIOSim(swerveSubsystem.getSwerveDriveSimulation()));
 
-     //Conditionally create SimulationSubsystem
-     public final SimulationSubsystem simulationSubsystem;
+  //Conditionally create SimulationSubsystem
+  public final SimulationSubsystem simulationSubsystem;
 
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -88,6 +98,8 @@ public class RobotContainer {
     if (Robot.isSimulation()) {
       simulationSubsystem = new SimulationSubsystem(swerveSubsystem.getSwerveDriveSimulation(), swerveSubsystem);
       simulationSubsystem.setInitialPose(new Pose2d(SimulationConstants.ROBOT_STARTING_POSE_X, SimulationConstants.ROBOT_STARTING_POSE_Y, Rotation2d.fromDegrees(0)));
+      System.out.println("DEBUG: runIntake() called");
+      simulationSubsystem.runIntake();
     } else {
       simulationSubsystem = null;
     }
@@ -115,6 +127,9 @@ public class RobotContainer {
     rightSnapButton.onTrue(new DirectionSnapRight());
     backwardsSnapButton.onTrue(new DirectionSnapBackwards());
     stopSnapButton.onTrue(new StopSnap());
+    intakeRunButton.onTrue(new RunIntakeCommand(intakeSubsystem));
+    intakeStopButton.onTrue(new StopIntakeCommand(intakeSubsystem));
+    intakeLaunchButton.onTrue(new LaunchCoralCommand(intakeSubsystem));
   }
 
   /**
