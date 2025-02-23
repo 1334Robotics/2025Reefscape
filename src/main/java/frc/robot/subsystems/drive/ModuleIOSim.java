@@ -58,7 +58,7 @@ public class ModuleIOSim implements ModuleIO {
         The value 12.8 comes from combining two gear ratios, 
         which represent stages of reduction in the system.
         */
-        return moduleSimulation.getSteerRelativeEncoderPosition().divide(12.8);
+        return moduleSimulation.getSteerRelativeEncoderPosition().div(12.8);
     }
 
     @Override // specified by ModuleIO interface
