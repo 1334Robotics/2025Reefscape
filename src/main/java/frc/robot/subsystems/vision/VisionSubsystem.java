@@ -13,15 +13,13 @@ import java.util.List;
  * A simple vision subsystem using PhotonVision to detect and track targets.
  */
 public class VisionSubsystem extends SubsystemBase {
-    private static final String CAMERA_NAME = "Arducam_OV9782_USB_Camera";
-    private double imageAge = 0;
+    private static final String CAMERA_NAME = "Arducam_OV9782_USB_Camera"; 
 
     private final PhotonCamera cameraPhotonCamera;
     private PhotonPipelineMetadata cameraMetadata;
 
     // Store the latest result each loop
     private PhotonPipelineResult latestResult;
-
 
     public VisionSubsystem() {
         cameraPhotonCamera = new PhotonCamera(CAMERA_NAME);
@@ -112,14 +110,6 @@ public class VisionSubsystem extends SubsystemBase {
         return null;
     }
 
-    /**
-     * Gets the current age of the image as calculated in VisionSubsystem.periodic()
-     * @return The image age
-     */
-    public double getImageAge() {
-        return this.imageAge;
-    }
-
     @Override
     public void periodic() {
         // 1) Grab all unread results once per loop
@@ -148,10 +138,10 @@ public class VisionSubsystem extends SubsystemBase {
         //double captureTimeSeconds = latestResult.getTimestampSeconds(); 
         double captureTimeSeconds = (latestResult != null ? latestResult.getTimestampSeconds() : currentTimeSeconds);
         // (3) Convert to milliseconds
-        this.imageAge = (currentTimeSeconds - captureTimeSeconds) * 1000;
+        double imageAgeMs = (currentTimeSeconds - captureTimeSeconds) * 1000;
 
         // (4) Send to dashboard
-        SmartDashboard.putNumber("[VISION] Image Age (ms)", this.imageAge);
+        SmartDashboard.putNumber("[VISION] Image Age (ms)", imageAgeMs);
 
         if (hasTarget) {
             PhotonTrackedTarget target = latestResult.getBestTarget();

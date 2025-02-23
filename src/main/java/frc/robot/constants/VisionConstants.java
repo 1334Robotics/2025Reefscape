@@ -20,8 +20,7 @@ public final class VisionConstants {
     // Vision processing constants
     public static final double MAX_AMBIGUITY = 0.2;  // Maximum allowed pose ambiguity
     public static final double MIN_TARGET_AREA = 10.0;  // Minimum target area in pixels²
-    public static final double MAX_ACCEPTABLE_DELAY = 100; // In milliseconds
-
+    
     // Simulation constants
     public static final double SIM_CAMERA_FPS = 30;
     public static final double SIM_AVERAGE_LATENCY_MS = 35;
@@ -35,41 +34,7 @@ public final class VisionConstants {
 
     // AprilTag tracking constants
     public static final int TARGET_TAG_ID = 3;  // Target AprilTag ID
-    public static final double TARGET_FOLLOW_DISTANCE = 100;  // Centimeters from tag
-    public static final double AREA_10_DISTANCE = 44.6; // In Centimeters
-    public static final double DRIVE_SPEED = 0.5;
-    public static final double POWER_TABLE_SPACE = 0.005;
-
-    // Rotation PID constants
-    public static final double ROTATION_KP          = 0.05;
-    public static final double ROTATION_KI          = 0.0001;
-    public static final double ROTATION_KD          = 0;
-    public static final double ROTATION_TAU         = 0;
-    public static final double ROTATION_LIM_MIN_INT = -0.3;
-    public static final double ROTATION_LIM_MAX_INT = 0.3;
-
-    // Drive PID constants
-    public static final double DRIVE_KP          = 0.01;
-    public static final double DRIVE_KI          = 0.0001;
-    public static final double DRIVE_KD          = 0;
-    public static final double DRIVE_TAU         = 0;
-    public static final double DRIVE_LIM_MIN_INT = -0.3;
-    public static final double DRIVE_LIM_MAX_INT = 0.3;
-
-    // Camera mounting position relative to robot center (meters)
-    public static final double CAMERA_POSITION_X = 0.25;  // Forward/back
-    public static final double CAMERA_POSITION_Y = 0.0;  // Left/right
-    public static final double CAMERA_POSITION_Z = 0.5;  // Up/down
-
-    // Camera mounting angles (radians)
-    public static final double CAMERA_PITCH_RADIANS = 0.0;  // Up/down tilt
-    public static final double CAMERA_YAW_RADIANS = 0.0;    // Left/right rotation
-    public static final double CAMERA_ROLL_RADIANS = 0.0;   // Roll around camera axis
-    
-    // Vision measurement accuracy constants
-    public static final double BASE_VISION_STD_DEV = 0.5;  // Base std dev in meters
-    public static final double MAX_VISION_STD_DEV = 3.0;   // Max std dev in meters
-    public static final double MIN_VISION_STD_DEV = 0.1;   // Min std dev in meters
-    public static final double AREA_TO_STD_DEV_FACTOR = 20.0; // Higher area = lower std dev
-
+    public static final double TARGET_FOLLOW_DISTANCE = 0.25;  // Meters from tag
+    public static final double ROTATION_P = 0.1;  // Rotation proportional gain
+    public static final double DISTANCE_P = 0.5;  // Distance proportional gain
 }

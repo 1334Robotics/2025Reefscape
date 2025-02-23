@@ -6,13 +6,13 @@ import frc.robot.constants.DirectionSnapConstants;
 import frc.robot.RobotContainer;
 
 public class DirectionSnapSubsystem extends SubsystemBase {
-    private double              targetYaw;
-    private boolean             hitTargetYaw;
-    private final PIDController pidController;
+    private double    targetYaw;
+    private boolean   hitTargetYaw;
+    private final PID pidController;
     
     public DirectionSnapSubsystem() {
         this.hitTargetYaw = true; // This should disable it until it is requested
-        pidController = new PIDController(
+        pidController = new PID(
             DirectionSnapConstants.PID_KP,
             DirectionSnapConstants.PID_KI,
             DirectionSnapConstants.PID_KD,
@@ -51,7 +51,7 @@ public class DirectionSnapSubsystem extends SubsystemBase {
 
             // Turn the robot towards the targetYaw
             pidController.update(targetYaw, yaw);
-            double steer = pidController.getOutput();
+            double steer = pidController.getSteer();
             SmartDashboard.putNumber("[DIRECTIONSNAP] Steer", steer);
             RobotContainer.swerveSubsystem.steer(steer);
 
