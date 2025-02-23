@@ -9,12 +9,12 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.units.Units;
 
 public class ModuleIOSim implements ModuleIO {
-        // reference to module simulation
-        private final SwerveModuleSimulation moduleSimulation;
-        // reference to the simulated drive motor
-        private final SimulatedMotorController.GenericMotorController driveMotor;
-        // reference to the simulated turn motor
-        private final SimulatedMotorController.GenericMotorController turnMotor;
+    // reference to module simulation
+    private final SwerveModuleSimulation moduleSimulation;
+    // reference to the simulated drive motor
+    private final SimulatedMotorController.GenericMotorController driveMotor;
+    // reference to the simulated turn motor
+    private final SimulatedMotorController.GenericMotorController turnMotor;
 
     public ModuleIOSim(SwerveModuleSimulation moduleSimulation) {
         this.moduleSimulation = moduleSimulation;

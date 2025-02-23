@@ -31,12 +31,12 @@ public class IntakeIOSim implements IntakeIO{
     }
 
     public void periodic() {
-        // Add any periodic updates for the intake simulation here
-        // For example, you might want to update the intake's position based on the robot's movement
+        // Update the intake simulation state
     }    
 
     @Override
     public void setRunning(boolean runIntake) {
+        System.out.println("DEBUG: Intake setRunning(" + runIntake + ")");
         if (runIntake) {
             intakeSimulation.startIntake(); // Extends the intake out from the chassis frame and starts detecting contacts with game pieces
         } else {
@@ -45,31 +45,33 @@ public class IntakeIOSim implements IntakeIO{
     }
 
     @Override
-    public boolean isNoteInsideIntake() {
-        return intakeSimulation.getGamePiecesAmount() != 0; // True if there is a game piece in the intake
+    public boolean isCoralInsideIntake() {
+        boolean hasCoral = intakeSimulation.getGamePiecesAmount() != 0;
+        return hasCoral;
     }
 
     @Override
-    public void launchNote() {
+    public void launchCoral() {
+        System.out.println("DEBUG: Launching coral");
         // if there is a note in the intake, it will be removed and return true; otherwise, returns false
         if (intakeSimulation.obtainGamePieceFromIntake()) {
             // L3
             SimulatedArena.getInstance()
-    .addGamePieceProjectile(new ReefscapeCoralOnFly(
-        // Obtain robot position from drive simulation
-        swerveDriveSimulation.getSimulatedDriveTrainPose().getTranslation(),
-        // The scoring mechanism is installed at (0.35, 0) (meters) on the robot
-        new Translation2d(SimulationConstants.SCORING_MECH_L3_HEIGHT, 0),
-        // Obtain robot speed from drive simulation
-        swerveDriveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
-        // Obtain robot facing from drive simulation
-        swerveDriveSimulation.getSimulatedDriveTrainPose().getRotation(),
-        // The height at which the coral is ejected
-        SimulationConstants.L3_BRANCH_HEIGHT,
-        // The initial speed of the coral
-        Units.MetersPerSecond.of(2),
-        // The coral is ejected at a 35-degree slope
-        Units.Degrees.of(-35)));
+            .addGamePieceProjectile(new ReefscapeCoralOnFly(
+            // Obtain robot position from drive simulation
+            swerveDriveSimulation.getSimulatedDriveTrainPose().getTranslation(),
+            // The scoring mechanism is installed at (0.35, 0) (meters) on the robot
+            new Translation2d(SimulationConstants.SCORING_MECH_L3_HEIGHT, 0),
+            // Obtain robot speed from drive simulation
+            swerveDriveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
+            // Obtain robot facing from drive simulation
+            swerveDriveSimulation.getSimulatedDriveTrainPose().getRotation(),
+            // The height at which the coral is ejected
+            SimulationConstants.L3_BRANCH_HEIGHT,
+            // The initial speed of the coral
+            Units.MetersPerSecond.of(2),
+            // The coral is ejected at a 35-degree slope
+            Units.Degrees.of(-35)));
         }
     }
 }

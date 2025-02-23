@@ -8,6 +8,8 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.simulation.AIRobotInSimulation;
+
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -73,6 +75,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void simulationInit() {
     SimulatedArena.getInstance();
+    AIRobotInSimulation.startOpponentRobotSimulations();
   }
 
   /** This function is called periodically whilst in simulation. */

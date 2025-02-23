@@ -4,7 +4,7 @@ public interface IntakeIO {
 
     public void setRunning(boolean runIntake);
 
-    public boolean isNoteInsideIntake();
+    public boolean isCoralInsideIntake();
 
-    public void launchNote();
+    public void launchCoral();
 }

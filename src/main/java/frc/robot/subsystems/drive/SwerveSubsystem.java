@@ -19,7 +19,6 @@ import frc.robot.subsystems.gyro.GyroIO;
 import frc.robot.subsystems.gyro.GyroIOSim;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.math.geometry.Rotation2d;
-import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
@@ -52,8 +51,6 @@ public class SwerveSubsystem extends SubsystemBase {
             if (Robot.isSimulation()) {
                 // Create and configure a drivetrain simulation configuration
                 final DriveTrainSimulationConfig driveTrainSimulationConfig = DriveTrainSimulationConfig.Default()
-                        // Specify gyro type (for realistic gyro drifting and error simulation)
-                        .withGyro(COTS.ofPigeon2())
                         // Specify swerve module (for realistic swerve dynamics)
                         .withSwerveModule(new SwerveModuleSimulationConfig(
                                 DCMotor.getKrakenX60(SwerveConstants.NUM_DRIVE_MOTORS), // Drive motor is a Kraken X60
