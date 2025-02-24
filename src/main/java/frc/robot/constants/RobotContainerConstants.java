@@ -1,5 +1,5 @@
 package frc.robot.constants;
-
+import java.util.List;
 import frc.robot.XboxMappings;
 
 public class RobotContainerConstants {
@@ -12,6 +12,11 @@ public class RobotContainerConstants {
     public static final int MAILBOX_OUTPUT_BUTTON = XboxMappings.Button.A;
     public static final int MAILBOX_INPUT_BUTTON  = XboxMappings.Button.B;
     public static final int MAILBOX_STOP_BUTTON   = XboxMappings.Button.X;
+
+    public static final int ELEVATOR_L1_BUTTON = XboxMappings.Button.Y;
+    public static final List<Integer> ELEVATOR_L2_BUTTONS = List.of(XboxMappings.Button.Y, XboxMappings.Button.B);
+    public static final List<Integer> ELEVATOR_L3_BUTTONS = List.of(XboxMappings.Button.Y, XboxMappings.Button.A);
+    public static final List<Integer> ELEVATOR_L4_BUTTONS = List.of(XboxMappings.Button.Y, XboxMappings.Button.X);
 
     public static final double CONTROLLER_MOVEMENT_DEADBAND = 0.1;
     public static final double CONTROLLER_ROTATION_DEADBAND = 0.3;
