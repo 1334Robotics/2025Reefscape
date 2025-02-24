@@ -69,7 +69,7 @@ public final class VisionConstants {
     public static final double CAMERA_ROLL_RADIANS = 0.0;   // Roll around camera axis
     
     // Vision measurement accuracy constants
-    public static final double BASE_VISION_STD_DEV = 0.5;  // Base std dev in meters
+    public static final double BASE_VISION_STD_DEV = 0.5;  // Base std dev (Standard deviation) in meters
     public static final double MAX_VISION_STD_DEV = 3.0;   // Max std dev in meters
     public static final double MIN_VISION_STD_DEV = 0.1;   // Min std dev in meters
     public static final double AREA_TO_STD_DEV_FACTOR = 20.0; // Higher area = lower std dev
