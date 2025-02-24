@@ -34,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.laser.LaserCanSubsystem;
 import frc.robot.commands.laser.MonitorLaserCanCommand;
+import frc.robot.commands.Elevator.LowerDatElevator;
 import frc.robot.commands.Elevator.RaiseDatElevator;
 
 /**
@@ -72,6 +73,10 @@ public class RobotContainer {
   private final Trigger elevatorL4Trigger = new Trigger(() -> 
       operatorController.getRawButton(RobotContainerConstants.ELEVATOR_L4_BUTTONS.get(0)) &&
       operatorController.getRawButton(RobotContainerConstants.ELEVATOR_L4_BUTTONS.get(1))
+  );
+  private final Trigger elevatorLowerTrigger = new Trigger(() -> 
+    operatorController.getRawButton(RobotContainerConstants.ELEVATOR_LOWER_BUTTON.get(0)) &&
+    operatorController.getRawButton(RobotContainerConstants.ELEVATOR_LOWER_BUTTON.get(1))
   );
 
   // Subsystems
@@ -113,6 +118,7 @@ public class RobotContainer {
     SmartDashboard.putData("Elevator L2", new RaiseDatElevator(elevatorSubsystem, 2));
     SmartDashboard.putData("Elevator L3", new RaiseDatElevator(elevatorSubsystem, 3));
     SmartDashboard.putData("Elevator L4", new RaiseDatElevator(elevatorSubsystem, 4));
+    SmartDashboard.putData("Elevator Lower", new LowerDatElevator(elevatorSubsystem));
 
     // Configure default command if you want continuous monitoring
     laserCanSubsystem.setDefaultCommand(new MonitorLaserCanCommand());
@@ -144,6 +150,7 @@ public class RobotContainer {
     elevatorL2Trigger.onTrue(new RaiseDatElevator(elevatorSubsystem, 2));
     elevatorL3Trigger.onTrue(new RaiseDatElevator(elevatorSubsystem, 3));
     elevatorL4Trigger.onTrue(new RaiseDatElevator(elevatorSubsystem, 4));
+    elevatorLowerTrigger.onTrue(new LowerDatElevator(elevatorSubsystem));
   }
 
   /**
