@@ -14,10 +14,12 @@ import frc.robot.commands.solenoid.ExtendCommand;
 import frc.robot.commands.solenoid.RetractCommand;
 import frc.robot.constants.RobotContainerConstants;
 import frc.robot.constants.SimulationConstants;
+import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
 import frc.robot.subsystems.simulation.SimulationSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
+import frc.robot.commands.vision.Distance;
 import frc.robot.commands.vision.TrackAprilTagCommand;
 import frc.robot.subsystems.drive.DirectionSnapSubsystem;
 import frc.robot.subsystems.drive.SwerveSubsystem;
@@ -128,6 +130,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new TrackAprilTagCommand();
+    return new TrackAprilTagCommand(VisionConstants.TARGET_TAG_ID,
+                                    new Distance(VisionConstants.TRACK_TAG_X, VisionConstants.TRACK_TAG_Y));
   }
 }
