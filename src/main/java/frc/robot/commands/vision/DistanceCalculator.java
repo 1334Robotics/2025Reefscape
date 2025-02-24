@@ -3,9 +3,8 @@ package frc.robot.commands.vision;
 import frc.robot.constants.VisionConstants;
 
 public class DistanceCalculator {
-    public static DoubleLookupTable powerTable = null;
-
-    public static double getDistance(double yaw, double pitch, double area) {
+    // Returns the raw distance away from the tag without direction
+    public static double getLinearDistance(double area) {
         /*
         This is written in LaTeX notation.
         If you want to view this math, paste it into a LaTeX editor
@@ -38,5 +37,22 @@ public class DistanceCalculator {
         */
 
         return VisionConstants.AREA_10_DISTANCE * Math.pow(10/area, 0.602059991328);
+    }
+
+    public static Distance getDistance(double yaw, double pitch, double area) {
+        // Convert yaw and pitch to radians
+        double yawRadians = Math.toRadians(yaw);
+        double pitchRadians = Math.toRadians(pitch);
+
+        // Adjust for mounting offsets
+        yawRadians += VisionConstants.CAMERA_YAW_RADIANS;
+        pitchRadians += VisionConstants.CAMERA_PITCH_RADIANS;
+
+        // Project the distance into its horizontal and vertical components
+        double rawDistanceAway = getLinearDistance(area);
+        double distanceX = rawDistanceAway * Math.cos(pitchRadians);
+        double distanceY = rawDistanceAway * Math.cos(yawRadians);
+
+        return new Distance(distanceX * 100, distanceY * 100);
     }
 }

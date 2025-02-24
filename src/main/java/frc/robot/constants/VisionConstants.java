@@ -35,10 +35,12 @@ public final class VisionConstants {
 
     // AprilTag tracking constants
     public static final int TARGET_TAG_ID = 3;  // Target AprilTag ID
-    public static final double TARGET_FOLLOW_DISTANCE = 100;  // Centimeters from tag
-    public static final double AREA_10_DISTANCE = 44.6; // In Centimeters
+    public static final double AREA_10_DISTANCE = 44.6; // In centimeters
     public static final double DRIVE_SPEED = 0.5;
     public static final double POWER_TABLE_SPACE = 0.005;
+    // Both of these are in centimeters
+    public static final double TRACK_TAG_X = 20;
+    public static final double TRACK_TAG_Y = 100;
 
     // Rotation PID constants
     public static final double ROTATION_KP          = 0.05;
