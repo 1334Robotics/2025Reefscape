@@ -16,13 +16,14 @@ public class LaserCanSubsystem extends SubsystemBase {
     }
 
     private void configureDevice() {
+        System.out.println("[LaserCan] Configuring LaserCan...");
         try {
             laserCan.setRangingMode(LaserCan.RangingMode.SHORT);
             laserCan.setRegionOfInterest(new LaserCan.RegionOfInterest(LaserCanConstants.x,LaserCanConstants.y,LaserCanConstants.width,LaserCanConstants.height)); // Configure in constants
             laserCan.setTimingBudget(LaserCan.TimingBudget.TIMING_BUDGET_33MS);
-            System.out.println("LaserCan configured successfully");
+            System.out.println("[LaserCan] LaserCan configured successfully");
         } catch (ConfigurationFailedException e) {
-            System.out.println("LaserCan configuration failed! " + e);
+            System.out.println("[LaserCan] LaserCan configuration failed! " + e);
         }
     }
 
