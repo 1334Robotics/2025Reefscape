@@ -17,6 +17,7 @@ public class RobotContainerConstants {
     public static final List<Integer> ELEVATOR_L2_BUTTONS = List.of(XboxMappings.Button.Y, XboxMappings.Button.B);
     public static final List<Integer> ELEVATOR_L3_BUTTONS = List.of(XboxMappings.Button.Y, XboxMappings.Button.A);
     public static final List<Integer> ELEVATOR_L4_BUTTONS = List.of(XboxMappings.Button.Y, XboxMappings.Button.X);
+    public static final List<Integer> ELEVATOR_LOWER_BUTTON = List.of(XboxMappings.Button.A, XboxMappings.Button.B);
 
     public static final double CONTROLLER_MOVEMENT_DEADBAND = 0.1;
     public static final double CONTROLLER_ROTATION_DEADBAND = 0.3;
