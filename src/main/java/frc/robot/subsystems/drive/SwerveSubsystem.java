@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;//NEW CAL
+import swervelib.imu.SwerveIMU;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -143,6 +144,10 @@ public class SwerveSubsystem extends SubsystemBase {
         }
     }
 
+    public void autoDrive(ChassisSpeeds speeds) {
+        swerveDrive.drive(speeds);
+    }
+
     public SwerveController getSwerveController() {
         return swerveDrive.swerveController;
     }
@@ -167,6 +172,12 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public void resetOdometry(Pose2d pose) {
         swerveDrive.resetOdometry(pose);
+    }
+
+    //adding odometry reset with gyro zeroing
+    public void resetPose(Pose2d pose) {
+        swerveDrive.resetOdometry(pose);
+        zeroGyro();  // Optional: zero gyro when resetting pose
     }
     
     public void setFieldRelative(boolean fieldRelative) {
