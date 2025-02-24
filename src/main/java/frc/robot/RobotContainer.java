@@ -1,5 +1,6 @@
 package frc.robot;
 
+import frc.robot.auto.AutoConfigurer;
 import frc.robot.commands.directionSnaps.DirectionSnapBackwards;
 import frc.robot.commands.directionSnaps.DirectionSnapForwards;
 import frc.robot.commands.directionSnaps.DirectionSnapLeft;
@@ -32,12 +33,16 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.subsystems.solenoid.SolenoidSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -81,9 +86,17 @@ public class RobotContainer {
   //Conditionally create SimulationSubsystem
   public final SimulationSubsystem simulationSubsystem;
 
+  // Auto chooser for PathPlanner
+  private final SendableChooser<Command> autoChooser;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    // Configure path planner
+    AutoConfigurer.configure();
+
+    // Create an auto chooser and add it to SmartDashboard
+    autoChooser = AutoBuilder.buildAutoChooser();
+    SmartDashboard.putData("[PATHPLANNER] Auto Chooser", autoChooser);
 
     // Configure the trigger bindings
     configureBindings();
@@ -140,7 +153,8 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // Using ProointTargetInfo causes a command scheduler loop overrun when fieldRelative is enabled
     //return null; // new PrintTargetInfo(visionSubsystem);
-    return new TrackAprilTagCommand(visionSubsystem, swerveSubsystem);
+    // return new TrackAprilTagCommand(visionSubsystem, swerveSubsystem);
+    return autoChooser.getSelected();
   
   }
 }

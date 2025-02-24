@@ -64,7 +64,7 @@ public class AIRobotInSimulation extends SubsystemBase {
         new Pose2d(1.6, 4, new Rotation2d())
     };
     /* Store instances of AI robots in a static array. */
-    public static final AIRobotInSimulation[] instances = new AIRobotInSimulation[5];
+    public static final AIRobotInSimulation[] instances = new AIRobotInSimulation[6];
 
     /* The drivetrain configuration for the opponent robots in the maple-sim simulation. */
     private static final DriveTrainSimulationConfig DRIVETRAIN_CONFIG =
@@ -136,6 +136,15 @@ public class AIRobotInSimulation extends SubsystemBase {
                     PathPlannerPath.fromPathFile("opponent robot cycle path 4 backwards"),
                     Commands.none(),
                     new XboxController(6));
+
+                instances[5] = new AIRobotInSimulation(5);
+            instances[5].buildBehaviorChooser(
+                    PathPlannerPath.fromPathFile("opponent robot cycle path 5"),
+                    Commands.none(),
+                    PathPlannerPath.fromPathFile("opponent robot cycle path 5 backwards"),
+                    Commands.none(),
+                    new XboxController(7));
+
         } catch (Exception e) {
             DriverStation.reportError("failed to load opponent robot simulation path, error:" + e.getMessage(), false);
         }
