@@ -1,5 +1,4 @@
 package frc.robot.subsystems.elevator;
-
 import frc.robot.constants.ElevatorConstants;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -188,7 +187,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         }
     }
 }
-
 
 // Example command usage
 // ElevatorSubsystem elevator = new ElevatorSubsystem(1, 2);
