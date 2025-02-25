@@ -22,4 +22,9 @@ public class ElevatorConstants {
     public static final double MIDDLE_SECONDARY_HEIGHT = 12;
     public static final double HIGH_PRIMARY_HEIGHT = 48;
     public static final double HIGH_SECONDARY_HEIGHT = 24;
+
+    public static final double L1_HEIGHT_INCHES = 18;
+    public static final double L2_HEIGHT_INCHES = 31.875;
+    public static final double L3_HEIGHT_INCHES = 47.625;
+    public static final double L4_HEIGHT_INCHES = 72;
 }
