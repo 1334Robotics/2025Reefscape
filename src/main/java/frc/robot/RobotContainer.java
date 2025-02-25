@@ -1,5 +1,6 @@
 package frc.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.auto.AutoConfigurer;
 import frc.robot.commands.directionSnaps.DirectionSnapBackwards;
 import frc.robot.commands.directionSnaps.DirectionSnapForwards;
 import frc.robot.commands.directionSnaps.DirectionSnapLeft;
@@ -24,10 +25,16 @@ import frc.robot.commands.vision.TrackAprilTagCommand;
 import frc.robot.subsystems.drive.DirectionSnapSubsystem;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.solenoid.SolenoidSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -91,12 +98,20 @@ public class RobotContainer {
   public static final DirectionSnapSubsystem directionSnapSubsystem = new DirectionSnapSubsystem();
   public static final LaserCanSubsystem laserCanSubsystem           = new LaserCanSubsystem();
 
-     //Conditionally create SimulationSubsystem
-     public final SimulationSubsystem simulationSubsystem;
+  //Conditionally create SimulationSubsystem
+  public final SimulationSubsystem simulationSubsystem;
 
+  // Auto chooser for PathPlanner
+  private final SendableChooser<Command> autoChooser;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    // Configure path planner
+    AutoConfigurer.configure();
+
+    // Create an auto chooser and add it to SmartDashboard
+    autoChooser = AutoBuilder.buildAutoChooser();
+    SmartDashboard.putData("[PATHPLANNER] Auto Chooser", autoChooser);
 
     // Configure the trigger bindings
     configureBindings();
@@ -160,6 +175,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new TrackAprilTagCommand();
+    return autoChooser.getSelected();
   }
 }
