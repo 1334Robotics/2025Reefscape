@@ -6,6 +6,8 @@ import frc.robot.commands.directionSnaps.DirectionSnapLeft;
 import frc.robot.commands.directionSnaps.DirectionSnapRight;
 import frc.robot.commands.directionSnaps.StopSnap;
 import frc.robot.commands.drive.DriveCommand;
+import frc.robot.commands.elevator.LowerElevatorCommand;
+import frc.robot.commands.elevator.RaiseElevatorCommand;
 import frc.robot.commands.gyro.GyroZeroCommand;
 import frc.robot.commands.mailbox.InputCommand;
 import frc.robot.commands.mailbox.OutputCommand;
@@ -34,8 +36,7 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.laser.LaserCanSubsystem;
 import frc.robot.commands.laser.MonitorLaserCanCommand;
-import frc.robot.commands.Elevator.LowerDatElevator;
-import frc.robot.commands.Elevator.RaiseDatElevator;
+import frc.robot.commands.elevator.ElevatorHeightCalculation;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -62,21 +63,21 @@ public class RobotContainer {
   private final JoystickButton stopSnapButton           = new JoystickButton(driverController, RobotContainerConstants.SNAP_STOP_BUTTON);
   private final JoystickButton elevatorL1Button         = new JoystickButton(operatorController, RobotContainerConstants.ELEVATOR_L1_BUTTON);
   private final Trigger elevatorL2Trigger = new Trigger(() -> 
-    operatorController.getRawButton(RobotContainerConstants.ELEVATOR_L2_BUTTONS.get(0)) &&
-    operatorController.getRawButton(RobotContainerConstants.ELEVATOR_L2_BUTTONS.get(1))
+    operatorController.getRawButton(RobotContainerConstants.ELEVATOR_L2_BUTTONS[0]) &&
+    operatorController.getRawButton(RobotContainerConstants.ELEVATOR_L2_BUTTONS[1])
   );
   private final Trigger elevatorL3Trigger = new Trigger(() -> 
-      operatorController.getRawButton(RobotContainerConstants.ELEVATOR_L3_BUTTONS.get(0)) &&
-      operatorController.getRawButton(RobotContainerConstants.ELEVATOR_L3_BUTTONS.get(1))
+      operatorController.getRawButton(RobotContainerConstants.ELEVATOR_L3_BUTTONS[0]) &&
+      operatorController.getRawButton(RobotContainerConstants.ELEVATOR_L3_BUTTONS[1])
   );
 
   private final Trigger elevatorL4Trigger = new Trigger(() -> 
-      operatorController.getRawButton(RobotContainerConstants.ELEVATOR_L4_BUTTONS.get(0)) &&
-      operatorController.getRawButton(RobotContainerConstants.ELEVATOR_L4_BUTTONS.get(1))
+      operatorController.getRawButton(RobotContainerConstants.ELEVATOR_L4_BUTTONS[0]) &&
+      operatorController.getRawButton(RobotContainerConstants.ELEVATOR_L4_BUTTONS[1])
   );
   private final Trigger elevatorLowerTrigger = new Trigger(() -> 
-    operatorController.getRawButton(RobotContainerConstants.ELEVATOR_LOWER_BUTTON.get(0)) &&
-    operatorController.getRawButton(RobotContainerConstants.ELEVATOR_LOWER_BUTTON.get(1))
+    operatorController.getRawButton(RobotContainerConstants.ELEVATOR_LOWER_BUTTON[0]) &&
+    operatorController.getRawButton(RobotContainerConstants.ELEVATOR_LOWER_BUTTON[1])
   );
 
   // Subsystems
@@ -114,11 +115,11 @@ public class RobotContainer {
       simulationSubsystem = null;
     }
 
-    SmartDashboard.putData("Elevator L1", new RaiseDatElevator(elevatorSubsystem, 1));
-    SmartDashboard.putData("Elevator L2", new RaiseDatElevator(elevatorSubsystem, 2));
-    SmartDashboard.putData("Elevator L3", new RaiseDatElevator(elevatorSubsystem, 3));
-    SmartDashboard.putData("Elevator L4", new RaiseDatElevator(elevatorSubsystem, 4));
-    SmartDashboard.putData("Elevator Lower", new LowerDatElevator(elevatorSubsystem));
+    SmartDashboard.putData("Elevator L1", new RaiseElevatorCommand(ElevatorHeightCalculation.L1));
+    SmartDashboard.putData("Elevator L2", new RaiseElevatorCommand(ElevatorHeightCalculation.L2));
+    SmartDashboard.putData("Elevator L3", new RaiseElevatorCommand(ElevatorHeightCalculation.L3));
+    SmartDashboard.putData("Elevator L4", new RaiseElevatorCommand(ElevatorHeightCalculation.L4));
+    SmartDashboard.putData("Elevator Lower", new LowerElevatorCommand());
 
     // Configure default command if you want continuous monitoring
     laserCanSubsystem.setDefaultCommand(new MonitorLaserCanCommand());
@@ -146,11 +147,11 @@ public class RobotContainer {
     rightSnapButton.onTrue(new DirectionSnapRight());
     backwardsSnapButton.onTrue(new DirectionSnapBackwards());
     stopSnapButton.onTrue(new StopSnap());
-    elevatorL1Button.onTrue(new RaiseDatElevator(elevatorSubsystem, 1));
-    elevatorL2Trigger.onTrue(new RaiseDatElevator(elevatorSubsystem, 2));
-    elevatorL3Trigger.onTrue(new RaiseDatElevator(elevatorSubsystem, 3));
-    elevatorL4Trigger.onTrue(new RaiseDatElevator(elevatorSubsystem, 4));
-    elevatorLowerTrigger.onTrue(new LowerDatElevator(elevatorSubsystem));
+    elevatorL1Button.onTrue(new RaiseElevatorCommand(ElevatorHeightCalculation.L1));
+    elevatorL2Trigger.onTrue(new RaiseElevatorCommand(ElevatorHeightCalculation.L2));
+    elevatorL3Trigger.onTrue(new RaiseElevatorCommand(ElevatorHeightCalculation.L3));
+    elevatorL4Trigger.onTrue(new RaiseElevatorCommand(ElevatorHeightCalculation.L4));
+    elevatorLowerTrigger.onTrue(new LowerElevatorCommand());
   }
 
   /**
