@@ -19,12 +19,14 @@ import frc.robot.commands.intake.RunIntakeCommand;
 import frc.robot.commands.intake.StopIntakeCommand;
 import frc.robot.constants.RobotContainerConstants;
 import frc.robot.constants.SimulationConstants;
+import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
 import frc.robot.subsystems.simulation.SimulationSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
+import frc.robot.subsystems.vision.VisionSubsystemSim;
 import frc.robot.commands.vision.PrintTargetInfo;
 import frc.robot.subsystems.drive.DirectionSnapSubsystem;
 import frc.robot.subsystems.drive.SwerveSubsystem;
@@ -36,11 +38,13 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.subsystems.solenoid.SolenoidSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+
+import java.util.List;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -79,9 +83,11 @@ public class RobotContainer {
   public static final MailboxSubsystem mailboxSubsystem             = new MailboxSubsystem();
   public static final SwerveSubsystem swerveSubsystem               = new SwerveSubsystem();
   public static final SolenoidSubsystem solenoidSubsystem           = new SolenoidSubsystem();
-  public static final VisionSubsystem visionSubsystem               = new VisionSubsystem();
   public static final DirectionSnapSubsystem directionSnapSubsystem = new DirectionSnapSubsystem();
   public static final IntakeSubsystem intakeSubsystem = new IntakeSubsystem(new IntakeIOSim(swerveSubsystem.getSwerveDriveSimulation()));
+
+  public final VisionSubsystem visionSubsystem;
+  public final VisionSubsystemSim visionSubsystemSim;
 
   //Conditionally create SimulationSubsystem
   public final SimulationSubsystem simulationSubsystem;
@@ -91,6 +97,23 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+
+    // Conditionally initialize the vision subsystem
+  if (Robot.isSimulation()) {
+      visionSubsystemSim = new VisionSubsystemSim(swerveSubsystem::getPose, VisionConstants.fieldLayout);
+      visionSubsystem = null; // No real vision subsystem in simulation
+  } else {
+      visionSubsystem = new VisionSubsystem();
+      visionSubsystemSim = null; // No simulated vision subsystem on the real robot
+  }
+
+  // Create the TrackAprilTagCommand with the correct vision subsystem
+  if (Robot.isSimulation()) {
+      new TrackAprilTagCommand(visionSubsystemSim, swerveSubsystem);
+  } else {
+      new TrackAprilTagCommand(visionSubsystem, swerveSubsystem);
+  }
+
     // Configure path planner
     AutoConfigurer.configure();
 

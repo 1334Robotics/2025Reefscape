@@ -1,5 +1,7 @@
 package frc.robot.constants;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -37,4 +39,5 @@ public final class VisionConstants {
     public static final double TARGET_FOLLOW_DISTANCE = 0.25;  // Meters from tag
     public static final double ROTATION_P = 0.1;  // Rotation proportional gain
     public static final double DISTANCE_P = 0.5;  // Distance proportional gain
+    public static final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 }

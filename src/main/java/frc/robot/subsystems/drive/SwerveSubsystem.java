@@ -5,11 +5,14 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;//NEW CAL
-import swervelib.imu.SwerveIMU;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.constants.GyroConstants;
 import frc.robot.constants.SimulationConstants;
 import frc.robot.constants.SwerveConstants;
 import swervelib.SwerveController;
@@ -17,6 +20,7 @@ import swervelib.SwerveDrive;
 import swervelib.SwerveModule;
 import swervelib.parser.SwerveParser;
 import frc.robot.subsystems.gyro.GyroIO;
+import frc.robot.subsystems.gyro.GyroIOPigeon2;
 import frc.robot.subsystems.gyro.GyroIOSim;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -29,17 +33,20 @@ import java.io.File;
 import java.io.IOException;
 import org.ironmaple.simulation.SimulatedArena;
 
+
 public class SwerveSubsystem extends SubsystemBase {
     private final SwerveDrive swerveDrive;
     private boolean fieldRelative;
     private SwerveDriveSimulation swerveDriveSimulation;
     private int count = 0;
     private boolean allowDrive;
+    private final SwerveDriveOdometry odometry;
+
+    private final GyroIO gyroIO;
 
     public SwerveSubsystem() {
         this.fieldRelative = false;
         this.allowDrive = true;
-        final GyroIO gyroIO;
         final GyroSimulation gyroSimulation;
         final ModuleIO[] moduleIOs;
         SmartDashboard.putBoolean("[SWERVE] Field Relative", this.fieldRelative);
@@ -80,12 +87,37 @@ public class SwerveSubsystem extends SubsystemBase {
                 // Register with simulation world
                 SimulatedArena.getInstance().addDriveTrainSimulation(swerveDriveSimulation);
 
-                gyroIO = new GyroIOSim(this.swerveDriveSimulation.getGyroSimulation());
+                this.gyroIO = new GyroIOSim(this.swerveDriveSimulation.getGyroSimulation());
                 moduleIOs = new ModuleIO[4];
                 for (int i = 0; i < 4; i++) {
                     moduleIOs[i] = new ModuleIOSim(swerveDriveSimulation.getModules()[i]);
                 }
+            } else {
+            // Real robot initialization
+            this.gyroIO = new GyroIOPigeon2(GyroConstants.DEVICEID); // Assuming GyroConstants.DEVICEID is defined
+            moduleIOs = new ModuleIO[4];
+            // Initialize moduleIOs for real robot if needed
             }
+
+            // Initialize kinematics and odometry
+            SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
+                new Translation2d(29 / 2, 29 / 2), // Front left
+                new Translation2d(29 / 2, -29 / 2), // Front right
+                new Translation2d(-29 / 2, 29 / 2), // Back left
+                new Translation2d(-29 / 2, -29 / 2)  // Back right
+            );
+
+            // Initialize module positions (all zeros for starting position)
+            SwerveModulePosition[] modulePositions = new SwerveModulePosition[] {
+                new SwerveModulePosition(0, new Rotation2d(0)), // Front left
+                new SwerveModulePosition(0, new Rotation2d(0)), // Front right
+                new SwerveModulePosition(0, new Rotation2d(0)), // Back left
+                new SwerveModulePosition(0, new Rotation2d(0))  // Back right
+            };
+
+            // Initialize odometry
+            this.odometry = new SwerveDriveOdometry(kinematics, gyroIO.getGyroRotation(), modulePositions);
+
         } catch(IOException e) {
             throw new RuntimeException(e);
         }
@@ -97,6 +129,41 @@ public class SwerveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        if (Robot.isSimulation()) {
+        // Define wheel circumference
+        double wheelCircumference = 2 * Math.PI * 2; // Wheel circumference in meters
+
+        // Get simulated wheel positions
+        SwerveModulePosition[] simulatedPositions = new SwerveModulePosition[4];
+        for (int i = 0; i < 4; i++) {
+            double drivePositionMeters = swerveDriveSimulation.getModules()[i].getDriveWheelFinalPosition().in(Units.Rotations) * wheelCircumference;
+            Rotation2d steerAngle = swerveDriveSimulation.getModules()[i].getSteerAbsoluteFacing();
+            simulatedPositions[i] = new SwerveModulePosition(drivePositionMeters, steerAngle);
+        }
+
+        // Update odometry with simulated positions and gyro angle
+        Rotation2d gyroAngle = gyroIO.getGyroRotation();
+        odometry.update(gyroAngle, simulatedPositions);
+
+        // Update simulation with odometry pose
+        Pose2d odometryPose = odometry.getPoseMeters();
+        swerveDriveSimulation.setSimulationWorldPose(odometryPose);
+    
+        // Log simulated pose and odometry pose for debugging
+        Logger.recordOutput("Swerve/SimulatedPose", swerveDriveSimulation.getSimulatedDriveTrainPose());
+        Logger.recordOutput("Swerve/OdometryPose", odometryPose);
+        }
+
+        // Log robot pose and other data
+        Logger.recordOutput("Drive/Pose", swerveDrive.getPose());
+        Logger.recordOutput("FieldSimulation/RobotPose", new Pose3d(swerveDrive.getPose()));
+
+        // Log wheel positions for debugging
+        SwerveModulePosition[] modulePositions = swerveDrive.getModulePositions();
+        for (int i = 0; i < modulePositions.length; i++) {
+            Logger.recordOutput("Swerve/Module" + i + "/Position", modulePositions[i].distanceMeters);
+            Logger.recordOutput("Swerve/Module" + i + "/Angle", modulePositions[i].angle.getDegrees());
+        }
 
         Logger.recordOutput("Drive/Pose", swerveDrive.getPose());
         Pose2d currentPose = swerveDrive.getPose();

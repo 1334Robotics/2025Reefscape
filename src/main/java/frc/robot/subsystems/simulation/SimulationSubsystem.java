@@ -7,12 +7,14 @@ import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import org.littletonrobotics.junction.Logger;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralAlgaeStack;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnField;
 
 public class SimulationSubsystem extends SubsystemBase {
 
@@ -42,6 +44,10 @@ public class SimulationSubsystem extends SubsystemBase {
             SimulatedArena.getInstance().addGamePiece(new ReefscapeCoralAlgaeStack(new Translation2d(16.4,5.85)));
             SimulatedArena.getInstance().addGamePiece(new ReefscapeCoralAlgaeStack(new Translation2d(16.4,4)));
             SimulatedArena.getInstance().addGamePiece(new ReefscapeCoralAlgaeStack(new Translation2d(16.4,2.15)));
+            
+            SimulatedArena.getInstance().addGamePiece(new ReefscapeCoralOnField(
+            // We must specify a heading since the coral is a tube
+            new Pose2d(1.5, 5, Rotation2d.fromDegrees(90))));
         }
     }
 
@@ -65,6 +71,10 @@ public class SimulationSubsystem extends SubsystemBase {
         SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
 
         Logger.recordOutput("FieldSimulation/AIRobotPoses", AIRobotInSimulation.getOpponentRobotPoses());
+
+        Logger.recordOutput("FieldSimulation/RobotPose", swerveSubsystem.getPose());
+        Logger.recordOutput("FieldSimulation/GamePieces", 
+        SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
     }
 
 
