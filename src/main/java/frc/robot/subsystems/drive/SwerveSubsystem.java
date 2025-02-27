@@ -248,6 +248,10 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public void lockDrive() {
+        /*
+         * What needs to exist is a ControlManager class which tells either DriveCommand
+         * or some autonomous method that it is currently allowed to use the SwerveSubsystem
+         */
         this.allowDrive = false;
     }
 

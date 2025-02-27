@@ -18,9 +18,9 @@ public class MonitorLaserCanCommand extends Command {
             // Using %n instead of \n for platform-independent line separator
             // %n automatically uses the correct line ending for the current platform
             // (CRLF on Windows, LF on Unix/Linux/Mac)
-            System.out.printf("Target distance: %.1f mm%n", laserCanSubsystem.getDistance());
+            //System.out.printf("Target distance: %.1f mm%n", laserCanSubsystem.getDistance());
         } else {
-            System.out.println("No valid measurement available");
+            //System.out.println("No valid measurement available");
         }
     }
 
