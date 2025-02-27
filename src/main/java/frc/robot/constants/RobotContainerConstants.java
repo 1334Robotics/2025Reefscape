@@ -26,4 +26,7 @@ public class RobotContainerConstants {
     public static final int SNAP_RIGHT_DIRECTION     = XboxMappings.DPad.Right;
     public static final int SNAP_BACKWARDS_DIRECTION = XboxMappings.DPad.Down;
     public static final int SNAP_STOP_BUTTON         = XboxMappings.Button.B;
+
+    public static final int FLOPPER_UP_BUTTON   = XboxMappings.Button.LeftBumper;
+    public static final int FLOPPER_DOWN_BUTTON = XboxMappings.Button.RightBumper;
 }
