@@ -11,7 +11,7 @@ import frc.robot.commands.flopper.FlopperDownCommand;
 import frc.robot.commands.flopper.FlopperUpCommand;
 import frc.robot.commands.gyro.GyroZeroCommand;
 import frc.robot.commands.mailbox.OutputLowCommand;
-import frc.robot.commands.mailbox.MailboxHandler;
+import frc.robot.commands.mailbox.ShootCommand;
 import frc.robot.commands.mailbox.OutputHighCommand;
 import frc.robot.commands.mailbox.StopCommand;
 import frc.robot.commands.solenoid.ExtendCommand;
@@ -21,7 +21,9 @@ import frc.robot.constants.RobotContainerConstants;
 import frc.robot.constants.SimulationConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
+import frc.robot.subsystems.mailbox.MailboxHandler;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
+import frc.robot.subsystems.vision.TagInputHandler;
 //import frc.robot.subsystems.simulation.SimulationSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.commands.vision.Distance;
@@ -57,9 +59,6 @@ public class RobotContainer {
   private final XboxController operatorController = new XboxController(RobotContainerConstants.OPERATOR_CONTROLLER_PORT);
 
   // Controller buttons
-  private final JoystickButton mailboxOutputLowButton  = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_INPUT_BUTTON);
-  private final JoystickButton mailboxOutputHighButton = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_OUTPUT_BUTTON);
-  private final JoystickButton mailboxStopButton       = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_STOP_BUTTON);
   private final JoystickButton extendButton            = new JoystickButton(operatorController, RobotContainerConstants.SOLENOID_EXTEND_BUTTON);
   private final JoystickButton retractButton           = new JoystickButton(operatorController, RobotContainerConstants.SOLENOID_RETRACT_BUTTON);
   private final JoystickButton gyroZeroButton          = new JoystickButton(driverController, RobotContainerConstants.GYRO_ZERO_BUTON);
@@ -71,6 +70,7 @@ public class RobotContainer {
   private final JoystickButton elevatorButton          = new JoystickButton(driverController, 1);
   private final JoystickButton flopperUpButton         = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_UP_BUTTON);
   private final JoystickButton flopperDownButton       = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_DOWN_BUTTON);
+  private final JoystickButton mailboxShootButton      = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_SHOOT_BUTTON);
 
   // Subsystems
   public static final GyroSubsystem gyroSubsystem                   = new GyroSubsystem("CANivore");
@@ -85,6 +85,12 @@ public class RobotContainer {
   public static final LaserCanSubsystem       laserCanSubsystem      = new LaserCanSubsystem();
   public static final SingleElevatorSubsystem singleElevator         = new SingleElevatorSubsystem(ElevatorConstants.MOTOR_1);
   public static final FlopperSubsystem        flopperSubsystem       = new FlopperSubsystem();
+  public static final TagInputHandler         tagInputHandler        = new TagInputHandler();
+
+  // Auto
+  public static final TrackAprilTagCommand trackCommand = new TrackAprilTagCommand(0,
+                                                                                   new Distance(VisionConstants.TRACK_TAG_X,
+                                                                                                VisionConstants.TRACK_TAG_Y));
 
   //Conditionally create SimulationSubsystem
   //public final SimulationSubsystem simulationSubsystem;
@@ -95,8 +101,8 @@ public class RobotContainer {
 
     // Configure the trigger bindings
     configureBindings();
-    SmartDashboard.putData("ELEVATOR UP", new MoveOneSide(0.15));
-    SmartDashboard.putData("ELEVATOR DOWN", new MoveOneSide(-0.05));
+    SmartDashboard.putData("ELEVATOR UP", new MoveOneSide(-0.25));
+    SmartDashboard.putData("ELEVATOR DOWN", new MoveOneSide(0.15));
 
     DriveCommand xboxDriveCommand = new DriveCommand(() -> MathUtil.applyDeadband(driverController.getLeftX(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
                                                      () -> MathUtil.applyDeadband(driverController.getLeftY(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
@@ -127,7 +133,6 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    mailboxStopButton.onTrue(new StopCommand());
     extendButton.onTrue(new ExtendCommand());
     retractButton.onTrue(new RetractCommand());
     gyroZeroButton.onTrue(new GyroZeroCommand()); 
@@ -139,6 +144,7 @@ public class RobotContainer {
     elevatorButton.whileTrue(new MoveOneSide(0.7));
     flopperUpButton.whileTrue(new FlopperUpCommand());
     flopperDownButton.whileTrue(new FlopperDownCommand());
+    mailboxShootButton.onTrue(new ShootCommand());
   }
 
   /**
@@ -147,7 +153,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new TrackAprilTagCommand(VisionConstants.TARGET_TAG_ID,
-                                    new Distance(VisionConstants.TRACK_TAG_X, VisionConstants.TRACK_TAG_Y));
+    return trackCommand;
   }
 }

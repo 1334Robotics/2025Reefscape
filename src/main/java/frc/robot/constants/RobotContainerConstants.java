@@ -9,9 +9,7 @@ public class RobotContainerConstants {
     public static final int ELEVATOR_PRIMARY_MOTOR_ID   = 0;
     public static final int ELEVATOR_SECONDARY_MOTOR_ID = 0;
 
-    public static final int MAILBOX_OUTPUT_BUTTON = XboxMappings.Button.Start;
-    public static final int MAILBOX_INPUT_BUTTON  = XboxMappings.Button.Back;
-    public static final int MAILBOX_STOP_BUTTON   = XboxMappings.Button.Y;
+    public static final int MAILBOX_SHOOT_BUTTON = XboxMappings.Button.A;
 
     public static final double CONTROLLER_MOVEMENT_DEADBAND = 0.1;
     public static final double CONTROLLER_ROTATION_DEADBAND = 0.3;
