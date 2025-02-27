@@ -23,9 +23,6 @@ public class SingleElevatorSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // Good position for L1: 82.714806
-        // Good position for L2: 51.847301
-        // Good position for L3: 18.126422
         double position = motor.getEncoder().getPosition() * ElevatorConstants.GEAR_RATIO;
 
         SmartDashboard.putNumber("[ELEVATOR] Position", position);
