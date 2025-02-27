@@ -101,8 +101,8 @@ public class RobotContainer {
 
     // Configure the trigger bindings
     configureBindings();
-    SmartDashboard.putData("ELEVATOR UP", new MoveOneSide(-0.25));
-    SmartDashboard.putData("ELEVATOR DOWN", new MoveOneSide(0.15));
+    SmartDashboard.putData("ELEVATOR UP", new MoveOneSide(-1));
+    SmartDashboard.putData("ELEVATOR DOWN", new MoveOneSide(0.8));
 
     DriveCommand xboxDriveCommand = new DriveCommand(() -> MathUtil.applyDeadband(driverController.getLeftX(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
                                                      () -> MathUtil.applyDeadband(driverController.getLeftY(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
