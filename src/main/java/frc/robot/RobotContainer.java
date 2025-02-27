@@ -7,6 +7,8 @@ import frc.robot.commands.directionSnaps.DirectionSnapRight;
 import frc.robot.commands.directionSnaps.StopSnap;
 import frc.robot.commands.drive.DriveCommand;
 import frc.robot.commands.elevator.MoveOneSide;
+import frc.robot.commands.flopper.FlopperDownCommand;
+import frc.robot.commands.flopper.FlopperUpCommand;
 import frc.robot.commands.gyro.GyroZeroCommand;
 import frc.robot.commands.mailbox.OutputLowCommand;
 import frc.robot.commands.mailbox.MailboxHandler;
@@ -28,6 +30,7 @@ import frc.robot.subsystems.drive.DirectionSnapSubsystem;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.elevator.SingleElevatorSubsystem;
+import frc.robot.subsystems.flopper.FlopperSubsystem;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -66,6 +69,8 @@ public class RobotContainer {
   private final POVButton      backwardsSnapButton     = new POVButton(driverController, RobotContainerConstants.SNAP_BACKWARDS_DIRECTION);
   private final JoystickButton stopSnapButton          = new JoystickButton(driverController, RobotContainerConstants.SNAP_STOP_BUTTON);
   private final JoystickButton elevatorButton          = new JoystickButton(driverController, 1);
+  private final JoystickButton flopperUpButton         = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_UP_BUTTON);
+  private final JoystickButton flopperDownButton       = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_DOWN_BUTTON);
 
   // Subsystems
   public static final GyroSubsystem gyroSubsystem                   = new GyroSubsystem("CANivore");
@@ -79,6 +84,7 @@ public class RobotContainer {
   public static final DirectionSnapSubsystem  directionSnapSubsystem = new DirectionSnapSubsystem();
   public static final LaserCanSubsystem       laserCanSubsystem      = new LaserCanSubsystem();
   public static final SingleElevatorSubsystem singleElevator         = new SingleElevatorSubsystem(ElevatorConstants.MOTOR_1);
+  public static final FlopperSubsystem        flopperSubsystem       = new FlopperSubsystem();
 
   //Conditionally create SimulationSubsystem
   //public final SimulationSubsystem simulationSubsystem;
@@ -131,6 +137,8 @@ public class RobotContainer {
     backwardsSnapButton.onTrue(new DirectionSnapBackwards());
     stopSnapButton.onTrue(new StopSnap());
     elevatorButton.whileTrue(new MoveOneSide(0.7));
+    flopperUpButton.whileTrue(new FlopperUpCommand());
+    flopperDownButton.whileTrue(new FlopperDownCommand());
   }
 
   /**
