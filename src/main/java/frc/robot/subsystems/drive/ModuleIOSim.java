@@ -1,68 +1,66 @@
 package frc.robot.subsystems.drive;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
-import org.ironmaple.simulation.motorsims.SimulatedMotorController;
+// Remove IronMaple imports
+// import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
+// import org.ironmaple.simulation.motorsims.SimulatedMotorController;
 
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.units.Units;
 
 public class ModuleIOSim implements ModuleIO {
-        // reference to module simulation
-        private final SwerveModuleSimulation moduleSimulation;
-        // reference to the simulated drive motor
-        private final SimulatedMotorController.GenericMotorController driveMotor;
-        // reference to the simulated turn motor
-        private final SimulatedMotorController.GenericMotorController turnMotor;
+    // Simple simulation state variables
+    private Rotation2d steerRotation = new Rotation2d();
+    private Angle steerPosition = Units.Rotations.of(0);
+    private Angle drivePosition = Units.Rotations.of(0);
+    private Voltage driveVoltage = Units.Volts.of(0);
+    private Voltage steerVoltage = Units.Volts.of(0);
 
-    public ModuleIOSim(SwerveModuleSimulation moduleSimulation) {
-        this.moduleSimulation = moduleSimulation;
-
-        // configures a generic motor controller for drive motor
-        // set a current limit of 60 amps
-        this.driveMotor = moduleSimulation
-                .useGenericMotorControllerForDrive()
-                .withCurrentLimit(Units.Amps.of(60));
-        this.turnMotor = moduleSimulation
-                .useGenericControllerForSteer()
-                .withCurrentLimit(Units.Amps.of(20));
+    // Default constructor with no dependencies
+    public ModuleIOSim() {
+        System.out.println("Created simplified module simulation");
     }
 
     @Override
     public Rotation2d getSteerRotation() {
-        return moduleSimulation.getSteerAbsoluteFacing();
+        return steerRotation;
     }
 
     @Override // specified by ModuleIO interface
     public void setDriveVoltage(Voltage voltage) {
-        this.driveMotor.requestVoltage(voltage);
+        this.driveVoltage = voltage;
+        // In a real simulation, this would update the drive position based on physics
+        // For now, we'll just increment the position proportionally to voltage
+        this.drivePosition = Units.Rotations.of(
+            this.drivePosition.in(Units.Rotations) + 
+            (voltage.in(Units.Volts) * 0.01) // Simple approximation
+        );
     }
 
     @Override // specified by ModuleIO interface
     public void setSteerVoltage(Voltage voltage) {
-        this.turnMotor.requestVoltage(voltage);
+        this.steerVoltage = voltage;
+        // In a real simulation, this would update the steer rotation based on physics
+        // For now, we'll just increment the rotation proportionally to voltage
+        double currentAngle = this.steerRotation.getRadians();
+        currentAngle += voltage.in(Units.Volts) * 0.01; // Simple approximation
+        this.steerRotation = new Rotation2d(currentAngle);
+        this.steerPosition = Units.Radians.of(currentAngle);
     }
 
     @Override // specified by ModuleIO interface
     public Rotation2d getSteerFacing() {
-        return this.moduleSimulation.getSteerAbsoluteFacing();
+        return this.steerRotation;
     }
 
     @Override // specified by ModuleIO interface
     public Angle getSteerRelativePosition() {
-        /* 
-        Divide by 12.8 to account for the total effective gear reduction between
-        the motor and the steering mechanism. This ensures that the encoder value
-        reflects the actual physical rotation of the steering module.
-        The value 12.8 comes from combining two gear ratios, 
-        which represent stages of reduction in the system.
-        */
-        return moduleSimulation.getSteerRelativeEncoderPosition().div(12.8);
+        return this.steerPosition;
     }
 
     @Override // specified by ModuleIO interface
     public Angle getDriveWheelPosition() {
-        return moduleSimulation.getDriveWheelFinalPosition();
+        return this.drivePosition;
     }
 }

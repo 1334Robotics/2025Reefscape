@@ -4,85 +4,60 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.SwerveSubsystem;
-import frc.robot.subsystems.intake.IntakeIOSim;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import org.littletonrobotics.junction.Logger;
-import org.ironmaple.simulation.SimulatedArena;
-import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeAlgaeOnField;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralAlgaeStack;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnField;
 
+/**
+ * A simplified simulation subsystem that uses WPILib simulation capabilities
+ * instead of IronMaple simulation.
+ */
 public class SimulationSubsystem extends SubsystemBase {
 
     private final Field2d field = new Field2d(); // Initialize Field2d
-    private final SwerveDriveSimulation swerveDriveSimulation;
     private final SwerveSubsystem swerveSubsystem;
-    private final IntakeIOSim intakeIOSim;
 
-    public SimulationSubsystem(SwerveDriveSimulation swerveDriveSimulation, SwerveSubsystem swerveSubsystem) {
-        this.swerveDriveSimulation = swerveDriveSimulation;
+    /**
+     * Creates a new SimulationSubsystem.
+     * 
+     * @param swerveSubsystem The swerve subsystem to simulate
+     */
+    public SimulationSubsystem(SwerveSubsystem swerveSubsystem) {
         this.swerveSubsystem = swerveSubsystem;
-
-        // Initialize IntakeIOSim
-        this.intakeIOSim = new IntakeIOSim(swerveDriveSimulation);
+        System.out.println("Created simplified simulation subsystem");
     }
 
+    /**
+     * Sets the initial pose of the robot in simulation.
+     * 
+     * @param initialPose The initial pose to set
+     */
     public void setInitialPose(Pose2d initialPose) {
         if (Robot.isSimulation()) {
-            swerveDriveSimulation.setSimulationWorldPose(initialPose);
             swerveSubsystem.resetOdometry(initialPose); // Reset swerve odometry
             field.setRobotPose(initialPose);
-            SimulatedArena.getInstance().addGamePiece(new ReefscapeCoralOnField(
-                new Pose2d(2, 2, Rotation2d.fromDegrees(90))));
-            SimulatedArena.getInstance().addGamePiece(new ReefscapeAlgaeOnField(new Translation2d(2,2)));
-            // Add CORAL-ALGAE stack
-            SimulatedArena.getInstance().addGamePiece(new ReefscapeCoralAlgaeStack(new Translation2d(2,2)));
+            System.out.println("Set initial pose to " + initialPose);
         }
     }
 
     @Override
     public void periodic() {
-        // Warning: DO NOT call this method on a real robot, as it can drain the roboRIO’s resources.
-        SimulatedArena.getInstance().simulationPeriodic();
-
-        // Update intake simulation
-        intakeIOSim.periodic();
-
+        // Update field with robot pose
         Pose2d robotPose = RobotContainer.swerveSubsystem.getPose();
-        Logger.recordOutput("FieldSimulation/RobotPose", new Pose3d(robotPose));
-
-        // Log intake state
-        Logger.recordOutput("Simulation/IntakeRunning", intakeIOSim.isNoteInsideIntake());
-        Logger.recordOutput("Simulation/CoralInIntake", isCoralInIntake());
-
-        Logger.recordOutput("FieldSimulation/Algae", 
-        SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
-        Logger.recordOutput("FieldSimulation/Coral", 
-        SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
+        field.setRobotPose(robotPose);
+        
+        // Log robot pose
+        Logger.recordOutput("Simulation/RobotPose", new Pose3d(robotPose));
     }
 
-    // Add methods to control the intake
-    public void runIntake() {
-        intakeIOSim.setRunning(true);
-    }
-    
-    public void stopIntake() {
-        intakeIOSim.setRunning(false);
-    }
-    
-    public void launchCoral() {
-        intakeIOSim.launchNote();
-    }
-    
-    public boolean isCoralInIntake() {
-        return intakeIOSim.isNoteInsideIntake();
-    }
-
+    /**
+     * Gets the field visualization object.
+     * 
+     * @return The field visualization object
+     */
     public Field2d getField() {
         return field;
     }
