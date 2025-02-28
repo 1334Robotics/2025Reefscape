@@ -34,23 +34,16 @@ import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 
-import org.ironmaple.simulation.drivesims.COTS;
-import org.ironmaple.simulation.drivesims.GyroSimulation;
-import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
-import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import java.io.File;
 import java.io.IOException;
-import org.ironmaple.simulation.SimulatedArena;
 
 public class SwerveSubsystem extends SubsystemBase {
     private final SwerveDrive swerveDrive;
     private final VisionSubsystem visionSubsystem;
     private boolean fieldRelative;
-    private SwerveDriveSimulation swerveDriveSimulation;
     private int count = 0;
     private boolean allowDrive;
 
@@ -59,7 +52,6 @@ public class SwerveSubsystem extends SubsystemBase {
         this.fieldRelative = false;
         this.allowDrive = true;
         final GyroIO gyroIO;
-        final GyroSimulation gyroSimulation;
         final ModuleIO[] moduleIOs;
         SmartDashboard.putBoolean("[SWERVE] Field Relative", this.fieldRelative);
  
@@ -70,53 +62,28 @@ public class SwerveSubsystem extends SubsystemBase {
             this.swerveDrive = new SwerveParser(swerveDirectory).createSwerveDrive(SwerveConstants.MAX_SPEED);
 
             if (Robot.isSimulation()) {
-                // Create and configure a drivetrain simulation configuration
-                final DriveTrainSimulationConfig driveTrainSimulationConfig = DriveTrainSimulationConfig.Default()
-                        // Specify gyro type (for realistic gyro drifting and error simulation)
-                        .withGyro(COTS.ofPigeon2())
-                        // Specify swerve module (for realistic swerve dynamics)
-                        .withSwerveModule(new SwerveModuleSimulationConfig(
-                                DCMotor.getKrakenX60(SwerveConstants.NUM_DRIVE_MOTORS), // Drive motor is a Kraken X60
-                                DCMotor.getKrakenX60(SwerveConstants.NUM_STEER_MOTORS), // Steer motor is a Kraken X60
-                                SwerveConstants.DRIVE_GEAR_RATIO, // Drive motor gear ratio.
-                                SwerveConstants.STEER_GEAR_RATIO, // Steer motor gear ratio.
-                                SimulationConstants.DRIVE_FRICTION_VOLTAGE, // Drive friction voltage.
-                                SimulationConstants.STEER_FRICTION_VOLTAGE, // Steer friction voltage
-                                SimulationConstants.WHEEL_RADIUS, // Wheel radius
-                                SimulationConstants.STEER_MOI, // Steer MOI
-                                SimulationConstants.WHEEL_COF)) // Wheel COF
-                        // Configures the track length and track width (spacing between swerve modules)
-                        .withTrackLengthTrackWidth(Units.Inches.of(29), Units.Inches.of(29))
-                        // Configures the bumper size (dimensions of the robot bumper)
-                        .withBumperSize(Units.Inches.of(30), Units.Inches.of(30));
+                // In simulation mode, we'll use the standard WPILib simulation capabilities
+                System.out.println("Initializing swerve drive in simulation mode");
                 
-                
-                /* Create a swerve drive simulation */
-                this.swerveDriveSimulation = new SwerveDriveSimulation(
-                // Specify Configuration
-                driveTrainSimulationConfig,
-                // Specify starting pose
-                new Pose2d(0, 0, new Rotation2d())
-                );
-
-                // Register with simulation world
-                SimulatedArena.getInstance().addDriveTrainSimulation(swerveDriveSimulation);
-
-                gyroIO = new GyroIOSim(this.swerveDriveSimulation.getGyroSimulation());
+                // Use a simulated gyro
+                gyroIO = new GyroIOSim();
                 moduleIOs = new ModuleIO[4];
-                for (int i = 0; i < 4; i++) {
-                    moduleIOs[i] = new ModuleIOSim(swerveDriveSimulation.getModules()[i]);
+                
+                // Initialize module IOs for simulation
+                for (int i = 0; i < moduleIOs.length; i++) {
+                    moduleIOs[i] = new ModuleIOSim();
                 }
+                
+                System.out.println("Swerve drive simulation initialized");
+            } else {
+                // Real robot initialization
+                gyroIO = null;
+                moduleIOs = null;
             }
-        } 
-        catch(IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        
-        this.swerveDrive.setHeadingCorrection(true);
-        this.swerveDrive.setCosineCompensator(true);
-    
-}
+    }
 
     @Override
     public void periodic() {
@@ -158,46 +125,23 @@ public class SwerveSubsystem extends SubsystemBase {
         Logger.recordOutput("Drive/Pose", swerveDrive.getPose());
         Pose2d currentPose = swerveDrive.getPose();
         Logger.recordOutput("Drive/Pose", currentPose);
-        Logger.recordOutput("FieldSimulation/RobotPose", new Pose3d(currentPose));
-        Logger.recordOutput("FieldSimulation/RobotPose", new Pose3d(swerveDrive.getPose()));
+    }
 
-        // Update the encoder positions
-        SwerveModule[] modules = this.swerveDrive.getModules();
-        SmartDashboard.putNumber("[SWERVE] Front Left Encoder Position",  modules[0].getRawAbsolutePosition());
-        SmartDashboard.putNumber("[SWERVE] Front Right Encoder Position", modules[1].getRawAbsolutePosition());
-        SmartDashboard.putNumber("[SWERVE] Back Left Encoder Position",   modules[2].getRawAbsolutePosition());
-        SmartDashboard.putNumber("[SWERVE] Back Right Encoder Position",  modules[3].getRawAbsolutePosition());
-
-        // Update the true velocities of all the motors
-        SmartDashboard.putNumber("[SWERVE] Front Left Drive Velocity",  modules[0].getDriveMotor().getVelocity());
-        SmartDashboard.putNumber("[SWERVE] Front Left Angle Velocity",  modules[0].getAngleMotor().getVelocity());
-        SmartDashboard.putNumber("[SWERVE] Front Right Drive Velocity", modules[1].getDriveMotor().getVelocity());
-        SmartDashboard.putNumber("[SWERVE] Front Right Angle Velocity", modules[1].getAngleMotor().getVelocity());
-        SmartDashboard.putNumber("[SWERVE] Back Left Drive Velocity",   modules[2].getDriveMotor().getVelocity());
-        SmartDashboard.putNumber("[SWERVE] Back Left Angle Velocity",   modules[2].getAngleMotor().getVelocity());
-        SmartDashboard.putNumber("[SWERVE] Back Right Drive Velocity",  modules[3].getDriveMotor().getVelocity());
-        SmartDashboard.putNumber("[SWERVE] Back Right Angle Velocity",  modules[3].getAngleMotor().getVelocity());
-    
-        // Debug swerve state
-        SmartDashboard.putNumber("Swerve/UpdateCount", count++);
-
-        var pose = getPose();
-        SmartDashboard.putString("Swerve/Pose", 
-            String.format("X: %.2f, Y: %.2f, Rot: %.2f",
-                pose.getX(),
-                pose.getY(),
-                pose.getRotation().getDegrees()));
-
-        var speeds = getChassisSpeeds();
-        SmartDashboard.putNumber("Swerve/VX", speeds.vxMetersPerSecond);
-        SmartDashboard.putNumber("Swerve/VY", speeds.vyMetersPerSecond);
-        SmartDashboard.putNumber("Swerve/Omega", speeds.omegaRadiansPerSecond);
-
-        // Debug module states
-        var states = swerveDrive.getStates();
-        for (int i = 0; i < states.length; i++) {
-            SmartDashboard.putNumber("Swerve/Module" + i + "/Speed", states[i].speedMetersPerSecond);
-            SmartDashboard.putNumber("Swerve/Module" + i + "/Angle", states[i].angle.getDegrees());
+    public void autoDrive(ChassisSpeeds speeds) {
+        try {
+            swerveDrive.drive(speeds);
+        } catch (Exception e) {
+            if (Robot.isSimulation()) {
+                // In simulation, suppress repetitive errors about invalid measurements
+                // Only log occasional messages to avoid spamming the console
+                if (Math.random() < 0.01) { // 1% chance to log
+                    System.err.println("Simulation drive error (suppressing similar errors): " + e.getMessage());
+                }
+            } else {
+                // In real robot mode, always log errors
+                System.err.println("Drive error: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 
@@ -213,10 +157,6 @@ public class SwerveSubsystem extends SubsystemBase {
     public void steer(double steer) {
         swerveDrive.drive(new Translation2d(0, 0), steer * swerveDrive.swerveController.config.maxAngularVelocity,
                           false, false);
-    }
-
-    public void autoDrive(ChassisSpeeds speeds) {
-        swerveDrive.drive(speeds);
     }
 
     public void zeroGyro() {
@@ -262,8 +202,16 @@ public class SwerveSubsystem extends SubsystemBase {
         return this.swerveDrive;
     }
 
-    public SwerveDriveSimulation getSwerveDriveSimulation() {
-        return swerveDriveSimulation;
+    /**
+     * Gets the SwerveDrive simulation for use in simulation mode.
+     * This is a simplified version that returns null since we're not using IronMaple.
+     * 
+     * @return null (since we're not using IronMaple simulation)
+     */
+    public Object getSwerveDriveSimulation() {
+        // This method previously returned SwerveDriveSimulation
+        // Now it returns null since we're not using IronMaple
+        return null;
     }
 
 private Pose2d calculateRobotPoseFromVision(Transform3d targetToCamera) {

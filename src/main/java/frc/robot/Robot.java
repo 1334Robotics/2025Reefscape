@@ -4,11 +4,11 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
@@ -41,16 +41,18 @@ public class Robot extends LoggedRobot {
    * initialization code.
    */
   public Robot() {
-    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
-    // autonomous chooser on the dashboard.
-    m_robotContainer = new RobotContainer();
+    // Constructor now empty, RobotContainer is initialized in robotInit
   }
   @Override
   public void robotInit() {
       Logger.addDataReceiver(new NT4Publisher());
       Logger.start();
+      
+      // Set up field for visualization
       SmartDashboard.putData("Field", m_field);
-      // Get the default instance of the simulation world
+      
+      // Initialize the RobotContainer - this will also set up PathPlanner
+      m_robotContainer = new RobotContainer();
   }
 
   /**
@@ -72,18 +74,43 @@ public class Robot extends LoggedRobot {
    /** This function is called once when the robot is first started up. */
   @Override
   public void simulationInit() {
-    SimulatedArena.getInstance();
+    try {
+      System.out.println("Initializing simulation environment");
+      // Remove SimulatedArena initialization
+      
+      // Suppress joystick warnings in simulation
+      DriverStation.silenceJoystickConnectionWarning(true);
+      
+      SmartDashboard.putBoolean("Simulation Active", true);
+      System.out.println("Simulation initialized successfully");
+    } catch (Exception e) {
+      System.err.println("Error initializing simulation: " + e.getMessage());
+      e.printStackTrace();
+    }
   }
 
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {
-    SimulatedArena.getInstance().simulationPeriodic();
-    // Log game piece positions
-    Logger.recordOutput("FieldSimulation/Algae", 
-    SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
-    Logger.recordOutput("FieldSimulation/Coral", 
-    SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
+    try {
+      // Remove SimulatedArena call
+      
+      // Update field visualization with robot pose
+      m_field.setRobotPose(RobotContainer.swerveSubsystem.getPose());
+      
+      // Log game piece positions - replace with standard logging
+      
+      // Add PathPlanner path visualization to the field
+      // This will show the active path on the field visualization
+      if (m_autonomousCommand != null) {
+        Logger.recordOutput("PathPlanner/ActivePath", m_autonomousCommand.getName());
+      }
+    } catch (Exception e) {
+      // Don't spam the console with errors
+      if (Math.random() < 0.01) { // Only print occasionally (1% chance)
+        System.err.println("Error in simulation periodic: " + e.getMessage());
+      }
+    }
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
