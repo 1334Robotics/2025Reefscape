@@ -32,7 +32,17 @@ public class AutoHelper {
         
         try {
             // Load robot config from GUI settings
+            // Note: We use the GUI settings for both simulation and real robot
+            // to ensure compatibility with the PathPlanner library version
             RobotConfig config = RobotConfig.fromGUISettings();
+            
+            if (RobotMode.isRealRobot()) {
+                if (RobotMode.isDebugEnabled()) {
+                    DriverStation.reportWarning("Using PathPlanner GUI settings for robot - verify these are correct!", false);
+                }
+            } else if (RobotMode.isDebugEnabled()) {
+                DriverStation.reportWarning("Using GUI settings for AutoBuilder in simulation", false);
+            }
             
             // Configure AutoBuilder
             AutoBuilder.configure(
@@ -56,7 +66,7 @@ public class AutoHelper {
                                      PathPlannerConstants.ROTATION_KI,
                                      PathPlannerConstants.ROTATION_KD)
                 ),
-                config, // Robot config from GUI settings
+                config, // Robot config (from GUI settings)
                 // Should path flip based on alliance color
                 () -> {
                     var alliance = DriverStation.getAlliance();
@@ -66,9 +76,15 @@ public class AutoHelper {
             );
             
             isConfigured = true;
-            DriverStation.reportWarning("AutoBuilder configured successfully", false);
+            
+            // Only log in debug mode
+            if (RobotMode.isDebugEnabled()) {
+                DriverStation.reportWarning("AutoBuilder configured successfully", false);
+            }
+            
             return true;
         } catch (Exception e) {
+            // Always report configuration errors
             DriverStation.reportError("Failed to configure AutoBuilder: " + e.getMessage(), e.getStackTrace());
             return false;
         }

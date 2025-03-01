@@ -112,6 +112,9 @@ public class RobotContainer {
     //   simulationSubsystem = null;
     // }
     }
+
+    SmartDashboard.putNumber("Free Memory MB", 
+        Runtime.getRuntime().freeMemory() / (1024.0 * 1024.0));
   }
 
 
