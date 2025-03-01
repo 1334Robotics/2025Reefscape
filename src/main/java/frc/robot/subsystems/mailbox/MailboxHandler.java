@@ -12,7 +12,7 @@ public class MailboxHandler extends SubsystemBase {
 
     public MailboxHandler() {
         this.allowShoot = false;
-        this.feeding = false;
+        this.feeding    = false;
         this.outputLaserCan = new LaserCanSubsystem(0, MailboxConstants.LASERCAN_CLOSE_READING);
         this.inputLaserCan  = new LaserCanSubsystem(1, MailboxConstants.LASERCAN_CLOSE_READING);
     }
