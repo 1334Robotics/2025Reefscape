@@ -28,6 +28,11 @@ public class MailboxSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("[MAILBOX] Motor Two Speed", 0);
     }
 
+    public void feed() {
+        this.motors[0].set(MailboxConstants.FEED_MOTOR_SPEED);
+        this.motors[1].set(-MailboxConstants.FEED_MOTOR_SPEED);
+    }
+
     public void output(boolean high) {
         // This will need limit switches or other timings to tell when output is complete
         if(high) {

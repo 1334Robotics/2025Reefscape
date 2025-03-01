@@ -13,8 +13,8 @@ public class MailboxHandler extends SubsystemBase {
     public MailboxHandler() {
         this.allowShoot = false;
         this.feeding    = false;
-        this.outputLaserCan = new LaserCanSubsystem(0, MailboxConstants.LASERCAN_CLOSE_READING);
-        this.inputLaserCan  = new LaserCanSubsystem(1, MailboxConstants.LASERCAN_CLOSE_READING);
+        this.outputLaserCan = new LaserCanSubsystem(MailboxConstants.LASERCAN_OUTPUT_ID, MailboxConstants.LASERCAN_CLOSE_READING);
+        this.inputLaserCan  = new LaserCanSubsystem(MailboxConstants.LASERCAN_INPUT_ID, MailboxConstants.LASERCAN_CLOSE_READING);
     }
 
     @Override
@@ -23,13 +23,16 @@ public class MailboxHandler extends SubsystemBase {
         if(this.inputLaserCan.inRange()) {
             if(!this.outputLaserCan.inRange()) {
                 this.feeding = true;
-                RobotContainer.mailboxSubsystem.output(true);
+                this.allowShoot = false;
+                RobotContainer.mailboxSubsystem.feed();
+                return;
             } else if(this.feeding) {
                 RobotContainer.mailboxSubsystem.stop();
+                this.allowShoot = false;
                 this.feeding = false;
                 return;
             }
-        }
+        } else this.feeding = false;
 
         // Later, get the elevator level and decide what speed to run the output at
         // Low is for L1, high is for all others
