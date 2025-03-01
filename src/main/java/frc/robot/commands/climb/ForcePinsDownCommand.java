@@ -6,17 +6,15 @@ import frc.robot.subsystems.climb.ClimbSubsystem;
 
 public class ForcePinsDownCommand extends Command {
     private final ClimbSubsystem climb;
-    private final double speed;
 
-    public ForcePinsDownCommand(double speed) {
+    public ForcePinsDownCommand() {
         this.climb = RobotContainer.climbSubsystem;
-        this.speed = speed;
         addRequirements(climb);
     }
 
     @Override
     public void execute() {
-        climb.forcePinsDown(speed);
+        climb.forcePinsDown();
     }
 
     @Override

@@ -34,10 +34,10 @@ public class ClimbSubsystem extends SubsystemBase {
      *
      * @param speed Speed from 0.0 to 1.0 (or negative if reversing is needed)
      */
-    public void forcePinsDown(double speed) {
-        lowerMotor1.set(speed);
-        lowerMotor2.set(speed);
-        SmartDashboard.putString("Climb State", "Forcing pins down");
+    public void forcePinsDown(){
+        lowerMotor1.set(ClimbConstants.FORCE_PIN_MOTOR_SPEED);
+        lowerMotor2.set(ClimbConstants.FORCE_PIN_MOTOR_SPEED);
+        SmartDashboard.putString("[Climb] State", "Forcing pins down");
     }
 
     /**
@@ -45,9 +45,9 @@ public class ClimbSubsystem extends SubsystemBase {
      *
      * @param speed Speed from 0.0 to 1.0 (or negative if reversing is needed)
      */
-    public void lockClimb(double speed) {
-        lockMotor.set(speed);
-        SmartDashboard.putString("Climb State", "Locking climb mechanism");
+    public void lockClimb() {
+        lockMotor.set(ClimbConstants.LOCK_CLIMB_MOTOR_SPEED);
+        SmartDashboard.putString("[Climb] State", "Locking climb mechanism");
     }
 
     /** Stops all climb motors. */
@@ -55,7 +55,7 @@ public class ClimbSubsystem extends SubsystemBase {
         lowerMotor1.set(0);
         lowerMotor2.set(0);
         lockMotor.set(0);
-        SmartDashboard.putString("Climb State", "Stopped");
+        SmartDashboard.putString("[Climb] State", "Stopped");
     }
 
     @Override
