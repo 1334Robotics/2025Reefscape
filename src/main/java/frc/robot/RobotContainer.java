@@ -6,7 +6,8 @@ import frc.robot.commands.directionSnaps.DirectionSnapLeft;
 import frc.robot.commands.directionSnaps.DirectionSnapRight;
 import frc.robot.commands.directionSnaps.StopSnap;
 import frc.robot.commands.drive.DriveCommand;
-import frc.robot.commands.elevator.MoveOneSide;
+import frc.robot.commands.elevator.ElevatorDownCommand;
+import frc.robot.commands.elevator.ElevatorUpCommand;
 import frc.robot.commands.flopper.FlopperDownCommand;
 import frc.robot.commands.flopper.FlopperUpCommand;
 import frc.robot.commands.gyro.GyroZeroCommand;
@@ -14,8 +15,6 @@ import frc.robot.commands.mailbox.OutputLowCommand;
 import frc.robot.commands.mailbox.ShootCommand;
 import frc.robot.commands.mailbox.OutputHighCommand;
 import frc.robot.commands.mailbox.StopCommand;
-import frc.robot.commands.solenoid.ExtendCommand;
-import frc.robot.commands.solenoid.RetractCommand;
 import frc.robot.constants.ElevatorConstants;
 import frc.robot.constants.RobotContainerConstants;
 import frc.robot.constants.SimulationConstants;
@@ -23,6 +22,7 @@ import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.mailbox.MailboxHandler;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
+import frc.robot.subsystems.solenoid.SolenoidSubsystem;
 import frc.robot.subsystems.vision.TagInputHandler;
 //import frc.robot.subsystems.simulation.SimulationSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
@@ -31,21 +31,18 @@ import frc.robot.commands.vision.TrackAprilTagCommand;
 import frc.robot.subsystems.drive.DirectionSnapSubsystem;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
-import frc.robot.subsystems.elevator.SingleElevatorSubsystem;
+import frc.robot.subsystems.elevator.LaserCanSubsystem;
 import frc.robot.subsystems.flopper.FlopperSubsystem;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.subsystems.solenoid.SolenoidSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.subsystems.laser.LaserCanSubsystem;
-import frc.robot.commands.laser.MonitorLaserCanCommand;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -59,31 +56,27 @@ public class RobotContainer {
   private final XboxController operatorController = new XboxController(RobotContainerConstants.OPERATOR_CONTROLLER_PORT);
 
   // Controller buttons
-  private final JoystickButton extendButton            = new JoystickButton(operatorController, RobotContainerConstants.SOLENOID_EXTEND_BUTTON);
-  private final JoystickButton retractButton           = new JoystickButton(operatorController, RobotContainerConstants.SOLENOID_RETRACT_BUTTON);
-  private final JoystickButton gyroZeroButton          = new JoystickButton(driverController, RobotContainerConstants.GYRO_ZERO_BUTON);
-  private final POVButton      forwardsSnapButton      = new POVButton(driverController, RobotContainerConstants.SNAP_FORWARDS_DIRECTION);
-  private final POVButton      leftSnapButton          = new POVButton(driverController, RobotContainerConstants.SNAP_LEFT_DIRECTION);
-  private final POVButton      rightSnapButton         = new POVButton(driverController, RobotContainerConstants.SNAP_RIGHT_DIRECTION);
-  private final POVButton      backwardsSnapButton     = new POVButton(driverController, RobotContainerConstants.SNAP_BACKWARDS_DIRECTION);
-  private final JoystickButton stopSnapButton          = new JoystickButton(driverController, RobotContainerConstants.SNAP_STOP_BUTTON);
-  private final JoystickButton elevatorButton          = new JoystickButton(driverController, 1);
+  private final JoystickButton gyroZeroButton          = new JoystickButton(driverController,   RobotContainerConstants.GYRO_ZERO_BUTON);
+  private final POVButton      forwardsSnapButton      = new POVButton(driverController,        RobotContainerConstants.SNAP_FORWARDS_DIRECTION);
+  private final POVButton      leftSnapButton          = new POVButton(driverController,        RobotContainerConstants.SNAP_LEFT_DIRECTION);
+  private final POVButton      rightSnapButton         = new POVButton(driverController,        RobotContainerConstants.SNAP_RIGHT_DIRECTION);
+  private final POVButton      backwardsSnapButton     = new POVButton(driverController,        RobotContainerConstants.SNAP_BACKWARDS_DIRECTION);
+  private final JoystickButton stopSnapButton          = new JoystickButton(driverController,   RobotContainerConstants.SNAP_STOP_BUTTON);
+  private final POVButton      elevatorUpButton        = new POVButton(operatorController,      RobotContainerConstants.ELEVATOR_UP_BUTTON);
+  private final POVButton      elevatorDownButton      = new POVButton(operatorController,      RobotContainerConstants.ELEVATOR_DOWN_BUTTON);
   private final JoystickButton flopperUpButton         = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_UP_BUTTON);
   private final JoystickButton flopperDownButton       = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_DOWN_BUTTON);
   private final JoystickButton mailboxShootButton      = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_SHOOT_BUTTON);
 
   // Subsystems
-  public static final GyroSubsystem gyroSubsystem                   = new GyroSubsystem("CANivore");
-  // public static final ElevatorSubsystem elevatorSubsystem           = new ElevatorSubsystem(RobotContainerConstants.ELEVATOR_PRIMARY_MOTOR_ID,
-  //                                                                                          RobotContainerConstants.ELEVATOR_SECONDARY_MOTOR_ID);
+  public static final GyroSubsystem           gyroSubsystem          = new GyroSubsystem("CANivore");
+  public static final SolenoidSubsystem       solenoidSubsystem      = new SolenoidSubsystem();
   public static final MailboxSubsystem        mailboxSubsystem       = new MailboxSubsystem();
   public static final MailboxHandler          mailboxHandler         = new MailboxHandler();
   public static final VisionSubsystem         visionSubsystem        = new VisionSubsystem();
-  public static final SwerveSubsystem         swerveSubsystem        = new SwerveSubsystem(visionSubsystem);
-  public static final SolenoidSubsystem       solenoidSubsystem      = new SolenoidSubsystem();
+  public static final SwerveSubsystem         swerveSubsystem        = new SwerveSubsystem();
   public static final DirectionSnapSubsystem  directionSnapSubsystem = new DirectionSnapSubsystem();
-  public static final LaserCanSubsystem       laserCanSubsystem      = new LaserCanSubsystem();
-  public static final SingleElevatorSubsystem singleElevator         = new SingleElevatorSubsystem(ElevatorConstants.MOTOR_1);
+  public static final ElevatorSubsystem       elevatorSubsystem      = new ElevatorSubsystem();
   public static final FlopperSubsystem        flopperSubsystem       = new FlopperSubsystem();
   public static final TagInputHandler         tagInputHandler        = new TagInputHandler();
 
@@ -98,11 +91,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-
-    // Configure the trigger bindings
     configureBindings();
-    SmartDashboard.putData("ELEVATOR UP", new MoveOneSide(-1));
-    SmartDashboard.putData("ELEVATOR DOWN", new MoveOneSide(0.8));
 
     DriveCommand xboxDriveCommand = new DriveCommand(() -> MathUtil.applyDeadband(driverController.getLeftX(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
                                                      () -> MathUtil.applyDeadband(driverController.getLeftY(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
@@ -118,8 +107,6 @@ public class RobotContainer {
     //   simulationSubsystem = null;
     // }
     }
-    // Configure default command if you want continuous monitoring
-    laserCanSubsystem.setDefaultCommand(new MonitorLaserCanCommand());
   }
 
 
@@ -133,15 +120,14 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    extendButton.onTrue(new ExtendCommand());
-    retractButton.onTrue(new RetractCommand());
     gyroZeroButton.onTrue(new GyroZeroCommand()); 
     forwardsSnapButton.onTrue(new DirectionSnapForwards());
     leftSnapButton.onTrue(new DirectionSnapLeft());
     rightSnapButton.onTrue(new DirectionSnapRight());
     backwardsSnapButton.onTrue(new DirectionSnapBackwards());
     stopSnapButton.onTrue(new StopSnap());
-    elevatorButton.whileTrue(new MoveOneSide(0.7));
+    elevatorUpButton.whileTrue(new ElevatorUpCommand());
+    elevatorDownButton.whileTrue(new ElevatorDownCommand());
     flopperUpButton.whileTrue(new FlopperUpCommand());
     flopperDownButton.whileTrue(new FlopperDownCommand());
     mailboxShootButton.onTrue(new ShootCommand());
