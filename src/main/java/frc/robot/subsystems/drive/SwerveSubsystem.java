@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.RobotContainer;
 import frc.robot.constants.SimulationConstants;
 import frc.robot.constants.SwerveConstants;
 import frc.robot.constants.VisionConstants;
@@ -48,15 +49,13 @@ import org.ironmaple.simulation.SimulatedArena;
 
 public class SwerveSubsystem extends SubsystemBase {
     private final SwerveDrive swerveDrive;
-    private final VisionSubsystem visionSubsystem;
     private static final double VISION_TRUST_FACTOR = 0.8;//NEW CAL leaving for now was part of a simpler vision implementation
     private boolean fieldRelative;
     private SwerveDriveSimulation swerveDriveSimulation;
     private int count = 0;
     private boolean allowDrive;
 
-    public SwerveSubsystem(VisionSubsystem visionSubsystem) {
-        this.visionSubsystem = visionSubsystem;
+    public SwerveSubsystem() {
         this.fieldRelative = false;
         this.allowDrive = true;
         final GyroIO gyroIO;
@@ -135,10 +134,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
         // Secondary feedback loop for the swerve drive with vision
         // 2. If vision target visible & data fresh, use as correction
-        if (visionSubsystem.isTargetVisible() && 
-            visionSubsystem.getImageAge() < VisionConstants.MAX_ACCEPTABLE_DELAY) {
+        if(RobotContainer.visionSubsystem.isTargetVisible() && 
+           RobotContainer.visionSubsystem.getImageAge() < VisionConstants.MAX_ACCEPTABLE_DELAY) {
             
-            PhotonTrackedTarget target = visionSubsystem.getTarget();
+            PhotonTrackedTarget target = RobotContainer.visionSubsystem.getTarget();
             if (target != null) {
                 Transform3d targetPose = target.getBestCameraToTarget();
                 
@@ -147,7 +146,7 @@ public class SwerveSubsystem extends SubsystemBase {
                 
                 swerveDrive.addVisionMeasurement(
                     calculateRobotPoseFromVision(targetPose),
-                    Timer.getFPGATimestamp() - (visionSubsystem.getImageAge() / 1000.0),
+                    Timer.getFPGATimestamp() - (RobotContainer.visionSubsystem.getImageAge() / 1000.0),
                     visionStdDevs
                 );
                 

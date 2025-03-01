@@ -10,9 +10,8 @@ package frc.robot.constants;
 // Suitable for 32x32 sensors: Creates centered ROI (8+16=24 < 32)
 // Reduces processing area while maintaining central focus
 public class LaserCanConstants {
-    public static final int can_id = 0;
-    public static final int x = 8;
-    public static final int y = 8;
-    public static final int width = 16;
-    public static final int height = 16;
+    public static final int X = 8;
+    public static final int Y = 8;
+    public static final int WIDTH = 16;
+    public static final int HEIGHT = 16;
 }
