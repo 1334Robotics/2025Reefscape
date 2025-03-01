@@ -68,6 +68,9 @@ public class Robot extends LoggedRobot {
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
     m_field.setRobotPose(RobotContainer.swerveSubsystem.getPose());
+    
+    // Call periodic method in RobotContainer to handle dashboard buttons
+    m_robotContainer.periodic();
   }
    /** This function is called once when the robot is first started up. */
   @Override
