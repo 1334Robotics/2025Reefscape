@@ -32,6 +32,7 @@ import frc.robot.subsystems.drive.DirectionSnapSubsystem;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.flopper.FlopperSubsystem;
+import frc.robot.utils.PathPlannerHelper;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -83,6 +84,9 @@ public class RobotContainer {
                                                                                    new Distance(VisionConstants.TRACK_TAG_X,
                                                                                                 VisionConstants.TRACK_TAG_Y));
 
+  // PathPlanner Helper
+  private final PathPlannerHelper pathPlannerHelper;
+
   //Conditionally create SimulationSubsystem
   //public final SimulationSubsystem simulationSubsystem;
 
@@ -96,6 +100,9 @@ public class RobotContainer {
                                                      () -> MathUtil.applyDeadband(-driverController.getRightX(), RobotContainerConstants.CONTROLLER_ROTATION_DEADBAND));
 
     swerveSubsystem.setDefaultCommand(xboxDriveCommand);
+
+    // Initialize PathPlanner helper
+    pathPlannerHelper = new PathPlannerHelper(swerveSubsystem);
 
     //Conditionally initialize the simulation subsystem
     if (Robot.isSimulation()) {
@@ -137,6 +144,24 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return trackCommand;
+    // Get the selected auto command from PathPlanner helper
+    Command selectedCommand = pathPlannerHelper.getAutonomousCommand();
+    
+    // If no command is selected or the command is empty, fall back to the track command
+    if (selectedCommand == null) {
+      return trackCommand;
+    }
+    
+    return selectedCommand;
+  }
+
+  /**
+   * Call periodically to handle dashboard button inputs for PathPlanner
+   */
+  public void periodic() {
+    // Check for dashboard button presses to run paths
+    if (pathPlannerHelper != null) {
+      pathPlannerHelper.periodic();
+    }
   }
 }
