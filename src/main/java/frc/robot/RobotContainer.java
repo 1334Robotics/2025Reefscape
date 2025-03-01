@@ -23,7 +23,6 @@ import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.mailbox.LaserCanSubsystem;
 import frc.robot.subsystems.mailbox.MailboxHandler;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
-import frc.robot.subsystems.solenoid.SolenoidSubsystem;
 import frc.robot.subsystems.vision.TagInputHandler;
 //import frc.robot.subsystems.simulation.SimulationSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
@@ -70,7 +69,6 @@ public class RobotContainer {
 
   // Subsystems
   public static final GyroSubsystem           gyroSubsystem          = new GyroSubsystem("CANivore");
-  public static final SolenoidSubsystem       solenoidSubsystem      = new SolenoidSubsystem();
   public static final MailboxSubsystem        mailboxSubsystem       = new MailboxSubsystem();
   public static final MailboxHandler          mailboxHandler         = new MailboxHandler();
   public static final VisionSubsystem         visionSubsystem        = new VisionSubsystem();
