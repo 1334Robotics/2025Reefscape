@@ -6,17 +6,15 @@ import frc.robot.subsystems.climb.ClimbSubsystem;
 
 public class LockClimbCommand extends Command {
     private final ClimbSubsystem climb;
-    private final double speed;
 
-    public LockClimbCommand(double speed) {
+    public LockClimbCommand() {
         this.climb = RobotContainer.climbSubsystem;
-        this.speed = speed;
         addRequirements(climb);
     }
 
     @Override
     public void execute() {
-        climb.lockClimb(speed);
+        climb.lockClimb();
     }
 
     @Override

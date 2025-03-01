@@ -175,8 +175,8 @@ public class RobotContainer {
     elevatorL3Trigger.onTrue(new RaiseElevatorCommand(ElevatorHeightCalculation.L3));
     elevatorL4Trigger.onTrue(new RaiseElevatorCommand(ElevatorHeightCalculation.L4));
     elevatorLowerTrigger.onTrue(new LowerElevatorCommand());
-    climbLockButton.onTrue(new LockClimbCommand(0.5));
-    climbForceDownButton.onTrue(new ForcePinsDownCommand(0.5));
+    climbLockButton.onTrue(new LockClimbCommand());
+    climbForceDownButton.onTrue(new ForcePinsDownCommand());
     climbStopButton.onTrue(new StopClimbCommand());
   }
 
