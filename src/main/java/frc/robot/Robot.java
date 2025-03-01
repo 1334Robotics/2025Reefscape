@@ -12,6 +12,8 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
+import frc.robot.utils.RobotMode;
+import edu.wpi.first.wpilibj.DriverStation;
 
 /**
  * The Virtual Machine is configured to automatically run this class, and to call the methods corresponding to
@@ -50,7 +52,22 @@ public class Robot extends LoggedRobot {
       Logger.addDataReceiver(new NT4Publisher());
       Logger.start();
       SmartDashboard.putData("Field", m_field);
-      // Get the default instance of the simulation world
+      
+      // Configure robot mode based on whether we're in simulation or on the real robot
+      if (RobotMode.isRealRobot()) {
+          // On the real robot, disable debug features to save memory and processing power
+          DriverStation.reportWarning("Running on REAL ROBOT - Debug features disabled by default", false);
+          
+          // Add a toggle on the dashboard to enable verbose logging if needed during testing
+          SmartDashboard.putBoolean("Enable Verbose Logging", false);
+      } else {
+          // In simulation, enable all debug features
+          DriverStation.reportWarning("Running in SIMULATION - Debug features enabled", false);
+          
+          // Debug features are already enabled by default in simulation
+          // Just add a dashboard indicator
+          SmartDashboard.putBoolean("Simulation Mode", true);
+      }
   }
 
   /**
@@ -71,6 +88,18 @@ public class Robot extends LoggedRobot {
     
     // Call periodic method in RobotContainer to handle dashboard buttons
     m_robotContainer.periodic();
+    
+    // Check if verbose logging was toggled on the dashboard (only for real robot)
+    if (RobotMode.isRealRobot()) {
+        boolean enableVerboseLogging = SmartDashboard.getBoolean("Enable Verbose Logging", false);
+        if (enableVerboseLogging && !RobotMode.isDebugEnabled()) {
+            RobotMode.enableVerboseLogging();
+            DriverStation.reportWarning("Verbose logging ENABLED - this may impact performance", false);
+        } else if (!enableVerboseLogging && RobotMode.isDebugEnabled()) {
+            RobotMode.disableVerboseLogging();
+            DriverStation.reportWarning("Verbose logging DISABLED", false);
+        }
+    }
   }
    /** This function is called once when the robot is first started up. */
   @Override
