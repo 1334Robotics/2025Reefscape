@@ -1,6 +1,9 @@
 package frc.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.auto.AutoConfigurer;
+import frc.robot.commands.climb.ForcePinsDownCommand;
+import frc.robot.commands.climb.LockClimbCommand;
+import frc.robot.commands.climb.StopClimbCommand;
 import frc.robot.commands.directionSnaps.DirectionSnapBackwards;
 import frc.robot.commands.directionSnaps.DirectionSnapForwards;
 import frc.robot.commands.directionSnaps.DirectionSnapLeft;
@@ -21,6 +24,7 @@ import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
 import frc.robot.subsystems.simulation.SimulationSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
+import frc.robot.subsystems.climb.ClimbSubsystem;
 import frc.robot.commands.vision.TrackAprilTagCommand;
 import frc.robot.subsystems.drive.DirectionSnapSubsystem;
 import frc.robot.subsystems.drive.SwerveSubsystem;
@@ -86,6 +90,9 @@ public class RobotContainer {
     operatorController.getRawButton(RobotContainerConstants.ELEVATOR_LOWER_BUTTON[0]) &&
     operatorController.getRawButton(RobotContainerConstants.ELEVATOR_LOWER_BUTTON[1])
   );
+  private final JoystickButton climbLockButton         = new JoystickButton(operatorController, RobotContainerConstants.CLIMB_LOCK_BUTTON);
+  private final JoystickButton climbForceDownButton     = new JoystickButton(operatorController, RobotContainerConstants.CLIMB_FORCE_DOWN_BUTTON);
+  private final JoystickButton climbStopButton          = new JoystickButton(operatorController, RobotContainerConstants.CLIMB_STOP_BUTTON);
 
   // Subsystems
   public static final GyroSubsystem gyroSubsystem                   = new GyroSubsystem("CANivore");
@@ -97,6 +104,7 @@ public class RobotContainer {
   public static final SolenoidSubsystem solenoidSubsystem           = new SolenoidSubsystem();
   public static final DirectionSnapSubsystem directionSnapSubsystem = new DirectionSnapSubsystem();
   public static final LaserCanSubsystem laserCanSubsystem           = new LaserCanSubsystem();
+  public static final ClimbSubsystem climbSubsystem                 = new ClimbSubsystem();
 
   //Conditionally create SimulationSubsystem
   public final SimulationSubsystem simulationSubsystem;
@@ -167,6 +175,9 @@ public class RobotContainer {
     elevatorL3Trigger.onTrue(new RaiseElevatorCommand(ElevatorHeightCalculation.L3));
     elevatorL4Trigger.onTrue(new RaiseElevatorCommand(ElevatorHeightCalculation.L4));
     elevatorLowerTrigger.onTrue(new LowerElevatorCommand());
+    climbLockButton.onTrue(new LockClimbCommand());
+    climbForceDownButton.onTrue(new ForcePinsDownCommand());
+    climbStopButton.onTrue(new StopClimbCommand());
   }
 
   /**
