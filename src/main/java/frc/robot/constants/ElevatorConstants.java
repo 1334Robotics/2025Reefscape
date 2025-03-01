@@ -31,5 +31,5 @@ public class ElevatorConstants {
 
     public static final double ELEVATOR_UP_SPEED    = 1;
     public static final double ELEVATOR_DOWN_SPEED  = 0.85;
-    public static final double ELEVATOR_RESET_SPEED = 0.4;
+    public static final double ELEVATOR_RESET_SPEED = 0.2;
 }
