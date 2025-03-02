@@ -168,6 +168,18 @@ public class Robot extends LoggedRobot {
     @Override
     public void simulationInit() {
         SimulatedArena.getInstance();
+        
+        // Set initial robot pose for simulation
+        edu.wpi.first.math.geometry.Pose2d initialPose = new edu.wpi.first.math.geometry.Pose2d(
+            7.036, // X position in meters
+            7.036, // Y position in meters
+            edu.wpi.first.math.geometry.Rotation2d.fromDegrees(-161.026) // Heading in degrees
+        );
+        RobotContainer.swerveSubsystem.resetOdometry(initialPose);
+        m_field.setRobotPose(initialPose);
+        
+        // Set blue alliance for simulation
+        SmartDashboard.putString("Alliance", "Blue");
     }
 
     /** This function is called periodically whilst in simulation. */
