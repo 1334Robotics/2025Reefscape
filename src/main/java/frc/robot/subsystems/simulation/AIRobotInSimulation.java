@@ -65,6 +65,7 @@ public class AIRobotInSimulation extends SubsystemBase {
     };
     /* Store instances of AI robots in a static array. */
     public static final AIRobotInSimulation[] instances = new AIRobotInSimulation[6];
+    SendableChooser<Command> behaviorChooser = new SendableChooser<>();
 
     /* The drivetrain configuration for the opponent robots in the maple-sim simulation. */
     private static final DriveTrainSimulationConfig DRIVETRAIN_CONFIG =
@@ -174,7 +175,6 @@ public class AIRobotInSimulation extends SubsystemBase {
         PathPlannerPath segment1,
         Command toRunAtEndOfSegment1,
         XboxController joystick) {
-        SendableChooser<Command> behaviorChooser = new SendableChooser<>();
 
         // Supplier to disable the robot: sets the robot's pose to the queening position and stops its movement
         final Supplier<Command> disable =
@@ -210,9 +210,9 @@ public class AIRobotInSimulation extends SubsystemBase {
 
         // Explicitly add the SendableChooser to the AIRobotBehaviors tab in Shuffleboard
         Shuffleboard.getTab("AIRobotBehaviors")
-        .add("Opponent Robot " + id + " Behavior", behaviorChooser)
-        .withPosition(0, id) // Adjust position as needed
-        .withSize(2, 1); // Adjust size as needed
+                .add("Opponent Robot " + id + " Behavior", behaviorChooser)
+                .withPosition(0, id) // Adjust position as needed
+                .withSize(2, 1); // Adjust size as needed
     }
 
     /**
