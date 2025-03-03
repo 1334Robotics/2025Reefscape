@@ -2,8 +2,10 @@ package frc.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.auto.AutoConfigurer;
 import frc.robot.commands.climb.ForcePinsDownCommand;
+import frc.robot.commands.climb.ForcePinsUpCommand;
 import frc.robot.commands.climb.LockClimbCommand;
 import frc.robot.commands.climb.StopClimbCommand;
+import frc.robot.commands.climb.UnlockClimbCommand;
 import frc.robot.commands.directionSnaps.DirectionSnapBackwards;
 import frc.robot.commands.directionSnaps.DirectionSnapForwards;
 import frc.robot.commands.directionSnaps.DirectionSnapLeft;
@@ -11,6 +13,10 @@ import frc.robot.commands.directionSnaps.DirectionSnapRight;
 import frc.robot.commands.directionSnaps.StopSnap;
 import frc.robot.commands.drive.DriveCommand;
 import frc.robot.commands.elevator.ElevatorDownCommand;
+import frc.robot.commands.elevator.ElevatorGotoL1Command;
+import frc.robot.commands.elevator.ElevatorGotoL2Command;
+import frc.robot.commands.elevator.ElevatorGotoL3Command;
+import frc.robot.commands.elevator.ElevatorGotoL4Command;
 import frc.robot.commands.elevator.ElevatorUpCommand;
 import frc.robot.commands.flopper.FlopperDownCommand;
 import frc.robot.commands.flopper.FlopperUpCommand;
@@ -36,6 +42,7 @@ import frc.robot.subsystems.climb.ClimbSubsystem;
 import frc.robot.commands.vision.TrackAprilTagCommand;
 import frc.robot.subsystems.drive.DirectionSnapSubsystem;
 import frc.robot.subsystems.drive.SwerveSubsystem;
+import frc.robot.subsystems.elevator.ElevatorHandler;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -88,6 +95,7 @@ public class RobotContainer {
   public static final SwerveSubsystem         swerveSubsystem        = new SwerveSubsystem();
   public static final DirectionSnapSubsystem  directionSnapSubsystem = new DirectionSnapSubsystem();
   public static final ElevatorSubsystem       elevatorSubsystem      = new ElevatorSubsystem();
+  public static final ElevatorHandler         elevatorHandler        = new ElevatorHandler();
   public static final FlopperSubsystem        flopperSubsystem       = new FlopperSubsystem();
   public static final TagInputHandler         tagInputHandler        = new TagInputHandler();
 
@@ -125,6 +133,18 @@ public class RobotContainer {
     //   simulationSubsystem = null;
     // }
     }
+
+    // Add climb commands to SmartDashboard
+    SmartDashboard.putData("[CLIMB] Force Pins Down", new ForcePinsDownCommand());
+    SmartDashboard.putData("[CLIMB] Force Pins Up", new ForcePinsUpCommand());
+    SmartDashboard.putData("[CLIMB] Lock", new LockClimbCommand());
+    SmartDashboard.putData("[CLIMB] Unlock", new UnlockClimbCommand());
+    SmartDashboard.putData("[CLIMB] Stop", new StopClimbCommand());
+
+    SmartDashboard.putData("[ELEVATOR] L1", new ElevatorGotoL1Command());
+    SmartDashboard.putData("[ELEVATOR] L2", new ElevatorGotoL2Command());
+    SmartDashboard.putData("[ELEVATOR] L3", new ElevatorGotoL3Command());
+    SmartDashboard.putData("[ELEVATOR] L4", new ElevatorGotoL4Command());
   }
 
 
