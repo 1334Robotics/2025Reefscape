@@ -36,7 +36,7 @@ public class ClimbSubsystem extends SubsystemBase {
      */
     public void forcePinsDown(){
         lowerMotor1.set(ClimbConstants.FORCE_PIN_MOTOR_SPEED);
-            lowerMotor2.set(ClimbConstants.FORCE_PIN_MOTOR_SPEED);
+        lowerMotor2.set(ClimbConstants.FORCE_PIN_MOTOR_SPEED);
         SmartDashboard.putString("[Climb] State", "Forcing pins down");
     }
 
