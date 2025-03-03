@@ -14,9 +14,6 @@ import frc.robot.commands.mailbox.OutputCommand;
 import frc.robot.commands.mailbox.StopCommand;
 import frc.robot.commands.solenoid.ExtendCommand;
 import frc.robot.commands.solenoid.RetractCommand;
-import frc.robot.commands.intake.LaunchCoralCommand;
-import frc.robot.commands.intake.RunIntakeCommand;
-import frc.robot.commands.intake.StopIntakeCommand;
 import frc.robot.constants.RobotContainerConstants;
 import frc.robot.constants.SimulationConstants;
 import frc.robot.constants.VisionConstants;
@@ -42,8 +39,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-
-import java.util.List;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -71,10 +66,6 @@ public class RobotContainer {
   private final POVButton      rightSnapButton     = new POVButton(driverController, RobotContainerConstants.SNAP_RIGHT_DIRECTION);
   private final POVButton      backwardsSnapButton = new POVButton(driverController, RobotContainerConstants.SNAP_BACKWARDS_DIRECTION);
   private final JoystickButton stopSnapButton      = new JoystickButton(driverController, RobotContainerConstants.SNAP_STOP_BUTTON);
-
-  private final JoystickButton intakeRunButton = new JoystickButton(operatorController, RobotContainerConstants.INTAKE_RUN_BUTTON);
-  private final JoystickButton intakeStopButton = new JoystickButton(operatorController, RobotContainerConstants.INTAKE_STOP_BUTTON);
-  private final JoystickButton intakeLaunchButton = new JoystickButton(operatorController, RobotContainerConstants.INTAKE_LAUNCH_BUTTON);
 
   // Subsystems
   public static final GyroSubsystem gyroSubsystem                   = new GyroSubsystem("CANivore");
@@ -163,9 +154,6 @@ public class RobotContainer {
     rightSnapButton.onTrue(new DirectionSnapRight());
     backwardsSnapButton.onTrue(new DirectionSnapBackwards());
     stopSnapButton.onTrue(new StopSnap());
-    intakeRunButton.onTrue(new RunIntakeCommand(intakeSubsystem));
-    intakeStopButton.onTrue(new StopIntakeCommand(intakeSubsystem));
-    intakeLaunchButton.onTrue(new LaunchCoralCommand(intakeSubsystem));
   }
 
   /**

@@ -73,6 +73,17 @@ public class VisionSubsystemSim extends SubsystemBase implements VisionSubsystem
         Logger.recordOutput("Vision/Area", getTargetArea());
         Logger.recordOutput("Vision/PoseAmbiguity", getTargetPoseAmbiguity());
 
+        if (latestResult != null && latestResult.hasTargets()) {
+            PhotonTrackedTarget target = latestResult.getBestTarget();
+            Logger.recordOutput("Vision/TargetYaw", target.getYaw());
+            Logger.recordOutput("Vision/TargetDistance", target.getBestCameraToTarget().getTranslation().getNorm());
+            Logger.recordOutput("Vision/TargetID", target.getFiducialId());
+        } else {
+            Logger.recordOutput("Vision/TargetYaw", 0.0);
+            Logger.recordOutput("Vision/TargetDistance", 0.0);
+            Logger.recordOutput("Vision/TargetID", -1);
+        }
+
         // Log visible target poses
         List<Pose2d> visibleTargetPoses = new ArrayList<>();
         if (latestResult != null && latestResult.hasTargets()) {

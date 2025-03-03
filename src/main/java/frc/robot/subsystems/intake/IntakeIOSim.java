@@ -38,8 +38,10 @@ public class IntakeIOSim implements IntakeIO{
     public void setRunning(boolean runIntake) {
         System.out.println("DEBUG: Intake setRunning(" + runIntake + ")");
         if (runIntake) {
+            System.out.println("DEBUG: Starting intake");
             intakeSimulation.startIntake(); // Extends the intake out from the chassis frame and starts detecting contacts with game pieces
         } else {
+            System.out.println("DEBUG: Stopping intake");
             intakeSimulation.stopIntake(); // Retracts the intake into the chassis frame, disabling game piece collection
         }
     }

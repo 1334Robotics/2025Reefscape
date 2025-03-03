@@ -165,7 +165,8 @@ public class SwerveSubsystem extends SubsystemBase {
             Logger.recordOutput("Swerve/Module" + i + "/Angle", modulePositions[i].angle.getDegrees());
         }
 
-        Logger.recordOutput("Drive/Pose", swerveDrive.getPose());
+        Logger.recordOutput("Swerve/ChassisSpeeds", getChassisSpeeds());
+
         Pose2d currentPose = swerveDrive.getPose();
         Logger.recordOutput("Drive/Pose", currentPose);
         Logger.recordOutput("FieldSimulation/RobotPose", new Pose3d(currentPose));
