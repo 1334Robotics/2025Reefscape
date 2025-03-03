@@ -7,6 +7,7 @@ public class RobotContainerConstants {
     public static final int OPERATOR_CONTROLLER_PORT    = 1;
 
     public static final int MAILBOX_SHOOT_BUTTON = XboxMappings.Button.A;
+    public static final int MAILBOX_FEED_BUTTON  = XboxMappings.Button.Y;
 
     public static final double CONTROLLER_MOVEMENT_DEADBAND = 0.15;
     public static final double CONTROLLER_ROTATION_DEADBAND = 0.3;

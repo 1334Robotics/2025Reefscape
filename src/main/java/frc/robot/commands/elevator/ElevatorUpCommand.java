@@ -18,7 +18,12 @@ public class ElevatorUpCommand extends Command {
 
   @Override
   public void execute() {
-    RobotContainer.elevatorSubsystem.runMotor(-ElevatorConstants.ELEVATOR_UP_SPEED);
+    // Check if the elevator is locked, and if so, don't execute this
+    if(RobotContainer.elevatorSubsystem.lock) return;
+
+    RobotContainer.elevatorSubsystem.runMotor(((RobotContainer.elevatorSubsystem.getPosition() > ElevatorConstants.ELEVATOR_SLOW_HIGH_POS)
+                                                ? -(ElevatorConstants.ELEVATOR_SLOW_SPEED+0.05)
+                                                : -ElevatorConstants.ELEVATOR_UP_SPEED));
   }
 
   @Override
