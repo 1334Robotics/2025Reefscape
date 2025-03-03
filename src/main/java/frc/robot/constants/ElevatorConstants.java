@@ -29,7 +29,11 @@ public class ElevatorConstants {
     public static final int MOTOR_ONE_ID    = 20;
     public static final int LIMIT_SWITCH_ID = 8;
 
-    public static final double ELEVATOR_UP_SPEED    = 1;
-    public static final double ELEVATOR_DOWN_SPEED  = 0.85;
+    public static final double ELEVATOR_UP_SPEED    = 0.5;
+    public static final double ELEVATOR_DOWN_SPEED  = 0.4;
+    public static final double ELEVATOR_SLOW_SPEED  = 0.1;
     public static final double ELEVATOR_RESET_SPEED = 0.2;
+
+    public static final double ELEVATOR_SLOW_LOW_POS  = 0.5;
+    public static final double ELEVATOR_SLOW_HIGH_POS = 11;
 }

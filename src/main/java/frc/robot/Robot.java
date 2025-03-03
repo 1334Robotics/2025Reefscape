@@ -8,6 +8,8 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.elevator.ElevatorResetCommand;
+
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -112,6 +114,8 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     RobotContainer.swerveSubsystem.setFieldRelative(true);
+    // Have some flag to do this only once
+    (new ElevatorResetCommand()).schedule();
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove

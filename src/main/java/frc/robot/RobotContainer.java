@@ -13,6 +13,7 @@ import frc.robot.commands.flopper.FlopperUpCommand;
 import frc.robot.commands.gyro.GyroZeroCommand;
 import frc.robot.commands.mailbox.OutputLowCommand;
 import frc.robot.commands.mailbox.ShootCommand;
+import frc.robot.commands.mailbox.ForceFeedCommand;
 import frc.robot.commands.mailbox.OutputHighCommand;
 import frc.robot.commands.mailbox.StopCommand;
 import frc.robot.constants.ElevatorConstants;
@@ -66,6 +67,8 @@ public class RobotContainer {
   private final JoystickButton flopperUpButton         = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_UP_BUTTON);
   private final JoystickButton flopperDownButton       = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_DOWN_BUTTON);
   private final JoystickButton mailboxShootButton      = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_SHOOT_BUTTON);
+  private final JoystickButton mailboxFeedButton      = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_FEED_BUTTON);
+
 
   // Subsystems
   public static final GyroSubsystem           gyroSubsystem          = new GyroSubsystem("CANivore");
@@ -129,6 +132,7 @@ public class RobotContainer {
     flopperUpButton.whileTrue(new FlopperUpCommand());
     flopperDownButton.whileTrue(new FlopperDownCommand());
     mailboxShootButton.onTrue(new ShootCommand());
+    mailboxFeedButton.onTrue(new ForceFeedCommand());
   }
 
   /**

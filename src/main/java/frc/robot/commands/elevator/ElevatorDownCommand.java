@@ -18,7 +18,18 @@ public class ElevatorDownCommand extends Command {
 
   @Override
   public void execute() {
-    RobotContainer.elevatorSubsystem.runMotor(ElevatorConstants.ELEVATOR_DOWN_SPEED);
+    // Check if the elevator is locked, and if so, don't execute this
+    if(RobotContainer.elevatorSubsystem.lock) return;
+
+    // Check if the limit switch has been hit, and if so, stop
+    if(RobotContainer.elevatorSubsystem.limitSwitchSeen()) {
+      this.end(true);
+      return;
+    }
+
+    RobotContainer.elevatorSubsystem.runMotor(((RobotContainer.elevatorSubsystem.getPosition() < ElevatorConstants.ELEVATOR_SLOW_LOW_POS)
+                                                ? ElevatorConstants.ELEVATOR_SLOW_SPEED
+                                                : ElevatorConstants.ELEVATOR_DOWN_SPEED));
   }
 
   @Override
