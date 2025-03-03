@@ -38,7 +38,7 @@ public class ElevatorConstants {
     public static final double ELEVATOR_SLOW_HIGH_POS = 11;
 
     public static final double L1_POSITION = 2.789952;
-    public static final double L2_POSITION = 4.463580;
+    public static final double L2_POSITION = 4.513580;
     public static final double L3_POSITION = 7.915724;
     public static final double L4_POSITION = 0;
 
