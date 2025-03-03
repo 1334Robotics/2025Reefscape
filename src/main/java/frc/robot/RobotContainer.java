@@ -28,15 +28,18 @@ import frc.robot.subsystems.elevator.ElevatorSubsystem;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import frc.robot.commands.auto.PathFollowerCommand;
+import frc.robot.commands.auto.SimulationPathTestCommand;
+import frc.robot.commands.auto.SimulationTestRunner;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.solenoid.SolenoidSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
@@ -44,6 +47,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.laser.LaserCanSubsystem;
 import frc.robot.commands.laser.MonitorLaserCanCommand;
 import frc.robot.commands.elevator.ElevatorHeightCalculation;
+import edu.wpi.first.wpilibj.DriverStation;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -106,12 +110,15 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // Configure path planner
+    // Configure PathPlanner
     AutoConfigurer.configure();
-
-    // Create an auto chooser and add it to SmartDashboard
+    
+    // Create auto chooser
     autoChooser = AutoBuilder.buildAutoChooser();
-    SmartDashboard.putData("[PATHPLANNER] Auto Chooser", autoChooser);
+    SmartDashboard.putData("Auto Chooser", autoChooser);
+    
+    // Add individual path buttons to dashboard
+    addPathPlannerButtonsToDashboard();
 
     // Configure the trigger bindings
     configureBindings();
@@ -124,7 +131,11 @@ public class RobotContainer {
 
     //Conditionally initialize the simulation subsystem
     if (Robot.isSimulation()) {
-      simulationSubsystem = new SimulationSubsystem(swerveSubsystem.getSwerveDriveSimulation(), swerveSubsystem);
+      // Set up simulation-specific configurations
+      setupSimulation();
+      
+      // Create simplified simulation subsystem
+      simulationSubsystem = new SimulationSubsystem(swerveSubsystem);
       simulationSubsystem.setInitialPose(new Pose2d(SimulationConstants.ROBOT_STARTING_POSE_X, SimulationConstants.ROBOT_STARTING_POSE_Y, Rotation2d.fromDegrees(0)));
     } else {
       simulationSubsystem = null;
@@ -139,7 +150,72 @@ public class RobotContainer {
     // Configure default command if you want continuous monitoring
     laserCanSubsystem.setDefaultCommand(new MonitorLaserCanCommand());
   }
+  
+  /**
+   * Configure simulation-specific settings
+   */
+  private void setupSimulation() {
+    System.out.println("Setting up simulation environment");
+    
+    // Suppress joystick warnings in simulation
+    DriverStation.silenceJoystickConnectionWarning(true);
+    
+    // Add simulation-specific controls
+    SmartDashboard.putData("SIM: Zero Gyro", Commands.runOnce(() -> {
+      RobotContainer.gyroSubsystem.zero();
+      System.out.println("Gyro zeroed in simulation");
+    }));
+    
+    // Add a quick test button that combines zeroing the gyro and resetting pose
+    SmartDashboard.putData("SIM: Reset All", Commands.runOnce(() -> {
+      RobotContainer.gyroSubsystem.zero();
+      
+      if (simulationSubsystem != null) {
+        simulationSubsystem.setInitialPose(new Pose2d(
+          SimulationConstants.ROBOT_STARTING_POSE_X, 
+          SimulationConstants.ROBOT_STARTING_POSE_Y, 
+          Rotation2d.fromDegrees(0)));
+      }
+      
+      System.out.println("Robot reset in simulation");
+    }));
+  }
+  
+  /**
+   * Adds buttons to the SmartDashboard to run individual PathPlanner paths
+   */
+  private void addPathPlannerButtonsToDashboard() {
+    // Add buttons for individual paths
+    SmartDashboard.putData("Path: Feed12Tag17Left", createPathCommand("Feed12Tag17Left"));
+    SmartDashboard.putData("Path: Feed12Tag17Right", createPathCommand("Feed12Tag17Right"));
+    SmartDashboard.putData("Path: Feed12Tag18Left", createPathCommand("Feed12Tag18Left"));
+    SmartDashboard.putData("Path: Feed12Tag18Right", createPathCommand("Feed12Tag18Right"));
+    SmartDashboard.putData("Path: Feed12Tag19Left", createPathCommand("Feed12Tag19Left"));
+    SmartDashboard.putData("Path: Feed12Tag19Right", createPathCommand("Feed12Tag19Right"));
+    SmartDashboard.putData("Path: Feed12Tag20Left", createPathCommand("Feed12Tag20Left"));
+    SmartDashboard.putData("Path: Feed12Tag20Right", createPathCommand("Feed12Tag20Right"));
+    SmartDashboard.putData("Path: Feed12Tag21Left", createPathCommand("Feed12Tag21Left"));
+    SmartDashboard.putData("Path: Feed12Tag21Right", createPathCommand("Feed12Tag21Right"));
+    SmartDashboard.putData("Path: Feed12Tag22Left", createPathCommand("Feed12Tag22Left"));
+    SmartDashboard.putData("Path: Feed12Tag22Right", createPathCommand("Feed12Tag22Right"));
+    SmartDashboard.putData("Path: AutoDrive20", createPathCommand("AutoDrive20"));
+    SmartDashboard.putData("Path: AutoDrive22", createPathCommand("AutoDrive22"));
+    
+    // Add simulation-specific test buttons
+    if (Robot.isSimulation()) {
+      addSimulationTestButtons();
+    }
+  }
 
+  /**
+   * Creates a command to follow a path with proper field-relative setup
+   * 
+   * @param pathName the name of the path to follow
+   * @return a command that will follow the specified path
+   */
+  private Command createPathCommand(String pathName) {
+    return new PathFollowerCommand(pathName);
+  }
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
@@ -167,6 +243,11 @@ public class RobotContainer {
     elevatorL3Trigger.onTrue(new RaiseElevatorCommand(ElevatorHeightCalculation.L3));
     elevatorL4Trigger.onTrue(new RaiseElevatorCommand(ElevatorHeightCalculation.L4));
     elevatorLowerTrigger.onTrue(new LowerElevatorCommand());
+    
+    // Add controller bindings for common PathPlanner paths if needed
+    // Example: Add a quick access path to a commonly used driver controller button
+    // new JoystickButton(driverController, XboxMappings.BUTTON_Y).onTrue(createPathCommand("AutoDrive20"));
+    // new JoystickButton(driverController, XboxMappings.BUTTON_X).onTrue(createPathCommand("AutoDrive22"));
   }
 
   /**
@@ -175,6 +256,56 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser.getSelected();
+    // Log the selected auto routine
+    Command selectedAuto = autoChooser.getSelected();
+    if (selectedAuto != null) {
+      System.out.println("Selected autonomous command: " + selectedAuto.getName());
+    } else {
+      System.out.println("No autonomous command selected!");
+    }
+    
+    return selectedAuto;
+  }
+  
+  /**
+   * Gets the simulation subsystem for use in simulation mode
+   * 
+   * @return the simulation subsystem, or null if not in simulation mode
+   */
+  public SimulationSubsystem getSimulationSubsystem() {
+    return simulationSubsystem;
+  }
+
+  /**
+   * Adds simulation-specific test buttons to the dashboard
+   */
+  private void addSimulationTestButtons() {
+    // Add simulation test buttons for each path
+    SmartDashboard.putData("SIM Test: Feed12Tag17Left", 
+        new SimulationPathTestCommand("Feed12Tag17Left"));
+    SmartDashboard.putData("SIM Test: Feed12Tag17Right", 
+        new SimulationPathTestCommand("Feed12Tag17Right"));
+    SmartDashboard.putData("SIM Test: Feed12Tag18Left", 
+        new SimulationPathTestCommand("Feed12Tag18Left"));
+    SmartDashboard.putData("SIM Test: Feed12Tag18Right", 
+        new SimulationPathTestCommand("Feed12Tag18Right"));
+    SmartDashboard.putData("SIM Test: AutoDrive20", 
+        new SimulationPathTestCommand("AutoDrive20"));
+    SmartDashboard.putData("SIM Test: AutoDrive22", 
+        new SimulationPathTestCommand("AutoDrive22"));
+    
+    // Add a button to run the full automated test sequence
+    SmartDashboard.putData("SIM: Run Test Sequence", new SimulationTestRunner());
+    
+    // Add a button to reset the robot pose in simulation
+    SmartDashboard.putData("SIM: Reset Robot Pose", Commands.runOnce(() -> {
+      if (simulationSubsystem != null) {
+        simulationSubsystem.setInitialPose(new Pose2d(
+          SimulationConstants.ROBOT_STARTING_POSE_X, 
+          SimulationConstants.ROBOT_STARTING_POSE_Y, 
+          Rotation2d.fromDegrees(0)));
+        System.out.println("Robot pose reset in simulation");
+      }
+    }));
   }
 }
