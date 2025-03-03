@@ -1,5 +1,4 @@
 package frc.robot.constants;
-
 import frc.robot.XboxMappings;
 
 public class RobotContainerConstants {
@@ -8,6 +7,12 @@ public class RobotContainerConstants {
 
     public static final int MAILBOX_SHOOT_BUTTON = XboxMappings.Button.A;
     public static final int MAILBOX_FEED_BUTTON  = XboxMappings.Button.Y;
+
+    public static final int ELEVATOR_L1_BUTTON = XboxMappings.Button.Y;
+    public static final int[] ELEVATOR_L2_BUTTONS = {XboxMappings.Button.Y, XboxMappings.Button.B};
+    public static final int[] ELEVATOR_L3_BUTTONS = {XboxMappings.Button.Y, XboxMappings.Button.A};
+    public static final int[] ELEVATOR_L4_BUTTONS = {XboxMappings.Button.Y, XboxMappings.Button.X};
+    public static final int[] ELEVATOR_LOWER_BUTTON = {XboxMappings.Button.A, XboxMappings.Button.B};
 
     public static final double CONTROLLER_MOVEMENT_DEADBAND = 0.15;
     public static final double CONTROLLER_ROTATION_DEADBAND = 0.3;
