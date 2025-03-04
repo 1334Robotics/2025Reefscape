@@ -107,13 +107,10 @@ public class SwerveSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         if (Robot.isSimulation()) {
-        // Define wheel circumference
-        double wheelCircumference = 2 * Math.PI * 2; // Wheel circumference in meters
-
         // Get simulated wheel positions
         SwerveModulePosition[] simulatedPositions = new SwerveModulePosition[4];
         for (int i = 0; i < 4; i++) {
-            double drivePositionMeters = swerveDriveSimulation.getModules()[i].getDriveWheelFinalPosition().in(Units.Rotations) * wheelCircumference;
+            double drivePositionMeters = swerveDriveSimulation.getModules()[i].getDriveWheelFinalPosition().in(Units.Rotations);
             Rotation2d steerAngle = swerveDriveSimulation.getModules()[i].getSteerAbsoluteFacing();
             simulatedPositions[i] = new SwerveModulePosition(drivePositionMeters, steerAngle);
         }
