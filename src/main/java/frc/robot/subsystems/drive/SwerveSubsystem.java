@@ -5,7 +5,6 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;//NEW CAL
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -106,24 +105,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        if (Robot.isSimulation()) {
-        // Get simulated wheel positions
-        SwerveModulePosition[] simulatedPositions = new SwerveModulePosition[4];
-        for (int i = 0; i < 4; i++) {
-            double drivePositionMeters = swerveDriveSimulation.getModules()[i].getDriveWheelFinalPosition().in(Units.Rotations);
-            Rotation2d steerAngle = swerveDriveSimulation.getModules()[i].getSteerAbsoluteFacing();
-            simulatedPositions[i] = new SwerveModulePosition(drivePositionMeters, steerAngle);
-        }
-    
-        // Log simulated pose and odometry pose for debugging
-        Logger.recordOutput("Swerve/SimulatedPose", swerveDriveSimulation.getSimulatedDriveTrainPose());
-        }
-
         Logger.recordOutput("Swerve/ChassisSpeeds", getChassisSpeeds());
 
-        Pose2d currentPose = swerveDrive.getPose();
-        Logger.recordOutput("Drive/Pose", currentPose);
-        Logger.recordOutput("FieldSimulation/RobotPose", new Pose3d(currentPose));
         Logger.recordOutput("FieldSimulation/RobotPose", new Pose3d(swerveDrive.getPose()));
 
         // Update the encoder positions
