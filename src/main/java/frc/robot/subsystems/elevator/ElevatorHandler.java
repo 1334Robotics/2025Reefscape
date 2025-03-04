@@ -31,6 +31,10 @@ public class ElevatorHandler extends SubsystemBase {
         this.hitTarget = false;
     }
 
+    public ElevatorLevel getLevel() {
+        return this.targetLevel;
+    }
+
     @Override
     public void periodic() {
         if(!this.hitTarget) {

@@ -13,6 +13,8 @@ import frc.robot.commands.directionSnaps.DirectionSnapRight;
 import frc.robot.commands.directionSnaps.StopSnap;
 import frc.robot.commands.drive.DriveCommand;
 import frc.robot.commands.elevator.ElevatorDownCommand;
+import frc.robot.commands.elevator.ElevatorGotoBottomCommand;
+import frc.robot.commands.elevator.ElevatorGotoFeedCommand;
 import frc.robot.commands.elevator.ElevatorGotoL1Command;
 import frc.robot.commands.elevator.ElevatorGotoL2Command;
 import frc.robot.commands.elevator.ElevatorGotoL3Command;
@@ -23,7 +25,7 @@ import frc.robot.commands.flopper.FlopperUpCommand;
 import frc.robot.commands.gyro.GyroZeroCommand;
 import frc.robot.commands.mailbox.OutputLowCommand;
 import frc.robot.commands.mailbox.ShootCommand;
-import frc.robot.commands.mailbox.ForceFeedCommand;
+import frc.robot.commands.mailbox.MailboxFeedCommand;
 import frc.robot.commands.mailbox.OutputHighCommand;
 import frc.robot.commands.mailbox.StopCommand;
 import frc.robot.constants.ElevatorConstants;
@@ -85,7 +87,7 @@ public class RobotContainer {
   private final JoystickButton flopperUpButton         = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_UP_BUTTON);
   private final JoystickButton flopperDownButton       = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_DOWN_BUTTON);
   private final JoystickButton mailboxShootButton      = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_SHOOT_BUTTON);
-  private final JoystickButton mailboxFeedButton      = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_FEED_BUTTON);
+  private final JoystickButton mailboxFeedButton       = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_FEED_BUTTON);
 
   // Subsystems
   public static final GyroSubsystem           gyroSubsystem          = new GyroSubsystem("CANivore");
@@ -141,10 +143,12 @@ public class RobotContainer {
     SmartDashboard.putData("[CLIMB] Unlock", new UnlockClimbCommand());
     SmartDashboard.putData("[CLIMB] Stop", new StopClimbCommand());
 
-    SmartDashboard.putData("[ELEVATOR] L1", new ElevatorGotoL1Command());
-    SmartDashboard.putData("[ELEVATOR] L2", new ElevatorGotoL2Command());
-    SmartDashboard.putData("[ELEVATOR] L3", new ElevatorGotoL3Command());
-    SmartDashboard.putData("[ELEVATOR] L4", new ElevatorGotoL4Command());
+    SmartDashboard.putData("[ELEVATOR] Bottom", new ElevatorGotoBottomCommand());
+    SmartDashboard.putData("[ELEVATOR] Feed",   new ElevatorGotoFeedCommand());
+    SmartDashboard.putData("[ELEVATOR] L1",     new ElevatorGotoL1Command());
+    SmartDashboard.putData("[ELEVATOR] L2",     new ElevatorGotoL2Command());
+    SmartDashboard.putData("[ELEVATOR] L3",     new ElevatorGotoL3Command());
+    SmartDashboard.putData("[ELEVATOR] L4",     new ElevatorGotoL4Command());
   }
 
 
@@ -169,7 +173,7 @@ public class RobotContainer {
     flopperUpButton.whileTrue(new FlopperUpCommand());
     flopperDownButton.whileTrue(new FlopperDownCommand());
     mailboxShootButton.onTrue(new ShootCommand());
-    mailboxFeedButton.onTrue(new ForceFeedCommand());
+    mailboxFeedButton.onTrue(new MailboxFeedCommand());
   }
 
   /**
