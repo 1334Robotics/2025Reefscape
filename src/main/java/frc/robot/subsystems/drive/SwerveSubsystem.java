@@ -19,6 +19,7 @@ import swervelib.SwerveController;
 import swervelib.SwerveDrive;
 import swervelib.SwerveModule;
 import swervelib.parser.SwerveParser;
+import swervelib.imu.SwerveIMU;
 import frc.robot.subsystems.gyro.GyroIO;
 import frc.robot.subsystems.gyro.GyroIOPigeon2;
 import frc.robot.subsystems.gyro.GyroIOSim;
@@ -36,6 +37,7 @@ import org.ironmaple.simulation.SimulatedArena;
 
 public class SwerveSubsystem extends SubsystemBase {
     private final SwerveDrive swerveDrive;
+    private final VisionSubsystem visionSubsystem;
     private boolean fieldRelative;
     private SwerveDriveSimulation swerveDriveSimulation;
     private int count = 0;
@@ -228,6 +230,10 @@ public class SwerveSubsystem extends SubsystemBase {
     public void steer(double steer) {
         swerveDrive.drive(new Translation2d(0, 0), steer * swerveDrive.swerveController.config.maxAngularVelocity,
                           false, false);
+    }
+
+    public void autoDrive(ChassisSpeeds speeds) {
+        swerveDrive.drive(speeds);
     }
 
     public void zeroGyro() {
