@@ -47,7 +47,8 @@ import frc.robot.subsystems.elevator.ElevatorSubsystem;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
-
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.PathConstraints;
 import frc.robot.subsystems.flopper.FlopperSubsystem;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -55,12 +56,17 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import java.util.List;
+import java.io.IOException;
+import java.io.File;
+import edu.wpi.first.wpilibj.Filesystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -109,12 +115,55 @@ public class RobotContainer {
   //public final SimulationSubsystem simulationSubsystem;
 
   // Auto chooser for PathPlanner
-  private final SendableChooser<Command> autoChooser;
+  private SendableChooser<Command> autoChooser;
+  private SendableChooser<Command> pathChooser; // New path chooser for individual paths
+
+  /**
+   * List available path files on the dashboard
+   */
+  private void listAvailablePaths() {
+    try {
+      // Use Filesystem to get the deploy directory in a platform-independent way
+      File pathsDir = new File(Filesystem.getDeployDirectory(), "pathplanner/paths");
+      if (pathsDir.exists() && pathsDir.isDirectory()) {
+        File[] pathFiles = pathsDir.listFiles((dir, name) -> name.endsWith(".path"));
+        if (pathFiles != null) {
+          // Create a text listing of available paths for reference
+          StringBuilder pathsList = new StringBuilder();
+          for (File file : pathFiles) {
+            pathsList.append("- ").append(file.getName().replace(".path", "")).append("\n");
+          }
+          SmartDashboard.putString("Path Files (Reference Only)", pathsList.toString());
+        }
+      }
+      
+      // Also list available auto files
+      File autosDir = new File(Filesystem.getDeployDirectory(), "pathplanner/autos");
+      if (autosDir.exists() && autosDir.isDirectory()) {
+        File[] autoFiles = autosDir.listFiles((dir, name) -> name.endsWith(".auto"));
+        if (autoFiles != null) {
+          StringBuilder autosList = new StringBuilder();
+          for (File file : autoFiles) {
+            autosList.append("- ").append(file.getName().replace(".auto", "")).append("\n");
+          }
+          SmartDashboard.putString("Auto Files (Reference Only)", autosList.toString());
+        }
+      }
+    } catch (Exception e) {
+      System.err.println("Error listing path files: " + e.getMessage());
+    }
+  }
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     AutoConfigurer.configure();
-    autoChooser = AutoBuilder.buildAutoChooser();
+    
+    // Initialize both choosers
+    autoChooser = new SendableChooser<>();
+    pathChooser = new SendableChooser<>();
+
+    // Set up autonomous options and path chooser
+    configureAutoChooser();
 
     // Configure the trigger bindings
     configureBindings();
@@ -145,8 +194,70 @@ public class RobotContainer {
     SmartDashboard.putData("[ELEVATOR] L2", new ElevatorGotoL2Command());
     SmartDashboard.putData("[ELEVATOR] L3", new ElevatorGotoL3Command());
     SmartDashboard.putData("[ELEVATOR] L4", new ElevatorGotoL4Command());
+
+    SmartDashboard.putString("Current Path", "None");
+
+    // List available paths for manual selection
+    listAvailablePaths();
   }
 
+  private void configureAutoChooser() {
+    // Build an auto chooser using PathPlanner's built-in method
+    // This will automatically find all autos in deploy/pathplanner/autos
+    autoChooser = AutoBuilder.buildAutoChooser();
+    
+    // Override the default option to be "Do Nothing"
+    autoChooser.setDefaultOption("Do Nothing", new InstantCommand());
+    
+    // Put on dashboard with descriptive name
+    SmartDashboard.putData("Full Auto Routines", autoChooser);
+    
+    // Create a chooser for individual paths
+    pathChooser = new SendableChooser<>();
+    pathChooser.setDefaultOption("Do Nothing", new InstantCommand());
+    
+    // Add all paths from the paths directory
+    try {
+      File pathsDir = new File(Filesystem.getDeployDirectory(), "pathplanner/paths");
+      if (pathsDir.exists() && pathsDir.isDirectory()) {
+        File[] pathFiles = pathsDir.listFiles((dir, name) -> name.endsWith(".path"));
+        if (pathFiles != null) {
+          for (File file : pathFiles) {
+            String pathName = file.getName().replace(".path", "");
+            // Create a command that follows just this path
+            Command pathCommand = getPathCommand(pathName);
+            pathChooser.addOption(pathName, pathCommand);
+          }
+        }
+      }
+    } catch (Exception e) {
+      System.err.println("Error configuring path chooser: " + e.getMessage());
+    }
+    
+    // Put the path chooser on the dashboard
+    SmartDashboard.putData("Individual Path Selector", pathChooser);
+    
+    // List available paths for reference
+    listAvailablePaths();
+  }
+  
+  /**
+   * Get a command to follow a specific path
+   * 
+   * @param pathName The name of the path to follow
+   * @return A command that follows the specified path
+   */
+  private Command getPathCommand(String pathName) {
+    try {
+      // Load path from file
+      PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+      // Create command to follow the path
+      return AutoBuilder.followPath(path);
+    } catch (Exception e) {
+      System.err.println("Error loading path '" + pathName + "': " + e.getMessage());
+      return new InstantCommand();
+    }
+  }
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
@@ -177,7 +288,37 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand() {
+  public Command getAutonomousCommand() {//auto path selection via chooser
     return autoChooser.getSelected();
+  }
+
+  public Command getAutonomousPathCommand() {//manual path selection via path name 
+    // Return the command selected from the path chooser
+    return pathChooser.getSelected();
+  }
+
+  /**
+   * Get an autonomous command for a specific named auto routine
+   * 
+   * @param autoName The name of the auto routine to run
+   * @return The command to run the specified auto
+   */
+  public Command getAutonomousCommandByName(String autoName) {
+    try {
+      return new PathPlannerAuto(autoName);
+    } catch (Exception e) {
+      System.err.println("Error loading auto '" + autoName + "': " + e.getMessage());
+      return Commands.none();
+    }
+  }
+
+  /**
+   * Get a command to execute the currently selected path from the path chooser
+   * This is useful for testing paths during teleop
+   * 
+   * @return Command to execute the selected path
+   */
+  public Command runSelectedPath() {
+    return pathChooser.getSelected();
   }
 }
