@@ -105,7 +105,7 @@ public class RobotContainer {
     pathPlannerHelper = new PathPlannerHelper(swerveSubsystem);
 
     //Conditionally initialize the simulation subsystem
-    if (Robot.isSimulation()) {
+    if (true) {
     //   simulationSubsystem = new SimulationSubsystem(swerveSubsystem.getSwerveDriveSimulation(), swerveSubsystem);
     //   simulationSubsystem.setInitialPose(new Pose2d(SimulationConstants.ROBOT_STARTING_POSE_X, SimulationConstants.ROBOT_STARTING_POSE_Y, Rotation2d.fromDegrees(0)));
     // } else {
