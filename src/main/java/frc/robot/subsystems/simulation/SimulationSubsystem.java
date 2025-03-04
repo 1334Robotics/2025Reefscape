@@ -12,13 +12,10 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import org.littletonrobotics.junction.Logger;
 
-import java.util.Optional;
-
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralAlgaeStack;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnField;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeReefSimulation;
 
 public class SimulationSubsystem extends SubsystemBase {
 
@@ -26,7 +23,6 @@ public class SimulationSubsystem extends SubsystemBase {
     private final SwerveDriveSimulation swerveDriveSimulation;
     private final SwerveSubsystem swerveSubsystem;
     private final IntakeIOSim intakeIOSim;
-    private final AIRobotInSimulation[] instances = new AIRobotInSimulation[1];
     
 
     public SimulationSubsystem(SwerveDriveSimulation swerveDriveSimulation, SwerveSubsystem swerveSubsystem) {
