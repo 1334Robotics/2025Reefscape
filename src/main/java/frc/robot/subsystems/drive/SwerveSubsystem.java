@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.constants.SimulationConstants;
@@ -47,12 +48,43 @@ import java.io.File;
 import java.io.IOException;
 import org.ironmaple.simulation.SimulatedArena;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.commands.PathfindingCommand;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.DriveFeedforwards;
+import com.pathplanner.lib.util.swerve.SwerveSetpoint;
+import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import swervelib.telemetry.SwerveDriveTelemetry;
+import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
+import static edu.wpi.first.units.Units.Meter;
+import edu.wpi.first.wpilibj2.command.Commands;
+
+
+
 public class SwerveSubsystem extends SubsystemBase {
     private final SwerveDrive swerveDrive;
     private boolean fieldRelative;
     private SwerveDriveSimulation swerveDriveSimulation;
     private int count = 0;
     private boolean allowDrive;
+
+  /**
+   * Enable vision odometry updates while driving.
+   */
+    private final boolean     visionDriveTest = false;
+  /**
+   * PhotonVision class to keep an accurate odometry.
+   */
+   private VisionSubsystem vision;
+
+
 
     public SwerveSubsystem() {
         this.fieldRelative = false;
@@ -61,12 +93,22 @@ public class SwerveSubsystem extends SubsystemBase {
         final GyroSimulation gyroSimulation;
         final ModuleIO[] moduleIOs;
         SmartDashboard.putBoolean("[SWERVE] Field Relative", this.fieldRelative);
- 
+        boolean blueAlliance = false;
+        // Set the starting pose based on the alliance color - THIS NEEDS TO BE UPDATED FOR COMPETITION (blue alliance is false) maybe get this from a constant file? or a method?
+        Pose2d startingPose = blueAlliance ? new Pose2d(new Translation2d(Meter.of(1),
+                                                                          Meter.of(4)),
+                                                        Rotation2d.fromDegrees(0))
+                                           : new Pose2d(new Translation2d(Meter.of(16),
+                                                                          Meter.of(4)),
+                                                        Rotation2d.fromDegrees(180));
         
+        // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary objects being created.
+        SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
         // Create the swerve drive
         File swerveDirectory = new File(Filesystem.getDeployDirectory(), SwerveConstants.SWERVE_DRIVE_DIRECTORY);
         try {
-            this.swerveDrive = new SwerveParser(swerveDirectory).createSwerveDrive(SwerveConstants.MAX_SPEED);
+            this.swerveDrive = new SwerveParser(swerveDirectory).createSwerveDrive(SwerveConstants.MAX_SPEED, startingPose);
+
 
             if (Robot.isSimulation()) {
                 // Create and configure a drivetrain simulation configuration
@@ -94,8 +136,8 @@ public class SwerveSubsystem extends SubsystemBase {
                 this.swerveDriveSimulation = new SwerveDriveSimulation(
                 // Specify Configuration
                 driveTrainSimulationConfig,
-                // Specify starting pose
-                new Pose2d(0, 0, new Rotation2d())
+                // Specify starting pose - this is the starting pose of the robot on the field in simulation
+                new Pose2d(5, 7, new Rotation2d(-180))
                 );
 
                 // Register with simulation world
@@ -112,10 +154,37 @@ public class SwerveSubsystem extends SubsystemBase {
             throw new RuntimeException(e);
         }
         
+    
+        
+        // Enable heading correction and cosine compensator
         this.swerveDrive.setHeadingCorrection(true);
         this.swerveDrive.setCosineCompensator(true);
-    
-}
+        this.swerveDrive.setHeadingCorrection(false); // Heading correction should only be used while controlling the robot via angle.
+        this.swerveDrive.setCosineCompensator(false);//!SwerveDriveTelemetry.isSimulation); // Disables cosine compensation for simulations since it causes discrepancies not seen in real life.
+        this.swerveDrive.setAngularVelocityCompensation(true,
+                                               true,
+                                               0.1); //Correct for skew that gets worse as angular velocity increases. Start with a coefficient of 0.1.
+        this.swerveDrive.setModuleEncoderAutoSynchronize(false,
+                                                1); // Enable if you want to resynchronize your absolute encoders and motor encoders periodically when they are not moving.
+        // swerveDrive.pushOffsetsToEncoders(); // Set the absolute encoder to be used over the internal encoder and push the offsets onto it. Throws warning if not possible
+        if (visionDriveTest)
+        {
+        setupPhotonVision();
+      // Stop the odometry thread if we are using vision that way we can synchronize updates better.
+        swerveDrive.stopOdometryThread();
+        }
+        setupPathPlanner();
+        // Comment out the line that uses RobotModeTriggers
+        // RobotModeTriggers.autonomous().onTrue(Commands.runOnce(this::zeroGyro));
+    }
+
+  /**
+   * Setup the photon vision class.
+   */
+  public void setupPhotonVision()
+  {
+    vision = new VisionSubsystem();
+  }
 
     @Override
     public void periodic() {
@@ -325,5 +394,69 @@ private Pose2d calculateRobotPoseFromVision(Transform3d targetToCamera) {
             new double[] {totalStdDev, totalStdDev, totalStdDev * 2} // Higher rotation uncertainty
         );
     }
+   /**
+   * Setup AutoBuilder for PathPlanner.
+   */
+  public void setupPathPlanner()
+  {
+    // Load the RobotConfig from the GUI settings. You should probably
+    // store this in your Constants file
+    RobotConfig config;
+    try
+    {
+      config = RobotConfig.fromGUISettings();
+
+      final boolean enableFeedforward = true;
+      // Configure AutoBuilder last
+      AutoBuilder.configure(
+          swerveDrive::getPose, // Robot pose supplier
+          swerveDrive::resetOdometry, // Method to reset odometry (will be called if your auto has a starting pose)
+          swerveDrive::getRobotVelocity, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+          (speedsRobotRelative, moduleFeedForwards) -> {
+            if (enableFeedforward)
+            {
+              swerveDrive.drive(
+                  speedsRobotRelative,
+                  swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
+                  moduleFeedForwards.linearForces()
+                               );
+            } else
+            {
+              swerveDrive.setChassisSpeeds(speedsRobotRelative);
+            }
+          },
+          // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
+          new PPHolonomicDriveController(
+              new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants - should to be tuned for competition
+              new PIDConstants(5.0, 0.0, 0.0)  // Rotation PID constants - should to be tuned for competition
+          ),
+          config,
+          // The robot configuration
+          () -> {
+            // Boolean supplier that controls when the path will be mirrored for the red alliance
+            // This will flip the path being followed to the red side of the field.
+            // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+            var alliance = DriverStation.getAlliance();
+            if (alliance.isPresent()) {
+              return alliance.get() == DriverStation.Alliance.Red;
+            }
+            return false;
+          },
+          this
+          // Reference to this subsystem to set requirements
+      );
+
+    } catch (Exception e)
+    {
+      // Handle exception as needed
+      e.printStackTrace();
+    }
+
+    //Preload PathPlanner Path finding
+    // IF USING CUSTOM PATHFINDER ADD BEFORE THIS LINE
+    PathfindingCommand.warmupCommand().schedule();
+  }
+
 
 }
