@@ -74,15 +74,19 @@ public class SwerveSubsystem extends SubsystemBase {
     private SwerveDriveSimulation swerveDriveSimulation;
     private int count = 0;
     private boolean allowDrive;
-
-  /**
-   * Enable vision odometry updates while driving.
-   */
+    
+    // Add speed scaling factor for testing - set to a value between 0.0 and 1.0
+    // 0.5 means 50% of normal speed, 0.3 means 30% of normal speed
+    private final double TESTING_SPEED_FACTOR = 0.3; // Adjust this value as needed for safe testing
+    
+    /**
+     * Enable vision odometry updates while driving.
+     */
     private final boolean     visionDriveTest = false;
-  /**
-   * PhotonVision class to keep an accurate odometry.
-   */
-   private VisionSubsystem vision;
+    /**
+     * PhotonVision class to keep an accurate odometry.
+     */
+    private VisionSubsystem vision;
 
 
 
@@ -415,14 +419,27 @@ private Pose2d calculateRobotPoseFromVision(Transform3d targetToCamera) {
           (speedsRobotRelative, moduleFeedForwards) -> {
             if (enableFeedforward)
             {
+              // Apply speed factor to limit velocity during testing
+              ChassisSpeeds scaledSpeeds = new ChassisSpeeds(
+                  speedsRobotRelative.vxMetersPerSecond * TESTING_SPEED_FACTOR,
+                  speedsRobotRelative.vyMetersPerSecond * TESTING_SPEED_FACTOR,
+                  speedsRobotRelative.omegaRadiansPerSecond * TESTING_SPEED_FACTOR
+              );
+              
               swerveDrive.drive(
-                  speedsRobotRelative,
-                  swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
-                  moduleFeedForwards.linearForces()
+                  scaledSpeeds,
+                  swerveDrive.kinematics.toSwerveModuleStates(scaledSpeeds),
+                  moduleFeedForwards.linearForces() // Keep the original feedforward forces
                                );
             } else
             {
-              swerveDrive.setChassisSpeeds(speedsRobotRelative);
+              // Apply speed factor to limit velocity during testing
+              ChassisSpeeds scaledSpeeds = new ChassisSpeeds(
+                  speedsRobotRelative.vxMetersPerSecond * TESTING_SPEED_FACTOR,
+                  speedsRobotRelative.vyMetersPerSecond * TESTING_SPEED_FACTOR,
+                  speedsRobotRelative.omegaRadiansPerSecond * TESTING_SPEED_FACTOR
+              );
+              swerveDrive.setChassisSpeeds(scaledSpeeds);
             }
           },
           // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds

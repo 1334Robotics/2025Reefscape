@@ -66,6 +66,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import java.util.List;
 import java.io.IOException;
 import java.io.File;
+
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 
 /**
@@ -117,6 +119,7 @@ public class RobotContainer {
   // Auto chooser for PathPlanner
   private SendableChooser<Command> autoChooser;
   private SendableChooser<Command> pathChooser; // New path chooser for individual paths
+  private SendableChooser<String> masterChooser;
 
   /**
    * List available path files on the dashboard
@@ -157,11 +160,13 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     AutoConfigurer.configure();
+    DriverStation.silenceJoystickConnectionWarning(true);//silence the warning about the joystick connection
     
-    // Initialize both choosers
+    // Initialize all choosers
     autoChooser = new SendableChooser<>();
     pathChooser = new SendableChooser<>();
-
+    masterChooser = new SendableChooser<>();
+    
     // Set up autonomous options and path chooser
     configureAutoChooser();
 
@@ -202,6 +207,12 @@ public class RobotContainer {
   }
 
   private void configureAutoChooser() {
+    // Set up master chooser to select between auto routines and individual paths
+    masterChooser = new SendableChooser<>();
+    masterChooser.setDefaultOption("Use Auto Routines", "AUTO");
+    masterChooser.addOption("Use Individual Paths", "PATH");
+    SmartDashboard.putData("Chooser Selection", masterChooser);
+    
     // Build an auto chooser using PathPlanner's built-in method
     // This will automatically find all autos in deploy/pathplanner/autos
     autoChooser = AutoBuilder.buildAutoChooser();
@@ -250,12 +261,30 @@ public class RobotContainer {
   private Command getPathCommand(String pathName) {
     try {
       // Load path from file
-      PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+      System.out.println("Attempting to load path: " + pathName);
+      final String cleanPathName;
+      if (pathName.endsWith(".path")) {
+        cleanPathName = pathName.substring(0, pathName.length() - 5);
+      } else {
+        cleanPathName = pathName;
+      }
+      
+      PathPlannerPath path = PathPlannerPath.fromPathFile(cleanPathName);
+      
+      if (path == null) {
+        System.err.println("ERROR: Path was null for: " + cleanPathName);
+        return new InstantCommand(() -> System.out.println("Path was null"));
+      }
+      
       // Create command to follow the path
-      return AutoBuilder.followPath(path);
+      return AutoBuilder.followPath(path).finallyDo(() -> {
+        // Log when path completes
+        System.out.println("Path " + cleanPathName + " completed");
+      });
     } catch (Exception e) {
       System.err.println("Error loading path '" + pathName + "': " + e.getMessage());
-      return new InstantCommand();
+      e.printStackTrace(); // Print the stack trace for more detailed debugging
+      return new InstantCommand(() -> System.out.println("Path loading failed: " + e.getMessage()));
     }
   }
 
@@ -281,6 +310,11 @@ public class RobotContainer {
     flopperDownButton.whileTrue(new FlopperDownCommand());
     mailboxShootButton.onTrue(new ShootCommand());
     mailboxFeedButton.onTrue(new ForceFeedCommand());
+    
+    // Add a button to test the currently selected path
+    // Modify this to use any available button on your controller - this example uses Y button
+    //new JoystickButton(driverController, XboxController.Button.kY.value) //uncomment this to test paths with Y button on controller
+    //    .onTrue(runSelectedPath());
   }
 
   /**
@@ -289,7 +323,17 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {//auto path selection via chooser
-    return autoChooser.getSelected();
+    String selection = masterChooser.getSelected();
+    
+    if (selection != null && selection.equals("PATH")) {
+      // Use the path chooser
+      System.out.println("Using PATH chooser for autonomous");
+      return pathChooser.getSelected();
+    } else {
+      // Use the auto chooser (default)
+      System.out.println("Using AUTO chooser for autonomous");
+      return autoChooser.getSelected();
+    }
   }
 
   public Command getAutonomousPathCommand() {//manual path selection via path name 
