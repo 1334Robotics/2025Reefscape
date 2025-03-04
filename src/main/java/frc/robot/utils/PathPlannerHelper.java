@@ -59,7 +59,7 @@ public class PathPlannerHelper {
         this.swerveSubsystem = swerveSubsystem;
         
         // Only do detailed memory tracking in simulation and not in competition mode
-        this.isDetailedMemoryTrackingEnabled = RobotMode.isDebugEnabled() && !RobotMode.isCompetitionMode();
+        this.isDetailedMemoryTrackingEnabled = RobotMode.isDebugEnabled();
         
         // Configure the AutoBuilder (only done once)
         AutoHelper.configureAutoBuilder(swerveSubsystem);
@@ -70,14 +70,11 @@ public class PathPlannerHelper {
         // Create path chooser for dashboard
         setupPathChooser();
         
-        // Only add dashboard controls if not in competition mode
-        if (!RobotMode.isCompetitionMode()) {
-            // Add dashboard buttons for each path
-            addPathButtonsToDashboard();
-            
-            // Add cancel button to dashboard
-            addCancelButtonToDashboard();
-        }
+        // Add dashboard buttons for each path
+        addPathButtonsToDashboard();
+        
+        // Add cancel button to dashboard
+        addCancelButtonToDashboard();
         
         // Initialize path status
         SmartDashboard.putString(PATH_STATUS_KEY, "No Path Running");
@@ -362,16 +359,16 @@ public class PathPlannerHelper {
             return Commands.none();
         }
 
-        // Get the actual path name based on the auto name
-        String actualPathName = switch(pathName) {
-            case "TopAuto" -> "AutoDrive20";
-            case "MidAuto" -> "AutoDrive22";
-            case "BottomAuto" -> "Audodrive22";
-            default -> pathName;
-        };
+        // // Get the actual path name based on the auto name
+        // String actualPathName = switch(pathName) {
+        //     case "TopAuto" -> "AutoDrive20";
+        //     case "MidAuto" -> "AutoDrive22";
+        //     case "BottomAuto" -> "Audodrive22";
+        //     default -> pathName;
+        // };
 
         // Load the path command
-        Command pathCommand = loadPathCommand(actualPathName);
+        Command pathCommand = loadPathCommand(pathName);
         if (pathCommand == null) {
             return Commands.none();
         }
@@ -379,50 +376,38 @@ public class PathPlannerHelper {
         // Create the full sequence
         return Commands.sequence(
             // First follow the path to get into position
-            pathCommand,
+            pathCommand//simplifying to just path following for now
             
-            // Then raise elevator to L1
-            Commands.runOnce(() -> {
-                RobotContainer.elevatorSubsystem.runMotor(-ElevatorConstants.ELEVATOR_UP_SPEED);
-            }),
-            // Wait until elevator reaches L1 height
-            Commands.waitSeconds(1.0), // Adjust time based on testing
-            // Stop elevator
-            Commands.runOnce(() -> {
-                RobotContainer.elevatorSubsystem.runMotor(0);
-            }),
+            // // Then raise elevator to L1
+            // Commands.runOnce(() -> {
+            //     RobotContainer.elevatorSubsystem.runMotor(-ElevatorConstants.ELEVATOR_UP_SPEED);
+            // }),
+            // // Wait until elevator reaches L1 height
+            // Commands.waitSeconds(1.0), // Adjust time based on testing
+            // // Stop elevator
+            // Commands.runOnce(() -> {
+            //     RobotContainer.elevatorSubsystem.runMotor(0);
+            // }),
             
-            // Finally shoot at L1 speed
-            Commands.runOnce(() -> {
-                RobotContainer.mailboxSubsystem.output(false); // false = L1 speed
-            }),
-            // Wait for shot to complete
-            Commands.waitSeconds(1.0), // Adjust time based on testing
-            // Stop mailbox
-            Commands.runOnce(() -> {
-                RobotContainer.mailboxSubsystem.stop();
-            })
+            // // Finally shoot at L1 speed
+            // Commands.runOnce(() -> {
+            //     RobotContainer.mailboxSubsystem.output(false); // false = L1 speed
+            // }),
+            // // Wait for shot to complete
+            // Commands.waitSeconds(1.0), // Adjust time based on testing
+            // // Stop mailbox
+            // Commands.runOnce(() -> {
+            //     RobotContainer.mailboxSubsystem.stop();
+            // })
         );
     }
     
     /**
-     * Get the autonomous command based on dashboard selection or competition position
+     * Get the autonomous command based on dashboard selection
      * Only loads the path when actually needed for autonomous
      * @return The selected autonomous command
      */
     public Command getAutonomousCommand() {
-        // In competition mode, use the pre-configured auto for the current position
-        if (RobotMode.isCompetitionMode()) {
-            String competitionAuto = RobotMode.getCurrentAuto();
-            if (competitionAuto != null && !competitionAuto.isEmpty()) {
-                if (RobotMode.isDebugEnabled()) {
-                    DriverStation.reportWarning("Using competition auto: " + competitionAuto +
-                            " for position " + RobotMode.getStartingPosition(), false);
-                }
-                return createShootingPathCommand(competitionAuto);
-            }
-        }
-        
         // Otherwise use dashboard selection
         String selectedPath = pathChooser.getSelected();
         

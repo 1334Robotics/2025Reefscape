@@ -38,14 +38,12 @@ public class Robot extends LoggedRobot {
     // Dashboard keys
     private static final String ENABLE_VERBOSE_KEY = "Enable Verbose Logging";
     private static final String SIMULATION_MODE_KEY = "Simulation Mode";
-    private static final String COMPETITION_MODE_KEY = "Competition Mode";
     
     // Status messages
     private static final String ROBOT_MODE_MSG = "Running on REAL ROBOT - Debug features disabled by default";
     private static final String SIM_MODE_MSG = "Running in SIMULATION - Debug features enabled";
     private static final String VERBOSE_ENABLED_MSG = "Verbose logging ENABLED - this may impact performance";
     private static final String VERBOSE_DISABLED_MSG = "Verbose logging DISABLED";
-    private static final String COMPETITION_ENABLED_MSG = "COMPETITION MODE ENABLED - All debug features disabled";
     
     private Command m_autonomousCommand;
     private RobotContainer m_robotContainer;
@@ -69,7 +67,15 @@ public class Robot extends LoggedRobot {
         Logger.start();
         SmartDashboard.putData("Field", m_field);
         
-        configureRobotMode();
+        if (RobotMode.isRealRobot()) {
+            // On the real robot, disable debug features to save memory and processing power
+            DriverStation.reportWarning(ROBOT_MODE_MSG, false);
+            SmartDashboard.putBoolean(ENABLE_VERBOSE_KEY, false);
+        } else {
+            // In simulation, enable all debug features
+            DriverStation.reportWarning(SIM_MODE_MSG, false);
+            SmartDashboard.putBoolean(SIMULATION_MODE_KEY, true);
+        }
         
         // Configure competition auto paths with descriptive names
         RobotMode.setCompetitionAuto(1, "TopAuto");    // Top position - follows AutoDrive20 then shoots
@@ -77,28 +83,6 @@ public class Robot extends LoggedRobot {
         RobotMode.setCompetitionAuto(3, "BottomAuto"); // Bottom position - follows Audodrive22 then shoots
     }
     
-    /**
-     * Configure robot mode based on whether we're in simulation or on the real robot
-     */
-    private void configureRobotMode() {
-        if (RobotMode.isRealRobot()) {
-            // On the real robot, disable debug features to save memory and processing power
-            DriverStation.reportWarning(ROBOT_MODE_MSG, false);
-            
-            // Add toggles for verbose logging and competition mode
-            SmartDashboard.putBoolean(ENABLE_VERBOSE_KEY, false);
-            SmartDashboard.putBoolean(COMPETITION_MODE_KEY, false);
-        } else {
-            // In simulation, enable all debug features
-            DriverStation.reportWarning(SIM_MODE_MSG, false);
-            
-            // Debug features are already enabled by default in simulation
-            // Just add dashboard indicators
-            SmartDashboard.putBoolean(SIMULATION_MODE_KEY, true);
-            SmartDashboard.putBoolean(COMPETITION_MODE_KEY, false);
-        }
-    }
-
     /**
      * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
      * that you want ran during disabled, autonomous, teleoperated and test.
@@ -130,7 +114,6 @@ public class Robot extends LoggedRobot {
         
         // Check dashboard toggles
         checkVerboseLoggingToggle();
-        checkCompetitionModeToggle();
     }
     
     /**
@@ -147,20 +130,6 @@ public class Robot extends LoggedRobot {
                 RobotMode.disableVerboseLogging();
                 DriverStation.reportWarning(VERBOSE_DISABLED_MSG, false);
             }
-        }
-    }
-    
-    /**
-     * Check if competition mode was toggled on the dashboard
-     */
-    private void checkCompetitionModeToggle() {
-        boolean enableCompetitionMode = SmartDashboard.getBoolean(COMPETITION_MODE_KEY, false);
-        
-        if (enableCompetitionMode && !RobotMode.isCompetitionMode()) {
-            RobotMode.enableCompetitionMode();
-            DriverStation.reportWarning(COMPETITION_ENABLED_MSG, false);
-        } else if (!enableCompetitionMode && RobotMode.isCompetitionMode()) {
-            RobotMode.disableCompetitionMode();
         }
     }
     
