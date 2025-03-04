@@ -4,7 +4,6 @@ import frc.robot.auto.AutoConfigurer;
 import frc.robot.commands.climb.ForcePinsDownCommand;
 import frc.robot.commands.climb.LockClimbCommand;
 import frc.robot.commands.climb.StopClimbCommand;
-import frc.robot.auto.AutoConfigurer;
 import frc.robot.commands.directionSnaps.DirectionSnapBackwards;
 import frc.robot.commands.directionSnaps.DirectionSnapForwards;
 import frc.robot.commands.directionSnaps.DirectionSnapLeft;
@@ -31,20 +30,16 @@ import frc.robot.subsystems.simulation.SimulationSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.subsystems.climb.ClimbSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystemSim;
-import frc.robot.commands.vision.PrintTargetInfo;
 import frc.robot.subsystems.drive.DirectionSnapSubsystem;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.subsystems.solenoid.SolenoidSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -53,8 +48,6 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.commands.elevator.ElevatorHeightCalculation;
 
 /**
@@ -146,13 +139,6 @@ public class RobotContainer {
   } else {
       new TrackAprilTagCommand(visionSubsystem, swerveSubsystem);
   }
-
-    // Configure path planner
-    AutoConfigurer.configure();
-
-    // Create an auto chooser and add it to SmartDashboard
-    autoChooser = AutoBuilder.buildAutoChooser();
-    SmartDashboard.putData("[PATHPLANNER] Auto Chooser", autoChooser);
 
     // Configure the trigger bindings
     configureBindings();
