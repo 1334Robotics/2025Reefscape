@@ -35,4 +35,6 @@ public class RobotContainerConstants {
     public static final int CLIMB_LOCK_BUTTON = XboxMappings.Button.Y;
     public static final int CLIMB_FORCE_DOWN_BUTTON = XboxMappings.Button.A;
     public static final int CLIMB_STOP_BUTTON = XboxMappings.Button.B;
+
+    public static final int LED_BUTTON = XboxMappings.Button.Back;
 }
