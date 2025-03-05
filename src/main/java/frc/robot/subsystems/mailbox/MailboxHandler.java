@@ -7,6 +7,7 @@ import frc.robot.constants.MailboxConstants;
 import frc.robot.subsystems.elevator.ElevatorLevel;
 
 public class MailboxHandler extends SubsystemBase {
+    private boolean rewinding;
     private boolean allowShoot;
     private boolean feeding;
     public  boolean allowFeeding;
@@ -14,6 +15,7 @@ public class MailboxHandler extends SubsystemBase {
     private final LaserCanSubsystem inputLaserCan;
 
     public MailboxHandler() {
+        this.rewinding    = false;
         this.allowShoot   = false;
         this.feeding      = false;
         this.allowFeeding = false;
@@ -29,13 +31,29 @@ public class MailboxHandler extends SubsystemBase {
                                                          MailboxConstants.LASERCAN_INPUT_WIDTH));
     }
 
+    public void startRewinding() {
+        this.rewinding = true;
+    }
+
+    public void stopRewinding() {
+        this.rewinding = false;
+    }
+
     @Override
     public void periodic() {
         SmartDashboard.putBoolean("[MAILBOX] Allow Shooting", this.allowFeeding);
+        SmartDashboard.putBoolean("[MAILBOX] Output In Range", this.outputLaserCan.inRange());
+        SmartDashboard.putBoolean("[MAILBOX] Input In Range", this.inputLaserCan.inRange());
+
+        if(this.rewinding) {
+            this.feeding      = false;
+            this.allowFeeding = false;
+            this.allowShoot   = false;
+            RobotContainer.mailboxSubsystem.rewind();
+            return;
+        }
 
         // Check for a coral waiting to be inputted and feed it in
-        // Feeding currently doesn't work.
-        // It feeds until the output doesn't see it, not until the input doesn't see it
         if(this.allowFeeding) {
             if(!this.outputLaserCan.inRange()) {
                 this.feeding = true;
@@ -50,7 +68,6 @@ public class MailboxHandler extends SubsystemBase {
             }
         } else this.feeding = false;
 
-        this.allowFeeding = false;
         if(this.outputLaserCan.inRange()) {
             if(this.allowShoot) {
                 // Ensure that the level is valid (L1-L4)
@@ -60,6 +77,7 @@ public class MailboxHandler extends SubsystemBase {
                 // Shoots it on high for L2+; on low for L1
                 RobotContainer.mailboxSubsystem.output((level != ElevatorLevel.L1));
                 this.allowShoot = false;
+                this.allowFeeding = false;
             }
         } else {
             RobotContainer.mailboxSubsystem.stop();
