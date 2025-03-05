@@ -1,10 +1,10 @@
 package frc.robot.subsystems.laser;
 
-import frc.robot.constants.LaserCanConstants;
 import au.grapplerobotics.ConfigurationFailedException;
 import au.grapplerobotics.LaserCan;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.constants.LaserCanConstants;
 
 public class LaserCanSubsystem extends SubsystemBase {
     private final LaserCan laserCan;

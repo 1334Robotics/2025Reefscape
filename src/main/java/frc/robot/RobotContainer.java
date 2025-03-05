@@ -4,6 +4,7 @@ import frc.robot.auto.AutoConfigurer;
 import frc.robot.commands.climb.ForcePinsDownCommand;
 import frc.robot.commands.climb.LockClimbCommand;
 import frc.robot.commands.climb.StopClimbCommand;
+import frc.robot.commands.led.ToggleLedCommand;
 import frc.robot.commands.directionSnaps.DirectionSnapBackwards;
 import frc.robot.commands.directionSnaps.DirectionSnapForwards;
 import frc.robot.commands.directionSnaps.DirectionSnapLeft;
@@ -29,6 +30,7 @@ import frc.robot.commands.vision.TrackAprilTagCommand;
 import frc.robot.subsystems.drive.DirectionSnapSubsystem;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
+import frc.robot.subsystems.led.LedSubsystem;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -36,6 +38,7 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -66,6 +69,9 @@ public class RobotContainer {
   private final JoystickButton mailboxStopButton        = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_STOP_BUTTON);
   private final JoystickButton extendButton             = new JoystickButton(operatorController, RobotContainerConstants.SOLENOID_EXTEND_BUTTON);
   private final JoystickButton retractButton            = new JoystickButton(operatorController, RobotContainerConstants.SOLENOID_RETRACT_BUTTON);
+  
+  private final JoystickButton LedButton                = new JoystickButton(operatorController, RobotContainerConstants.LED_BUTTON);
+
   private final JoystickButton gyroZeroButton           = new JoystickButton(driverController, RobotContainerConstants.GYRO_ZERO_BUTON);
   private final POVButton      forwardsSnapButton       = new POVButton(driverController, RobotContainerConstants.SNAP_FORWARDS_DIRECTION);
   private final POVButton      leftSnapButton           = new POVButton(driverController, RobotContainerConstants.SNAP_LEFT_DIRECTION);
@@ -94,6 +100,9 @@ public class RobotContainer {
   private final JoystickButton climbForceDownButton     = new JoystickButton(operatorController, RobotContainerConstants.CLIMB_FORCE_DOWN_BUTTON);
   private final JoystickButton climbStopButton          = new JoystickButton(operatorController, RobotContainerConstants.CLIMB_STOP_BUTTON);
 
+
+  
+
   // Subsystems
   public static final GyroSubsystem gyroSubsystem                   = new GyroSubsystem("CANivore");
   public static final ElevatorSubsystem elevatorSubsystem           = new ElevatorSubsystem(RobotContainerConstants.ELEVATOR_PRIMARY_MOTOR_ID,
@@ -105,6 +114,7 @@ public class RobotContainer {
   public static final DirectionSnapSubsystem directionSnapSubsystem = new DirectionSnapSubsystem();
   public static final LaserCanSubsystem laserCanSubsystem           = new LaserCanSubsystem();
   public static final ClimbSubsystem climbSubsystem                 = new ClimbSubsystem();
+  public static final LedSubsystem ledSubsystem                     = new LedSubsystem(1);   // Adjust channel afterwards 
 
   //Conditionally create SimulationSubsystem
   public final SimulationSubsystem simulationSubsystem;
@@ -178,6 +188,7 @@ public class RobotContainer {
     climbLockButton.onTrue(new LockClimbCommand());
     climbForceDownButton.onTrue(new ForcePinsDownCommand());
     climbStopButton.onTrue(new StopClimbCommand());
+    LedButton.onTrue(new ToggleLedCommand(ledSubsystem));
   }
 
   /**
