@@ -119,7 +119,6 @@ public class RobotContainer {
   // Auto chooser for PathPlanner
   private SendableChooser<Command> autoChooser;
   private SendableChooser<Command> pathChooser; // New path chooser for individual paths
-  private SendableChooser<String> masterChooser;
 
   /**
    * List available path files on the dashboard
@@ -162,12 +161,11 @@ public class RobotContainer {
     AutoConfigurer.configure();
     DriverStation.silenceJoystickConnectionWarning(true);//silence the warning about the joystick connection
     
-    // Initialize all choosers
+    // Initialize choosers
     autoChooser = new SendableChooser<>();
     pathChooser = new SendableChooser<>();
-    masterChooser = new SendableChooser<>();
     
-    // Set up autonomous options and path chooser
+    // Set up autonomous options
     configureAutoChooser();
 
     // Configure the trigger bindings
@@ -207,12 +205,6 @@ public class RobotContainer {
   }
 
   private void configureAutoChooser() {
-    // Set up master chooser to select between auto routines and individual paths
-    masterChooser = new SendableChooser<>();
-    masterChooser.setDefaultOption("Use Auto Routines", "AUTO");
-    masterChooser.addOption("Use Individual Paths", "PATH");
-    SmartDashboard.putData("Chooser Selection", masterChooser);
-    
     // Build an auto chooser using PathPlanner's built-in method
     // This will automatically find all autos in deploy/pathplanner/autos
     autoChooser = AutoBuilder.buildAutoChooser();
@@ -221,9 +213,10 @@ public class RobotContainer {
     autoChooser.setDefaultOption("Do Nothing", new InstantCommand());
     
     // Put on dashboard with descriptive name
-    SmartDashboard.putData("Full Auto Routines", autoChooser);
+    SmartDashboard.putData("Auto Routines", autoChooser);
     
-    // Create a chooser for individual paths
+    // Create the path chooser for internal use (in case it's needed later),
+    // but we don't display it on the dashboard - remove if we need to free up memory/space
     pathChooser = new SendableChooser<>();
     pathChooser.setDefaultOption("Do Nothing", new InstantCommand());
     
@@ -245,10 +238,7 @@ public class RobotContainer {
       System.err.println("Error configuring path chooser: " + e.getMessage());
     }
     
-    // Put the path chooser on the dashboard
-    SmartDashboard.putData("Individual Path Selector", pathChooser);
-    
-    // List available paths for reference
+    // List available paths in the terminal/log for debugging
     listAvailablePaths();
   }
   
@@ -310,11 +300,6 @@ public class RobotContainer {
     flopperDownButton.whileTrue(new FlopperDownCommand());
     mailboxShootButton.onTrue(new ShootCommand());
     mailboxFeedButton.onTrue(new ForceFeedCommand());
-    
-    // Add a button to test the currently selected path
-    // Modify this to use any available button on your controller - this example uses Y button
-    //new JoystickButton(driverController, XboxController.Button.kY.value) //uncomment this to test paths with Y button on controller
-    //    .onTrue(runSelectedPath());
   }
 
   /**
@@ -322,18 +307,9 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand() {//auto path selection via chooser
-    String selection = masterChooser.getSelected();
-    
-    if (selection != null && selection.equals("PATH")) {
-      // Use the path chooser
-      System.out.println("Using PATH chooser for autonomous");
-      return pathChooser.getSelected();
-    } else {
-      // Use the auto chooser (default)
-      System.out.println("Using AUTO chooser for autonomous");
-      return autoChooser.getSelected();
-    }
+  public Command getAutonomousCommand() {
+    // Always use the auto chooser
+    return autoChooser.getSelected();
   }
 
   public Command getAutonomousPathCommand() {//manual path selection via path name 
