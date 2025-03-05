@@ -28,6 +28,13 @@ public class MailboxSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("[MAILBOX] Motor Two Speed", 0);
     }
 
+    public void rewind() {
+        // Fix and remove the print
+        System.out.println("Here");
+        this.motors[0].set(-MailboxConstants.REWIND_MOTOR_SPEED);
+        this.motors[1].set(MailboxConstants.REWIND_MOTOR_SPEED);
+    }
+
     public void feed() {
         this.motors[0].set(MailboxConstants.FEED_MOTOR_SPEED);
         this.motors[1].set(-MailboxConstants.FEED_MOTOR_SPEED);

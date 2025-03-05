@@ -89,6 +89,10 @@ public class TrackAprilTagCommand extends Command {
             double pitch      = RobotContainer.visionSubsystem.getTargetPitch();
             double area       = RobotContainer.visionSubsystem.getTargetArea();
             Distance distance = DistanceCalculator.getDistance(yaw, pitch, area);
+
+            // Publish the distance
+            SmartDashboard.putNumber("[VISION] Distance X", distance.x);
+            SmartDashboard.putNumber("[VISION] Distance Y", distance.y);
             
             // Calculate drive commands
             rotationController.update(0, yaw);

@@ -9,6 +9,7 @@ public class MailboxConstants {
     public static final double OUTPUT_MOTOR_SPEED     = 0.5;
     public static final double OUTPUT_MOTOR_SPEED_LOW = 0.33;
     public static final double FEED_MOTOR_SPEED       = 0.1;
+    public static final double REWIND_MOTOR_SPEED     = 0.4;
 
     public static final double LASERCAN_OUTPUT_CLOSE_READING = 15;
     public static final double LASERCAN_INPUT_CLOSE_READING = 50;

@@ -26,6 +26,7 @@ import frc.robot.commands.gyro.GyroZeroCommand;
 import frc.robot.commands.mailbox.OutputLowCommand;
 import frc.robot.commands.mailbox.ShootCommand;
 import frc.robot.commands.mailbox.MailboxFeedCommand;
+import frc.robot.commands.mailbox.MailboxRewindCommand;
 import frc.robot.commands.mailbox.OutputHighCommand;
 import frc.robot.commands.mailbox.StopCommand;
 import frc.robot.constants.ElevatorConstants;
@@ -82,12 +83,17 @@ public class RobotContainer {
   private final POVButton      rightSnapButton         = new POVButton(driverController,        RobotContainerConstants.SNAP_RIGHT_DIRECTION);
   private final POVButton      backwardsSnapButton     = new POVButton(driverController,        RobotContainerConstants.SNAP_BACKWARDS_DIRECTION);
   private final JoystickButton stopSnapButton          = new JoystickButton(driverController,   RobotContainerConstants.SNAP_STOP_BUTTON);
-  private final POVButton      elevatorUpButton        = new POVButton(operatorController,      RobotContainerConstants.ELEVATOR_UP_BUTTON);
-  private final POVButton      elevatorDownButton      = new POVButton(operatorController,      RobotContainerConstants.ELEVATOR_DOWN_BUTTON);
   private final JoystickButton flopperUpButton         = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_UP_BUTTON);
   private final JoystickButton flopperDownButton       = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_DOWN_BUTTON);
   private final JoystickButton mailboxShootButton      = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_SHOOT_BUTTON);
   private final JoystickButton mailboxFeedButton       = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_FEED_BUTTON);
+  private final JoystickButton mailboxRewindButton     = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_REWIND_BUTTON);
+  private final JoystickButton elevatorBottomButton    = new JoystickButton(operatorController, RobotContainerConstants.ELEVATOR_BOTTOM_BUTTON);
+  private final JoystickButton elevatorFeedButton      = new JoystickButton(operatorController, RobotContainerConstants.ELEVATOR_FEED_BUTTON);
+  private final POVButton      elevatorL1Button        = new POVButton(operatorController, RobotContainerConstants.ELEVATOR_L1_BUTTON);
+  private final POVButton      elevatorL2Button        = new POVButton(operatorController, RobotContainerConstants.ELEVATOR_L2_BUTTON);
+  private final POVButton      elevatorL3Button        = new POVButton(operatorController, RobotContainerConstants.ELEVATOR_L3_BUTTON);
+  private final POVButton      elevatorL4Button        = new POVButton(operatorController, RobotContainerConstants.ELEVATOR_L4_BUTTON);
 
   // Subsystems
   public static final GyroSubsystem           gyroSubsystem          = new GyroSubsystem("CANivore");
@@ -102,7 +108,7 @@ public class RobotContainer {
   public static final TagInputHandler         tagInputHandler        = new TagInputHandler();
 
   // Auto
-  public static final TrackAprilTagCommand trackCommand = new TrackAprilTagCommand(0,
+  public static final TrackAprilTagCommand trackCommand = new TrackAprilTagCommand(21,
                                                                                    new Distance(VisionConstants.TRACK_TAG_X,
                                                                                                 VisionConstants.TRACK_TAG_Y));
   public static final ClimbSubsystem climbSubsystem                 = new ClimbSubsystem();
@@ -168,12 +174,17 @@ public class RobotContainer {
     rightSnapButton.onTrue(new DirectionSnapRight());
     backwardsSnapButton.onTrue(new DirectionSnapBackwards());
     stopSnapButton.onTrue(new StopSnap());
-    elevatorUpButton.whileTrue(new ElevatorUpCommand());
-    elevatorDownButton.whileTrue(new ElevatorDownCommand());
     flopperUpButton.whileTrue(new FlopperUpCommand());
     flopperDownButton.whileTrue(new FlopperDownCommand());
     mailboxShootButton.onTrue(new ShootCommand());
     mailboxFeedButton.onTrue(new MailboxFeedCommand());
+    mailboxRewindButton.whileTrue(new MailboxRewindCommand());
+    elevatorBottomButton.onTrue(new ElevatorGotoBottomCommand());
+    elevatorFeedButton.onTrue(new ElevatorGotoFeedCommand());
+    elevatorL1Button.onTrue(new ElevatorGotoL1Command());
+    elevatorL2Button.onTrue(new ElevatorGotoL2Command());
+    elevatorL3Button.onTrue(new ElevatorGotoL3Command());
+    elevatorL4Button.onTrue(new ElevatorGotoL4Command());
   }
 
   /**
@@ -182,6 +193,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser.getSelected();
+    return trackCommand;
   }
 }
