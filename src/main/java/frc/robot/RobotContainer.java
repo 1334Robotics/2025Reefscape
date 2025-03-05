@@ -63,12 +63,19 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.ProxyCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import java.util.List;
 import java.io.IOException;
 import java.io.File;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -83,6 +90,7 @@ public class RobotContainer {
 
   // Controller buttons
   private final JoystickButton gyroZeroButton          = new JoystickButton(driverController,   RobotContainerConstants.GYRO_ZERO_BUTON);
+  private final JoystickButton runAutoButton           = new JoystickButton(driverController,   RobotContainerConstants.RUN_AUTO_BUTTON);
   private final POVButton      forwardsSnapButton      = new POVButton(driverController,        RobotContainerConstants.SNAP_FORWARDS_DIRECTION);
   private final POVButton      leftSnapButton          = new POVButton(driverController,        RobotContainerConstants.SNAP_LEFT_DIRECTION);
   private final POVButton      rightSnapButton         = new POVButton(driverController,        RobotContainerConstants.SNAP_RIGHT_DIRECTION);
@@ -119,6 +127,9 @@ public class RobotContainer {
   // Auto chooser for PathPlanner
   private SendableChooser<Command> autoChooser;
   private SendableChooser<Command> pathChooser; // New path chooser for individual paths
+
+  // Map to store auto names for dashboard reporting
+  private final Map<Command, String> autoCommandNames = new HashMap<>();
 
   /**
    * List available path files on the dashboard
@@ -161,7 +172,7 @@ public class RobotContainer {
     AutoConfigurer.configure();
     DriverStation.silenceJoystickConnectionWarning(true);//silence the warning about the joystick connection
     
-    // Initialize choosers
+    // Initialize choosers for auto routines
     autoChooser = new SendableChooser<>();
     pathChooser = new SendableChooser<>();
     
@@ -170,6 +181,13 @@ public class RobotContainer {
 
     // Configure the trigger bindings
     configureBindings();
+
+    // Set up dashboard information about the Run Auto button
+    SmartDashboard.putString("Current Auto Status", "Ready (Press START button to run)");
+    SmartDashboard.putString("Auto Button Help", "Press START button on driver controller to run selected auto");
+    
+    // Silence the DriverStation joystick warning - Uncomment if needed
+    //DriverStation.silenceJoystickConnectionWarning(true);
 
     DriveCommand xboxDriveCommand = new DriveCommand(() -> MathUtil.applyDeadband(driverController.getLeftX(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
                                                      () -> MathUtil.applyDeadband(driverController.getLeftY(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
@@ -207,17 +225,20 @@ public class RobotContainer {
   private void configureAutoChooser() {
     // Build an auto chooser using PathPlanner's built-in method
     // This will automatically find all autos in deploy/pathplanner/autos
-    autoChooser = AutoBuilder.buildAutoChooser();
-    
-    // Override the default option to be "Do Nothing"
-    autoChooser.setDefaultOption("Do Nothing", new InstantCommand());
+    autoChooser = AutoBuilder.buildAutoChooser("Do Nothing");
+    //pathChooser = new SendableChooser<>();
     
     // Put on dashboard with descriptive name
     SmartDashboard.putData("Auto Routines", autoChooser);
     
-    // Create the path chooser for internal use (in case it's needed later),
-    // but we don't display it on the dashboard - remove if we need to free up memory/space
-    pathChooser = new SendableChooser<>();
+    // Clear and repopulate the auto command names map
+    autoCommandNames.clear();
+    
+    // Add default option
+    Command defaultCommand = new InstantCommand();
+    autoCommandNames.put(defaultCommand, "Do Nothing");
+    
+    // Set default option for path chooser
     pathChooser.setDefaultOption("Do Nothing", new InstantCommand());
     
     // Add all paths from the paths directory
@@ -236,6 +257,28 @@ public class RobotContainer {
       }
     } catch (Exception e) {
       System.err.println("Error configuring path chooser: " + e.getMessage());
+    }
+    
+    // Add all paths from autos directory for tracking
+    try {
+      File autosDir = new File(Filesystem.getDeployDirectory(), "pathplanner/autos");
+      if (autosDir.exists() && autosDir.isDirectory()) {
+        File[] autoFiles = autosDir.listFiles((dir, name) -> name.endsWith(".auto"));
+        if (autoFiles != null) {
+          for (File file : autoFiles) {
+            String autoName = file.getName().replace(".auto", "");
+            try {
+              // Get the command and store its name
+              Command autoCommand = new PathPlannerAuto(autoName);
+              autoCommandNames.put(autoCommand, autoName);
+            } catch (Exception e) {
+              System.err.println("Error loading auto: " + autoName + ": " + e.getMessage());
+            }
+          }
+        }
+      }
+    } catch (Exception e) {
+      System.err.println("Error listing autos: " + e.getMessage());
     }
     
     // List available paths in the terminal/log for debugging
@@ -300,6 +343,9 @@ public class RobotContainer {
     flopperDownButton.whileTrue(new FlopperDownCommand());
     mailboxShootButton.onTrue(new ShootCommand());
     mailboxFeedButton.onTrue(new ForceFeedCommand());
+    
+    // Add binding for running selected auto routine
+    runAutoButton.onTrue(runSelectedAuto());
   }
 
   /**
@@ -340,5 +386,60 @@ public class RobotContainer {
    */
   public Command runSelectedPath() {
     return pathChooser.getSelected();
+  }
+
+  /**
+   * Creates a command to run the currently selected autonomous routine from the auto chooser
+   * This allows running autonomously selected routines without switching robot modes
+   * 
+   * @return A command that runs the selected autonomous routine
+   */
+  public Command runSelectedAuto() {
+    return Commands.defer(() -> {
+      // Get the currently selected auto command
+      Command selectedAuto = autoChooser.getSelected();
+      
+      // If there's no command selected or it's just an InstantCommand (Do Nothing)
+      if (selectedAuto == null || 
+          (selectedAuto instanceof InstantCommand && 
+           !(selectedAuto instanceof SequentialCommandGroup))) {
+        System.out.println("No auto selected or 'Do Nothing' selected");
+        SmartDashboard.putString("Current Auto Status", "No auto routine selected");
+        return Commands.none();
+      }
+      
+      System.out.println("Running selected auto routine via button press");
+      
+      // Create a new command sequence using new Commands factory methods
+      return Commands.sequence(
+        Commands.runOnce(() -> {
+          CommandScheduler.getInstance().cancelAll();
+          SmartDashboard.putString("Current Auto Status", "Running Auto: " + getSelectedAutoName());
+        }),
+        selectedAuto,
+        Commands.runOnce(() -> {
+          System.out.println("Auto routine completed");
+          SmartDashboard.putString("Current Auto Status", "Completed: " + getSelectedAutoName());
+        })
+      );
+    }, Set.of()); // Pass an empty set of requirements
+  }
+  
+  /**
+   * Helper method to get the name of the currently selected auto routine
+   * Used for dashboard feedback
+   * 
+   * @return The name of the selected auto routine, or "Unknown" if not found
+   */
+  private String getSelectedAutoName() {
+    Command selected = autoChooser.getSelected();
+    if (selected == null) {
+      return "None";
+    }
+    
+    // Since we can't access the internal data of SendableChooser,
+    // we'll use our auto name lookup map or a generic identifier
+    String name = autoCommandNames.get(selected);
+    return (name != null) ? name : "Selected Auto";
   }
 }

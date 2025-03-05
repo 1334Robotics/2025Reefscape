@@ -30,4 +30,7 @@ public class RobotContainerConstants {
 
     public static final int FLOPPER_UP_BUTTON   = XboxMappings.Button.LeftBumper;
     public static final int FLOPPER_DOWN_BUTTON = XboxMappings.Button.RightBumper;
+    
+    // Button to run selected autonomous routine on demand
+    public static final int RUN_AUTO_BUTTON = XboxMappings.Button.Start;
 }
