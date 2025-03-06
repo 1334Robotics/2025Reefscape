@@ -53,6 +53,12 @@ public class MailboxSubsystem extends SubsystemBase {
         }
     }
 
+    public void slowOutput() {
+        this.motors[0].set(MailboxConstants.OUTPUT_MOTOR_SPEED_SLOW);
+        this.motors[1].set(-MailboxConstants.OUTPUT_MOTOR_SPEED_SLOW);
+        SmartDashboard.putString("[MAILBOX] State", "Output Slow");
+    }
+
     public void stop() {
         this.motors[0].set(0);
         this.motors[1].set(0);

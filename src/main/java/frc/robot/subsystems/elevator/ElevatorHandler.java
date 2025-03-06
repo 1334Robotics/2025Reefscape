@@ -6,10 +6,10 @@ import frc.robot.constants.ElevatorConstants;
 import frc.robot.subsystems.drive.PIDController;
 
 public class ElevatorHandler extends SubsystemBase {
-    private ElevatorLevel       targetLevel;
-    private ElevatorLevel       previousTargetLevel;
-    private boolean             hitTarget;
-    private final PIDController pidController;
+    private ElevatorLevel            targetLevel;
+    private ElevatorLevel            previousTargetLevel;
+    private boolean                  hitTarget;
+    private final PIDController      pidController;
     
     public ElevatorHandler() {
         this.targetLevel = null;
@@ -37,6 +37,7 @@ public class ElevatorHandler extends SubsystemBase {
 
     @Override
     public void periodic() {
+        if(ElevatorConstants.MANUAL_ELEVATOR_CONTROL) return;
         if(!this.hitTarget) {
             if(this.targetLevel == null) return;
 
