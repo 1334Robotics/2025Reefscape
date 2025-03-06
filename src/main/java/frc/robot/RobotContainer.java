@@ -88,6 +88,8 @@ public class RobotContainer {
   private final JoystickButton mailboxShootButton      = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_SHOOT_BUTTON);
   private final JoystickButton mailboxFeedButton       = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_FEED_BUTTON);
   private final JoystickButton mailboxRewindButton     = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_REWIND_BUTTON);
+  private final POVButton      elevatorUpButton        = new POVButton(operatorController, RobotContainerConstants.ELEVATOR_UP_BUTTON);
+  private final POVButton      elevatorDownButton      = new POVButton(operatorController, RobotContainerConstants.ELEVATOR_DOWN_BUTTON);
   private final JoystickButton elevatorBottomButton    = new JoystickButton(operatorController, RobotContainerConstants.ELEVATOR_BOTTOM_BUTTON);
   private final JoystickButton elevatorFeedButton      = new JoystickButton(operatorController, RobotContainerConstants.ELEVATOR_FEED_BUTTON);
   private final POVButton      elevatorL1Button        = new POVButton(operatorController, RobotContainerConstants.ELEVATOR_L1_BUTTON);
@@ -179,12 +181,17 @@ public class RobotContainer {
     mailboxShootButton.onTrue(new ShootCommand());
     mailboxFeedButton.onTrue(new MailboxFeedCommand());
     mailboxRewindButton.whileTrue(new MailboxRewindCommand());
-    elevatorBottomButton.onTrue(new ElevatorGotoBottomCommand());
-    elevatorFeedButton.onTrue(new ElevatorGotoFeedCommand());
-    elevatorL1Button.onTrue(new ElevatorGotoL1Command());
-    elevatorL2Button.onTrue(new ElevatorGotoL2Command());
-    elevatorL3Button.onTrue(new ElevatorGotoL3Command());
-    elevatorL4Button.onTrue(new ElevatorGotoL4Command());
+    if(!ElevatorConstants.MANUAL_ELEVATOR_CONTROL) {
+      elevatorBottomButton.onTrue(new ElevatorGotoBottomCommand());
+      elevatorFeedButton.onTrue(new ElevatorGotoFeedCommand());
+      elevatorL1Button.onTrue(new ElevatorGotoL1Command());
+      elevatorL2Button.onTrue(new ElevatorGotoL2Command());
+      elevatorL3Button.onTrue(new ElevatorGotoL3Command());
+      elevatorL4Button.onTrue(new ElevatorGotoL4Command());
+    } else {
+      elevatorUpButton.whileTrue(new ElevatorUpCommand());
+      elevatorDownButton.whileTrue(new ElevatorDownCommand());
+    }
   }
 
   /**

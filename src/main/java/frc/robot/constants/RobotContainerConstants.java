@@ -20,6 +20,8 @@ public class RobotContainerConstants {
     public static final int SNAP_BACKWARDS_DIRECTION = XboxMappings.DPad.Down;
     public static final int SNAP_STOP_BUTTON         = XboxMappings.Button.B;
 
+    public static final int ELEVATOR_UP_BUTTON     = XboxMappings.DPad.Up;
+    public static final int ELEVATOR_DOWN_BUTTON   = XboxMappings.DPad.Down;
     public static final int ELEVATOR_BOTTOM_BUTTON = XboxMappings.Button.B;
     public static final int ELEVATOR_FEED_BUTTON   = XboxMappings.Button.X;
     public static final int ELEVATOR_L1_BUTTON     = XboxMappings.DPad.Up;
