@@ -188,3 +188,6 @@ compile_commands.json
 
 # Sim settings
 simgui-ds.json
+
+# Ignore vscode stuff
+.vscode
