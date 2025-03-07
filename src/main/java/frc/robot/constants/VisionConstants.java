@@ -36,10 +36,9 @@ public final class VisionConstants {
     // AprilTag tracking constants
     public static final int TARGET_TAG_ID = 3;  // Target AprilTag ID
     public static final double AREA_10_DISTANCE = 44.6; // In centimeters
-    public static final double DRIVE_SPEED = 0.5;
     public static final double POWER_TABLE_SPACE = 0.005;
     // Both of these are in centimeters
-    public static final double TRACK_TAG_X = 20;
+    public static final double TRACK_TAG_X = 10;
     public static final double TRACK_TAG_Y = 100;
 
     // Rotation PID constants
@@ -74,4 +73,7 @@ public final class VisionConstants {
     public static final double MIN_VISION_STD_DEV = 0.1;   // Min std dev in meters
     public static final double AREA_TO_STD_DEV_FACTOR = 20.0; // Higher area = lower std dev
 
+    // Speed
+    public static final double DRIVE_SPEED    = 0.5;
+    public static final double ROTATION_SPEED = 0.5;
 }

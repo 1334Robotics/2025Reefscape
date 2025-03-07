@@ -1,5 +1,6 @@
 package frc.robot.commands.vision;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.constants.VisionConstants;
 
 public class DistanceCalculator {
@@ -42,17 +43,16 @@ public class DistanceCalculator {
     public static Distance getDistance(double yaw, double pitch, double area) {
         // Convert yaw and pitch to radians
         double yawRadians = Math.toRadians(yaw);
-        double pitchRadians = Math.toRadians(pitch);
 
         // Adjust for mounting offsets
         yawRadians += VisionConstants.CAMERA_YAW_RADIANS;
-        pitchRadians += VisionConstants.CAMERA_PITCH_RADIANS;
 
         // Project the distance into its horizontal and vertical components
         double rawDistanceAway = getLinearDistance(area);
-        double distanceX = rawDistanceAway * Math.cos(pitchRadians);
+        SmartDashboard.putNumber("[VISION] Linear Distance Aaway", rawDistanceAway);
+        double distanceX = rawDistanceAway * Math.sin(yawRadians);
         double distanceY = rawDistanceAway * Math.cos(yawRadians);
 
-        return new Distance(distanceX * 100, distanceY * 100);
+        return new Distance(distanceX, distanceY);
     }
 }
