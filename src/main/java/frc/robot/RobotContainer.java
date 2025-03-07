@@ -110,7 +110,7 @@ public class RobotContainer {
   public static final TagInputHandler         tagInputHandler        = new TagInputHandler();
 
   // Auto
-  public static final TrackAprilTagCommand trackCommand = new TrackAprilTagCommand(21,
+  public static final TrackAprilTagCommand trackCommand = new TrackAprilTagCommand(22,
                                                                                    new Distance(VisionConstants.TRACK_TAG_X,
                                                                                                 VisionConstants.TRACK_TAG_Y));
   public static final ClimbSubsystem climbSubsystem                 = new ClimbSubsystem();

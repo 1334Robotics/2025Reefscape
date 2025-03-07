@@ -98,15 +98,17 @@ public class TrackAprilTagCommand extends Command {
             rotationController.update(0, yaw);
             forwardController.update(this.targetY, distance.y);
             horizontalController.update(this.targetX, distance.x);
-            double rotationSpeed   = rotationController.getOutput() * VisionConstants.DRIVE_SPEED * SwerveConstants.MAX_SPEED;
+            double rotationSpeed   = rotationController.getOutput() * VisionConstants.ROTATION_SPEED * SwerveConstants.MAX_SPEED;
             double forwardSpeed    = -forwardController.getOutput() * VisionConstants.DRIVE_SPEED * SwerveConstants.MAX_SPEED;
             double horizontalSpeed = horizontalController.getOutput() * VisionConstants.DRIVE_SPEED * SwerveConstants.MAX_SPEED;
+
+            // Magic numbers (bad)
+            if(Math.abs(distance.x - this.targetX) < 2
+            && Math.abs(distance.y - this.targetY) < 1) return;
 
             // Publish the speeds
             SmartDashboard.putNumber("[VISION] Rotation Speed", rotationSpeed);
             SmartDashboard.putNumber("[VISION] Forward Speed", forwardSpeed);
-            SmartDashboard.putNumber("[VISION] Predicted X Distance From Tag", distance.x);
-            SmartDashboard.putNumber("[VISION] Predicted Y Distance From Tag", distance.y);
             
             // Drive robot
             RobotContainer.swerveSubsystem.drive(
