@@ -15,11 +15,14 @@ public class TrackAprilTagCommand extends Command {
     private int targetTag;
     private double targetX;
     private double targetY;
+    private boolean enabled;
+
+    // Explain this later
+    private double targetYaw;
 
     public TrackAprilTagCommand(int targetTag, Distance relativeDistance) {
         this.targetTag = targetTag;
-        this.targetX = relativeDistance.x;
-        this.targetY = relativeDistance.y;
+        this.enabled = false;
 
         // Initialize the PID controllers
         rotationController   = new PIDController(VisionConstants.ROTATION_KP,
@@ -53,6 +56,8 @@ public class TrackAprilTagCommand extends Command {
                                                  VisionConstants.DRIVE_LIM_MAX_INT,
                                                  1);
 
+        this.setRelativeDistance(relativeDistance);
+
         addRequirements(RobotContainer.swerveSubsystem, RobotContainer.visionSubsystem);
     }
 
@@ -64,8 +69,10 @@ public class TrackAprilTagCommand extends Command {
         forwardController.zero();
         horizontalController.zero();
 
-        this.targetX = relativeDistance.x;
-        this.targetY = relativeDistance.y;
+        this.targetX   = relativeDistance.x;
+        this.targetY   = relativeDistance.y;
+        this.targetYaw = Math.atan2(this.targetX, this.targetY) * (180.0 / Math.PI);
+        SmartDashboard.putNumber("[VISION] Target Yaw", this.targetYaw);
     }
 
     public void setTargetTag(int targetTag) {
@@ -78,24 +85,33 @@ public class TrackAprilTagCommand extends Command {
         this.targetTag = targetTag;
     }
 
+    public void enable() {
+        this.enabled = true;
+    }
+
+    public void disable() {
+        this.enabled = false;
+    }
+
     @Override
     public void execute() {
+        if(!this.enabled) return;
+
         boolean hasTarget = RobotContainer.visionSubsystem.isTargetVisible();
         
         if(hasTarget
         && RobotContainer.visionSubsystem.getTargetId() == this.targetTag
         && RobotContainer.visionSubsystem.getImageAge() <= VisionConstants.MAX_ACCEPTABLE_DELAY) {
-            double yaw        = RobotContainer.visionSubsystem.getTargetYaw();
-            double pitch      = RobotContainer.visionSubsystem.getTargetPitch();
-            double area       = RobotContainer.visionSubsystem.getTargetArea();
-            Distance distance = DistanceCalculator.getDistance(yaw, pitch, area);
+            double angle      = RobotContainer.visionSubsystem.getTargetAngle();
+            Distance distance = RobotContainer.visionSubsystem.getDistanceAway();
 
             // Publish the distance
             SmartDashboard.putNumber("[VISION] Distance X", distance.x);
             SmartDashboard.putNumber("[VISION] Distance Y", distance.y);
+            SmartDashboard.putNumber("[VISION] Target Angle", angle);
             
             // Calculate drive commands
-            rotationController.update(0, yaw);
+            rotationController.update(180, angle);
             forwardController.update(this.targetY, distance.y);
             horizontalController.update(this.targetX, distance.x);
             double rotationSpeed   = rotationController.getOutput() * VisionConstants.ROTATION_SPEED * SwerveConstants.MAX_SPEED;
@@ -103,7 +119,7 @@ public class TrackAprilTagCommand extends Command {
             double horizontalSpeed = horizontalController.getOutput() * VisionConstants.DRIVE_SPEED * SwerveConstants.MAX_SPEED;
 
             // Magic numbers (bad)
-            if(Math.abs(distance.x - this.targetX) < 2
+            if(Math.abs(distance.x - this.targetX) < 1
             && Math.abs(distance.y - this.targetY) < 1) return;
 
             // Publish the speeds
@@ -113,7 +129,7 @@ public class TrackAprilTagCommand extends Command {
             // Drive robot
             RobotContainer.swerveSubsystem.drive(
                 new Translation2d(forwardSpeed, horizontalSpeed),
-                rotationSpeed
+                0 //rotationSpeed
             );
             
             // Log status
