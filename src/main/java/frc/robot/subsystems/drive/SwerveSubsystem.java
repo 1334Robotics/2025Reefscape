@@ -143,11 +143,12 @@ public class SwerveSubsystem extends SubsystemBase {
                 // Calculate vision measurement standard deviations
                 Matrix<N3, N1> visionStdDevs = calculateVisionStdDevs(target);
                 
-                swerveDrive.addVisionMeasurement(
+                // This makes testing much more difficult than it needs to be
+                /*swerveDrive.addVisionMeasurement(
                     calculateRobotPoseFromVision(targetPose),
                     Timer.getFPGATimestamp() - (RobotContainer.visionSubsystem.getImageAge() / 1000.0),
                     visionStdDevs
-                );
+                );*/
                 
                 // Log std devs for tuning
                 SmartDashboard.putNumber("Vision/StdDev", visionStdDevs.get(0, 0));
