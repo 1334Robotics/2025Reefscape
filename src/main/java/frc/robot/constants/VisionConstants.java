@@ -38,7 +38,7 @@ public final class VisionConstants {
     public static final double AREA_10_DISTANCE = 44.6; // In centimeters
     public static final double POWER_TABLE_SPACE = 0.005;
     // Both of these are in centimeters
-    public static final double TRACK_TAG_X = 10;
+    public static final double TRACK_TAG_X = 20;
     public static final double TRACK_TAG_Y = 100;
 
     // Rotation PID constants
@@ -50,8 +50,8 @@ public final class VisionConstants {
     public static final double ROTATION_LIM_MAX_INT = 0.3;
 
     // Drive PID constants
-    public static final double DRIVE_KP          = 0.01;
-    public static final double DRIVE_KI          = 0.0001;
+    public static final double DRIVE_KP          = 0.1;
+    public static final double DRIVE_KI          = 0.0005;
     public static final double DRIVE_KD          = 0;
     public static final double DRIVE_TAU         = 0;
     public static final double DRIVE_LIM_MIN_INT = -0.3;
@@ -74,6 +74,6 @@ public final class VisionConstants {
     public static final double AREA_TO_STD_DEV_FACTOR = 20.0; // Higher area = lower std dev
 
     // Speed
-    public static final double DRIVE_SPEED    = 0.5;
-    public static final double ROTATION_SPEED = 0.5;
+    public static final double DRIVE_SPEED    = 0.1;
+    public static final double ROTATION_SPEED = 0.1;
 }
