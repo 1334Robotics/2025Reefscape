@@ -105,6 +105,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void autonomousInit() {
     RobotContainer.swerveSubsystem.setFieldRelative(false);
+    RobotContainer.trackCommand.enable();
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -120,6 +121,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     RobotContainer.swerveSubsystem.setFieldRelative(true);
+    RobotContainer.trackCommand.disable();
     // Have some flag to do this only once
     if(SmartDashboard.getBoolean("[ELEVATOR] Reset On TeleOp Enable", false) && !this.elevatorReset) {
       (new ElevatorResetCommand()).schedule();
