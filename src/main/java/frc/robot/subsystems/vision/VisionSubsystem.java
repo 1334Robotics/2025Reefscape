@@ -1,11 +1,16 @@
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.units.DistanceUnit;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.commands.vision.Distance;
+
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.targeting.PhotonPipelineMetadata;
+
+import static edu.wpi.first.units.Units.Centimeters;
 
 import java.util.List;
 
@@ -118,6 +123,23 @@ public class VisionSubsystem extends SubsystemBase {
      */
     public double getImageAge() {
         return this.imageAge;
+    }
+
+    public Distance getDistanceAway() {
+        if(latestResult != null && latestResult.hasTargets()) {
+            PhotonTrackedTarget target = latestResult.getBestTarget();
+            return new Distance(target.getBestCameraToTarget().getMeasureY().in(Centimeters),
+                                target.getBestCameraToTarget().getMeasureX().in(Centimeters));
+        }
+        return null;
+    }
+
+    public double getTargetAngle() {
+        if(latestResult != null && latestResult.hasTargets()) {
+            return latestResult.getBestTarget().getBestCameraToTarget().getRotation().getZ() * (180 / Math.PI);
+        }
+        // If the angle is 1000­°, there is a problem
+        return 1000;
     }
 
     @Override
