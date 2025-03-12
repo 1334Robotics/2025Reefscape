@@ -11,6 +11,7 @@ public class ElevatorConstants {
     public static final double ELEVATOR_SLOW_SPEED  = 0.1;
     public static final double ELEVATOR_RESET_SPEED = 0.2;
 
+    // No unit
     public static final double ELEVATOR_SLOW_LOW_POS  = 0.15;
     public static final double ELEVATOR_SLOW_HIGH_POS = 4.15;
 
