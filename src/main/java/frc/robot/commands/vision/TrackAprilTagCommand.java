@@ -105,6 +105,9 @@ public class TrackAprilTagCommand extends Command {
             double angle      = RobotContainer.visionSubsystem.getTargetAngle();
             Distance distance = RobotContainer.visionSubsystem.getDistanceAway();
 
+            // Change angle from (-180 to 180) to (0 to 360) ensuring that -180 and 180 are the same
+            if(angle < 0) angle = 180 - (-180 - angle);
+
             // Publish the distance
             SmartDashboard.putNumber("[VISION] Distance X", distance.x);
             SmartDashboard.putNumber("[VISION] Distance Y", distance.y);
@@ -114,13 +117,14 @@ public class TrackAprilTagCommand extends Command {
             rotationController.update(180, angle);
             forwardController.update(this.targetY, distance.y);
             horizontalController.update(this.targetX, distance.x);
-            double rotationSpeed   = rotationController.getOutput() * VisionConstants.ROTATION_SPEED * SwerveConstants.MAX_SPEED;
+            double rotationSpeed   = -rotationController.getOutput() * VisionConstants.ROTATION_SPEED * SwerveConstants.MAX_SPEED;
             double forwardSpeed    = -forwardController.getOutput() * VisionConstants.DRIVE_SPEED * SwerveConstants.MAX_SPEED;
-            double horizontalSpeed = horizontalController.getOutput() * VisionConstants.DRIVE_SPEED * SwerveConstants.MAX_SPEED;
+            double horizontalSpeed = -horizontalController.getOutput() * VisionConstants.DRIVE_SPEED * SwerveConstants.MAX_SPEED;
 
             // Magic numbers (bad)
-            if(Math.abs(distance.x - this.targetX) < 1
-            && Math.abs(distance.y - this.targetY) < 1) return;
+            if(Math.abs(180 - angle) < 1)               rotationSpeed = 0;
+            if(Math.abs(distance.y - this.targetY) < 1) forwardSpeed = 0;
+            if(Math.abs(distance.x - this.targetX) < 1) horizontalSpeed = 0;
 
             // Publish the speeds
             SmartDashboard.putNumber("[VISION] Rotation Speed", rotationSpeed);
@@ -129,7 +133,7 @@ public class TrackAprilTagCommand extends Command {
             // Drive robot
             RobotContainer.swerveSubsystem.drive(
                 new Translation2d(forwardSpeed, horizontalSpeed),
-                0 //rotationSpeed
+                rotationSpeed
             );
             
             // Log status

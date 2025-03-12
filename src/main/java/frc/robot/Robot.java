@@ -105,7 +105,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void autonomousInit() {
     RobotContainer.swerveSubsystem.setFieldRelative(false);
-    //RobotContainer.trackCommand.enable();
+    RobotContainer.trackCommand.enable();
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
