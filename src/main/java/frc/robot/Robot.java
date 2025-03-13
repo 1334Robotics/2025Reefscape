@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -14,6 +15,8 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
  * The Virtual Machine is configured to automatically run this class, and to call the methods corresponding to
@@ -52,7 +55,36 @@ public class Robot extends LoggedRobot {
       Logger.addDataReceiver(new NT4Publisher());
       Logger.start();
       SmartDashboard.putData("Field", m_field);
-      // Get the default instance of the simulation world
+      
+      // Check and log library versions
+      logLibraryVersions();
+  }
+
+  /**
+   * Logs the versions of important libraries to help with debugging
+   */
+  private void logLibraryVersions() {
+    try {
+      // Log PathPlanner version
+      String pathPlannerVersion = "Unknown";
+      try {
+        // Try to get version using reflection to avoid direct dependency issues
+        Class<?> ppLib = Class.forName("com.pathplanner.lib.PathPlannerLib");
+        java.lang.reflect.Method getVersion = ppLib.getMethod("getVersion");
+        pathPlannerVersion = (String) getVersion.invoke(null);
+      } catch (Exception e) {
+        pathPlannerVersion = "Error getting version";
+      }
+      
+      System.out.println("=== Library Versions ===");
+      System.out.println("PathPlanner: " + pathPlannerVersion);
+      System.out.println("=====================");
+      
+      SmartDashboard.putString("Library/PathPlanner", pathPlannerVersion);
+      
+    } catch (Exception e) {
+      System.err.println("Error logging library versions: " + e.getMessage());
+    }
   }
 
   /**
@@ -70,6 +102,9 @@ public class Robot extends LoggedRobot {
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
     m_field.setRobotPose(RobotContainer.swerveSubsystem.getPose());
+    
+    // Update alliance indicators on dashboard
+    m_robotContainer.updateAllianceIndicators();
   }
    /** This function is called once when the robot is first started up. */
   @Override
@@ -81,12 +116,28 @@ public class Robot extends LoggedRobot {
   @Override
   public void simulationPeriodic() {
     SimulatedArena.getInstance().simulationPeriodic();
+    
+    // Debug alliance and position in simulation
+    if (count++ % 50 == 0) { // Only log every ~1 second
+      var alliance = DriverStation.getAlliance();
+      String allianceStr = alliance.isPresent() ? alliance.get().toString() : "Unknown";
+      Pose2d robotPose = RobotContainer.swerveSubsystem.getPose();
+      SmartDashboard.putString("Simulation/Alliance", allianceStr);
+      SmartDashboard.putString("Simulation/RobotPose", 
+          String.format("X: %.2f, Y: %.2f, Rot: %.2f°", 
+              robotPose.getX(), robotPose.getY(), 
+              robotPose.getRotation().getDegrees()));
+    }
+    
     // Log game piece positions
     Logger.recordOutput("FieldSimulation/Algae", 
     SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
     Logger.recordOutput("FieldSimulation/Coral", 
     SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
   }
+
+  // Counter for periodic debug logs
+  private int count = 0;
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
@@ -100,12 +151,66 @@ public class Robot extends LoggedRobot {
   public void autonomousInit() {
     // Keep field-relative mode enabled for path following
     RobotContainer.swerveSubsystem.setFieldRelative(true);
+    
+    // Set initial robot pose based on alliance and position
+    setInitialPose();
+    
+    // Get the selected autonomous command
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
+  }
+
+  /**
+   * Sets the initial robot pose based on alliance and selected starting position
+   * This method is called at the start of autonomous to ensure the robot has the
+   * correct pose based on the latest alliance and position settings, overriding
+   * any initial pose set during robot construction.
+   * 
+   * This year the bots face the team so they need to start with a 180 degree rotation
+   * so red is facing the red alliance and blue is facing the blue alliance
+   * WE NEED TO ADD THE ROBOT OFFSET FROM CENTER TO BUMPER TO THE X VALUE BEFORE COMP!!! - TO DO
+   * THESE NEED TO BE BUDDY CHECKED!!!! - TO DO 
+   */
+  private void setInitialPose() {
+    var alliance = DriverStation.getAlliance();
+    String position = m_robotContainer.getSelectedPosition();
+    
+    // Default starting pose (Center, Blue alliance)
+    Pose2d startingPose = new Pose2d(5.89, 5.5, Rotation2d.fromDegrees(180));
+    
+    if (alliance.isPresent()) {
+      if (alliance.get() == DriverStation.Alliance.Blue) {
+        // Blue alliance positions
+        if (position.equals("Left")) {
+          startingPose = new Pose2d(5.89, 7.0, Rotation2d.fromDegrees(180));
+        } else if (position.equals("Right")) {
+          startingPose = new Pose2d(5.89, 1.0, Rotation2d.fromDegrees(180));
+        }
+        // Center position uses default pose
+      } else {
+        // Red alliance positions (mirrored across field center)
+        if (position.equals("Left")) {
+          startingPose = new Pose2d(8.05, 1.0, Rotation2d.fromDegrees(0));
+        } else if (position.equals("Right")) {
+          startingPose = new Pose2d(8.05, 7.0, Rotation2d.fromDegrees(0));
+        } else {
+          // Center position
+          startingPose = new Pose2d(8.05, 5.5, Rotation2d.fromDegrees(0));
+        }
+      }
+    }
+    
+    // Log the starting position
+    System.out.println("Setting initial pose to: " + startingPose + 
+                      " (Alliance: " + (alliance.isPresent() ? alliance.get() : "Unknown") + 
+                      ", Position: " + position + ")");
+                      
+    // Reset odometry to the starting pose
+    RobotContainer.swerveSubsystem.resetOdometry(startingPose);
   }
 
   /** This function is called periodically during autonomous. */
