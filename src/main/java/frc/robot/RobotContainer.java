@@ -46,6 +46,7 @@ import frc.robot.subsystems.elevator.ElevatorHandler;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.PathConstraints;
@@ -128,8 +129,14 @@ public class RobotContainer {
   private SendableChooser<Command> autoChooser;
   private SendableChooser<Command> pathChooser; // New path chooser for individual paths
 
+  // Position chooser for starting position
+  private SendableChooser<String> positionChooser;
+
   // Map to store auto names for dashboard reporting
   private final Map<Command, String> autoCommandNames = new HashMap<>();
+
+  // Path cache to improve performance and memory management
+  private final Map<String, PathPlannerPath> pathCache = new HashMap<>();
 
   /**
    * List available path files on the dashboard
@@ -172,12 +179,18 @@ public class RobotContainer {
     AutoConfigurer.configure();
     DriverStation.silenceJoystickConnectionWarning(true);//silence the warning about the joystick connection
     
+    // Register named commands for PathPlanner to use in auto routines
+    registerNamedCommands();
+    
     // Initialize choosers for auto routines
     autoChooser = new SendableChooser<>();
     pathChooser = new SendableChooser<>();
     
     // Set up autonomous options
     configureAutoChooser();
+    
+    // Preload all autonomous routines to prevent delays
+    preloadAutonomousRoutines();
 
     // Configure the trigger bindings
     configureBindings();
@@ -230,6 +243,13 @@ public class RobotContainer {
     
     // Put on dashboard with descriptive name
     SmartDashboard.putData("Auto Routines", autoChooser);
+    
+    // Initialize the position chooser
+    positionChooser = new SendableChooser<>();
+    positionChooser.setDefaultOption("Center", "Center");
+    positionChooser.addOption("Left", "Left");
+    positionChooser.addOption("Right", "Right");
+    SmartDashboard.putData("Starting Position", positionChooser);
     
     // Clear and repopulate the auto command names map
     autoCommandNames.clear();
@@ -293,31 +313,65 @@ public class RobotContainer {
    */
   private Command getPathCommand(String pathName) {
     try {
-      // Load path from file
-      System.out.println("Attempting to load path: " + pathName);
-      final String cleanPathName;
-      if (pathName.endsWith(".path")) {
-        cleanPathName = pathName.substring(0, pathName.length() - 5);
-      } else {
-        cleanPathName = pathName;
-      }
+      // Load path from file or use cached version
+      final String cleanPathName = pathName.endsWith(".path") 
+          ? pathName.substring(0, pathName.length() - 5) 
+          : pathName;
       
-      PathPlannerPath path = PathPlannerPath.fromPathFile(cleanPathName);
+      // Check path cache first
+      PathPlannerPath path;
+      if (pathCache.containsKey(cleanPathName)) {
+        path = pathCache.get(cleanPathName);
+        System.out.println("Using cached path: " + cleanPathName);
+      } else {
+        System.out.println("Loading path: " + cleanPathName);
+        path = PathPlannerPath.fromPathFile(cleanPathName);
+        
+        // Cache the path if valid
+        if (path != null) {
+          pathCache.put(cleanPathName, path);
+          
+          // Limit cache size to prevent memory issues
+          if (pathCache.size() > 10) {
+            String oldestPath = pathCache.keySet().iterator().next();
+            pathCache.remove(oldestPath);
+            System.out.println("Removed from cache: " + oldestPath);
+          }
+        }
+      }
       
       if (path == null) {
         System.err.println("ERROR: Path was null for: " + cleanPathName);
-        return new InstantCommand(() -> System.out.println("Path was null"));
+        SmartDashboard.putString("Path Error", "Failed to load: " + cleanPathName);
+        return Commands.none().withName("NullPathHandler");
       }
       
-      // Create command to follow the path
-      return AutoBuilder.followPath(path).finallyDo(() -> {
-        // Log when path completes
-        System.out.println("Path " + cleanPathName + " completed");
-      });
+      // Create a sequence with better error handling
+      return Commands.sequence(
+        // Log start
+        Commands.runOnce(() -> {
+          System.out.println("Starting path: " + cleanPathName);
+          SmartDashboard.putString("Current Path", cleanPathName);
+        }),
+        // Follow path with timeout
+        AutoBuilder.followPath(path)
+          .withTimeout(15) // Safety timeout
+          .handleInterrupt(() -> {
+            System.out.println("Path interrupted: " + cleanPathName);
+            SmartDashboard.putString("Path Status", "Interrupted");
+          }),
+        // Log completion
+        Commands.runOnce(() -> {
+          System.out.println("Path completed: " + cleanPathName);
+          SmartDashboard.putString("Current Path", "None");
+          SmartDashboard.putString("Path Status", "Completed");
+        })
+      ).withName("Path_" + cleanPathName);
     } catch (Exception e) {
       System.err.println("Error loading path '" + pathName + "': " + e.getMessage());
       e.printStackTrace(); // Print the stack trace for more detailed debugging
-      return new InstantCommand(() -> System.out.println("Path loading failed: " + e.getMessage()));
+      SmartDashboard.putString("Path Error", e.getMessage());
+      return Commands.none().withName("ErrorPathHandler");
     }
   }
 
@@ -371,10 +425,35 @@ public class RobotContainer {
    */
   public Command getAutonomousCommandByName(String autoName) {
     try {
-      return new PathPlannerAuto(autoName);
+      System.out.println("Loading auto routine: " + autoName);
+      SmartDashboard.putString("Current Auto", autoName);
+      
+      Command autoCommand = new PathPlannerAuto(autoName);
+      
+      // Create a sequence that provides diagnostics around the auto routine
+      return Commands.sequence(
+        // Indicate auto is starting
+        Commands.runOnce(() -> {
+          System.out.println("Starting auto routine: " + autoName);
+          SmartDashboard.putString("Auto Status", "Running");
+        }),
+        // Run the auto with timeout protection
+        autoCommand.withTimeout(15)
+          .handleInterrupt(() -> {
+            System.out.println("Auto routine interrupted: " + autoName);
+            SmartDashboard.putString("Auto Status", "Interrupted");
+          }),
+        // Indicate auto is complete
+        Commands.runOnce(() -> {
+          System.out.println("Auto routine completed: " + autoName);
+          SmartDashboard.putString("Auto Status", "Completed");
+        })
+      ).withName("Auto_" + autoName);
     } catch (Exception e) {
       System.err.println("Error loading auto '" + autoName + "': " + e.getMessage());
-      return Commands.none();
+      e.printStackTrace();
+      SmartDashboard.putString("Auto Error", e.getMessage());
+      return Commands.none().withName("ErrorAutoHandler");
     }
   }
 
@@ -441,5 +520,83 @@ public class RobotContainer {
     // we'll use our auto name lookup map or a generic identifier
     String name = autoCommandNames.get(selected);
     return (name != null) ? name : "Selected Auto";
+  }
+
+  /**
+   * Get the selected starting position from the dashboard
+   * @return The selected position (Left, Center, or Right)
+   */
+  public String getSelectedPosition() {
+    return positionChooser != null ? positionChooser.getSelected() : "Center";
+  }
+
+  /**
+   * Updates dashboard indicators for current alliance
+   * Called periodically from Robot to ensure indicators stay current
+   */
+  public void updateAllianceIndicators() {
+    var alliance = DriverStation.getAlliance();
+    if (alliance.isPresent()) {
+      boolean isRed = alliance.get() == DriverStation.Alliance.Red;
+      SmartDashboard.putBoolean("Is Red Alliance", isRed);
+      SmartDashboard.putString("Current Alliance", isRed ? "RED" : "BLUE");
+    } else {
+      SmartDashboard.putBoolean("Is Red Alliance", false);
+      SmartDashboard.putString("Current Alliance", "UNKNOWN");
+    }
+  }
+
+  /**
+   * Register named commands for use in PathPlanner auto routines
+   */
+  private void registerNamedCommands() {
+    System.out.println("Registering named commands for PathPlanner...");
+    
+    // Register standard robot commands
+    NamedCommands.registerCommand("ShootCommand", new ShootCommand().asProxy());
+    NamedCommands.registerCommand("ZeroGyro", new GyroZeroCommand().asProxy());
+    NamedCommands.registerCommand("FeedCommand", new ForceFeedCommand().asProxy());
+    NamedCommands.registerCommand("StopCommand", new StopCommand().asProxy());
+    
+    // Elevator commands
+    NamedCommands.registerCommand("ElevatorL1", new ElevatorGotoL1Command().asProxy());
+    NamedCommands.registerCommand("ElevatorL2", new ElevatorGotoL2Command().asProxy());
+    NamedCommands.registerCommand("ElevatorL3", new ElevatorGotoL3Command().asProxy());
+    NamedCommands.registerCommand("ElevatorL4", new ElevatorGotoL4Command().asProxy());
+    
+    // Flopper commands
+    NamedCommands.registerCommand("FlopperUp", new FlopperUpCommand().asProxy());
+    NamedCommands.registerCommand("FlopperDown", new FlopperDownCommand().asProxy());
+    
+    System.out.println("Named commands registered successfully!");
+  }
+  
+  /**
+   * Preload all autonomous routines to prevent delays during competitions
+   */
+  private void preloadAutonomousRoutines() {
+    try {
+        // Get all auto files
+        File autosDir = new File(Filesystem.getDeployDirectory(), "pathplanner/autos");
+        if (autosDir.exists() && autosDir.isDirectory()) {
+            File[] autoFiles = autosDir.listFiles((dir, name) -> name.endsWith(".auto"));
+            if (autoFiles != null) {
+                System.out.println("Preloading " + autoFiles.length + " auto routines...");
+                for (File file : autoFiles) {
+                    String autoName = file.getName().replace(".auto", "");
+                    try {
+                        // Create the command to ensure it's loaded in memory
+                        new PathPlannerAuto(autoName);
+                        System.out.println("  - Preloaded auto: " + autoName);
+                    } catch (Exception e) {
+                        System.err.println("  - Error preloading auto '" + autoName + "': " + e.getMessage());
+                    }
+                }
+                System.out.println("Auto preloading complete!");
+            }
+        }
+    } catch (Exception e) {
+        System.err.println("Error during auto preloading: " + e.getMessage());
+    }
   }
 }

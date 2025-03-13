@@ -65,6 +65,7 @@ import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 import static edu.wpi.first.units.Units.Meter;
 import edu.wpi.first.wpilibj2.command.Commands;
+import com.pathplanner.lib.auto.NamedCommands;
 
 
 
@@ -93,14 +94,24 @@ public class SwerveSubsystem extends SubsystemBase {
         final GyroSimulation gyroSimulation;
         final ModuleIO[] moduleIOs;
         SmartDashboard.putBoolean("[SWERVE] Field Relative", this.fieldRelative);
-        boolean blueAlliance = false;
-        // Set the starting pose based on the alliance color - THIS NEEDS TO BE UPDATED FOR COMPETITION (blue alliance is false) maybe get this from a constant file? or a method?
-        Pose2d startingPose = blueAlliance ? new Pose2d(new Translation2d(Meter.of(1),
-                                                                          Meter.of(4)),
-                                                        Rotation2d.fromDegrees(0))
-                                           : new Pose2d(new Translation2d(Meter.of(16),
-                                                                          Meter.of(4)),
-                                                        Rotation2d.fromDegrees(180));
+        
+        // Get alliance dynamically instead of hardcoding
+        boolean blueAlliance = true; // Default to blue if alliance cannot be determined
+        var alliance = DriverStation.getAlliance();
+        if (alliance.isPresent()) {
+            blueAlliance = alliance.get() == DriverStation.Alliance.Blue;
+            SmartDashboard.putString("[SWERVE] Initial Alliance", blueAlliance ? "BLUE" : "RED");
+        } else {
+            SmartDashboard.putString("[SWERVE] Initial Alliance", "UNKNOWN (defaulting to BLUE)");
+        }
+        
+        // Set the starting pose based on the alliance color
+        Pose2d startingPose = blueAlliance ? new Pose2d(new Translation2d(Meter.of(5.89),
+                                                                          Meter.of(5.5)),
+                                                        Rotation2d.fromDegrees(180))
+                                           : new Pose2d(new Translation2d(Meter.of(8.05),
+                                                                          Meter.of(5.5)),
+                                                        Rotation2d.fromDegrees(0));
         
         // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary objects being created.
         SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
@@ -136,9 +147,8 @@ public class SwerveSubsystem extends SubsystemBase {
                 this.swerveDriveSimulation = new SwerveDriveSimulation(
                 // Specify Configuration
                 driveTrainSimulationConfig,
-                // Specify starting pose - this is the starting pose of the robot on the field in simulation
-                new Pose2d(5, 7, new Rotation2d(-180))
-                );
+                // Specify starting pose - use the same starting pose based on alliance
+                startingPose);
 
                 // Register with simulation world
                 SimulatedArena.getInstance().addDriveTrainSimulation(swerveDriveSimulation);
@@ -200,6 +210,12 @@ public class SwerveSubsystem extends SubsystemBase {
         // Update odometry with latest module states and gyro reading this should be run in every loop
         swerveDrive.updateOdometry(); 
 
+        // Track alliance and pose for debugging
+        var alliance = DriverStation.getAlliance();
+        boolean isBlue = !alliance.isPresent() || alliance.get() == DriverStation.Alliance.Blue;
+        SmartDashboard.putString("Swerve/CurrentAlliance", isBlue ? "BLUE" : "RED");
+        SmartDashboard.putBoolean("Swerve/IsSimulation", Robot.isSimulation());
+        
         // Secondary feedback loop for the swerve drive with vision
         // 2. If vision target visible & data fresh, use as correction
         if(RobotContainer.visionSubsystem.isTargetVisible() && 
@@ -438,18 +454,29 @@ private Pose2d calculateRobotPoseFromVision(Transform3d targetToCamera) {
             // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
 
             var alliance = DriverStation.getAlliance();
+            boolean isRed = false;
             if (alliance.isPresent()) {
-              return alliance.get() == DriverStation.Alliance.Red;
+              isRed = alliance.get() == DriverStation.Alliance.Red;
             }
-            return false;
+            
+            // Log current alliance and mirroring state to dashboard
+            SmartDashboard.putBoolean("PathPlanner/IsRedAlliance", isRed);
+            SmartDashboard.putBoolean("PathPlanner/MirroringPaths", isRed);
+            
+            return isRed;
           },
           this
           // Reference to this subsystem to set requirements
       );
 
-    } catch (Exception e)
-    {
-      // Handle exception as needed
+      // Log setup completion
+      System.out.println("PathPlanner initialized with alliance detection");
+        
+      // Preload PathPlanner Path finding for faster initial path planning
+      PathfindingCommand.warmupCommand().schedule();
+        
+    } catch (Exception e) {
+      System.err.println("Error configuring PathPlanner: " + e.getMessage());
       e.printStackTrace();
     }
 
