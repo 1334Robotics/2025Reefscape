@@ -50,6 +50,17 @@ public class ClimbSubsystem extends SubsystemBase {
         SmartDashboard.putString("[Climb] State", "Locking climb mechanism");
     }
 
+    public void unlockClimb() {
+        lockMotor.set(-ClimbConstants.LOCK_CLIMB_MOTOR_SPEED);
+        SmartDashboard.putString("[Climb] State", "Unlocking climb mechanism");
+    }
+
+    public void forcePinsUp() {
+        lowerMotor1.set(-ClimbConstants.FORCE_PIN_MOTOR_SPEED);
+        lowerMotor2.set(-ClimbConstants.FORCE_PIN_MOTOR_SPEED);
+        SmartDashboard.putString("[Climb] State", "Forcing pins up");
+    }
+
     /** Stops all climb motors. */
     public void stopClimb() {
         lowerMotor1.set(0);
