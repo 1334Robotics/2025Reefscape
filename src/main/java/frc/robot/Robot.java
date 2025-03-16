@@ -152,7 +152,7 @@ public class Robot extends LoggedRobot {
     // Keep field-relative mode enabled for path following
     RobotContainer.swerveSubsystem.setFieldRelative(true);
     
-    // Set initial robot pose based on alliance and position
+    // Set initial robot pose based on FMS data
     setInitialPose();
     
     // Get the selected autonomous command
@@ -165,19 +165,13 @@ public class Robot extends LoggedRobot {
   }
 
   /**
-   * Sets the initial robot pose based on alliance and selected starting position
+   * Sets the initial robot pose based on FMS data
    * This method is called at the start of autonomous to ensure the robot has the
-   * correct pose based on the latest alliance and position settings, overriding
-   * any initial pose set during robot construction.
-   * 
-   * This year the bots face the team so they need to start with a 180 degree rotation
-   * so red is facing the red alliance and blue is facing the blue alliance
-   * WE NEED TO ADD THE ROBOT OFFSET FROM CENTER TO BUMPER TO THE X VALUE BEFORE COMP!!! - TO DO
-   * THESE NEED TO BE BUDDY CHECKED!!!! - TO DO 
+   * correct pose based on the latest alliance and FMS position settings.
    */
   private void setInitialPose() {
     var alliance = DriverStation.getAlliance();
-    String position = m_robotContainer.getSelectedPosition();
+    int location = DriverStation.getLocation().orElse(2); // Default to center (2) if not available
     
     // Default starting pose (Center, Blue alliance)
     Pose2d startingPose = new Pose2d(5.89, 5.5, Rotation2d.fromDegrees(180));
@@ -185,29 +179,39 @@ public class Robot extends LoggedRobot {
     if (alliance.isPresent()) {
       if (alliance.get() == DriverStation.Alliance.Blue) {
         // Blue alliance positions
-        if (position.equals("Left")) {
-          startingPose = new Pose2d(5.89, 7.0, Rotation2d.fromDegrees(180));
-        } else if (position.equals("Right")) {
-          startingPose = new Pose2d(5.89, 1.0, Rotation2d.fromDegrees(180));
+        switch (location) {
+          case 1:   // Left
+            startingPose = new Pose2d(5.89, 7.0, Rotation2d.fromDegrees(180));
+            break;
+          case 2:   // Center
+            startingPose = new Pose2d(5.89, 5.5, Rotation2d.fromDegrees(180));
+            break;
+          case 3: // Right
+            startingPose = new Pose2d(5.89, 1.0, Rotation2d.fromDegrees(180));
+            break;
         }
-        // Center position uses default pose
       } else {
         // Red alliance positions (mirrored across field center)
-        if (position.equals("Left")) {
-          startingPose = new Pose2d(8.05, 1.0, Rotation2d.fromDegrees(0));
-        } else if (position.equals("Right")) {
-          startingPose = new Pose2d(8.05, 7.0, Rotation2d.fromDegrees(0));
-        } else {
-          // Center position
-          startingPose = new Pose2d(8.05, 5.5, Rotation2d.fromDegrees(0));
+        switch (location) {
+          case 1:   // Left
+            startingPose = new Pose2d(8.05, 1.0, Rotation2d.fromDegrees(0));
+            break;
+          case 2:   // Center
+            startingPose = new Pose2d(8.05, 5.5, Rotation2d.fromDegrees(0));
+            break;
+          case 3: // Right
+            startingPose = new Pose2d(8.05, 7.0, Rotation2d.fromDegrees(0));
+            break;
         }
       }
+      
+      // Log the starting position
+      System.out.println("Setting initial pose to: " + startingPose + 
+                        " (Alliance: " + alliance.get() + 
+                        ", Position: " + location + ")");
+    } else {
+      System.out.println("Warning: Using default starting pose - Alliance not available");
     }
-    
-    // Log the starting position
-    System.out.println("Setting initial pose to: " + startingPose + 
-                      " (Alliance: " + (alliance.isPresent() ? alliance.get() : "Unknown") + 
-                      ", Position: " + position + ")");
                       
     // Reset odometry to the starting pose
     RobotContainer.swerveSubsystem.resetOdometry(startingPose);
