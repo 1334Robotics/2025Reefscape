@@ -77,6 +77,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.Optional;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -127,10 +128,6 @@ public class RobotContainer {
 
   // Auto chooser for PathPlanner
   private SendableChooser<Command> autoChooser;
-  private SendableChooser<Command> pathChooser; // New path chooser for individual paths
-
-  // Position chooser for starting position
-  private SendableChooser<String> positionChooser;
 
   // Map to store auto names for dashboard reporting
   private final Map<Command, String> autoCommandNames = new HashMap<>();
@@ -182,11 +179,7 @@ public class RobotContainer {
     // Register named commands for PathPlanner to use in auto routines
     registerNamedCommands();
     
-    // Initialize choosers for auto routines
-    autoChooser = new SendableChooser<>();
-    pathChooser = new SendableChooser<>();
-    
-    // Set up autonomous options
+    // Initialize and configure auto chooser
     configureAutoChooser();
     
     // Preload all autonomous routines to prevent delays
@@ -202,9 +195,10 @@ public class RobotContainer {
     // Silence the DriverStation joystick warning - Uncomment if needed
     //DriverStation.silenceJoystickConnectionWarning(true);
 
-    DriveCommand xboxDriveCommand = new DriveCommand(() -> MathUtil.applyDeadband(driverController.getLeftX(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
-                                                     () -> MathUtil.applyDeadband(driverController.getLeftY(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
-                                                     () -> MathUtil.applyDeadband(-driverController.getRightX(), RobotContainerConstants.CONTROLLER_ROTATION_DEADBAND));
+    DriveCommand xboxDriveCommand = new DriveCommand(
+        () -> MathUtil.applyDeadband(driverController.getLeftX(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
+        () -> MathUtil.applyDeadband(driverController.getLeftY(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
+        () -> MathUtil.applyDeadband(-driverController.getRightX(), RobotContainerConstants.CONTROLLER_ROTATION_DEADBAND));
 
     swerveSubsystem.setDefaultCommand(xboxDriveCommand);
 
@@ -239,70 +233,12 @@ public class RobotContainer {
     // Build an auto chooser using PathPlanner's built-in method
     // This will automatically find all autos in deploy/pathplanner/autos
     autoChooser = AutoBuilder.buildAutoChooser("Do Nothing");
-    //pathChooser = new SendableChooser<>();
     
-    // Put on dashboard with descriptive name
+    // Put auto chooser on dashboard with descriptive name
     SmartDashboard.putData("Auto Routines", autoChooser);
     
-    // Initialize the position chooser
-    positionChooser = new SendableChooser<>();
-    positionChooser.setDefaultOption("Center", "Center");
-    positionChooser.addOption("Left", "Left");
-    positionChooser.addOption("Right", "Right");
-    SmartDashboard.putData("Starting Position", positionChooser);
-    
-    // Clear and repopulate the auto command names map
-    autoCommandNames.clear();
-    
-    // Add default option
-    Command defaultCommand = new InstantCommand();
-    autoCommandNames.put(defaultCommand, "Do Nothing");
-    
-    // Set default option for path chooser
-    pathChooser.setDefaultOption("Do Nothing", new InstantCommand());
-    
-    // Add all paths from the paths directory
-    try {
-      File pathsDir = new File(Filesystem.getDeployDirectory(), "pathplanner/paths");
-      if (pathsDir.exists() && pathsDir.isDirectory()) {
-        File[] pathFiles = pathsDir.listFiles((dir, name) -> name.endsWith(".path"));
-        if (pathFiles != null) {
-          for (File file : pathFiles) {
-            String pathName = file.getName().replace(".path", "");
-            // Create a command that follows just this path
-            Command pathCommand = getPathCommand(pathName);
-            pathChooser.addOption(pathName, pathCommand);
-          }
-        }
-      }
-    } catch (Exception e) {
-      System.err.println("Error configuring path chooser: " + e.getMessage());
-    }
-    
-    // Add all paths from autos directory for tracking
-    try {
-      File autosDir = new File(Filesystem.getDeployDirectory(), "pathplanner/autos");
-      if (autosDir.exists() && autosDir.isDirectory()) {
-        File[] autoFiles = autosDir.listFiles((dir, name) -> name.endsWith(".auto"));
-        if (autoFiles != null) {
-          for (File file : autoFiles) {
-            String autoName = file.getName().replace(".auto", "");
-            try {
-              // Get the command and store its name
-              Command autoCommand = new PathPlannerAuto(autoName);
-              autoCommandNames.put(autoCommand, autoName);
-            } catch (Exception e) {
-              System.err.println("Error loading auto: " + autoName + ": " + e.getMessage());
-            }
-          }
-        }
-      }
-    } catch (Exception e) {
-      System.err.println("Error listing autos: " + e.getMessage());
-    }
-    
-    // List available paths in the terminal/log for debugging
-    listAvailablePaths();
+    // List available autos in the terminal/log for debugging
+    listAvailableAutos();
   }
   
   /**
@@ -408,130 +344,11 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // Always use the auto chooser
     return autoChooser.getSelected();
   }
 
-  public Command getAutonomousPathCommand() {//manual path selection via path name 
-    // Return the command selected from the path chooser
-    return pathChooser.getSelected();
-  }
-
   /**
-   * Get an autonomous command for a specific named auto routine
-   * 
-   * @param autoName The name of the auto routine to run
-   * @return The command to run the specified auto
-   */
-  public Command getAutonomousCommandByName(String autoName) {
-    try {
-      System.out.println("Loading auto routine: " + autoName);
-      SmartDashboard.putString("Current Auto", autoName);
-      
-      Command autoCommand = new PathPlannerAuto(autoName);
-      
-      // Create a sequence that provides diagnostics around the auto routine
-      return Commands.sequence(
-        // Indicate auto is starting
-        Commands.runOnce(() -> {
-          System.out.println("Starting auto routine: " + autoName);
-          SmartDashboard.putString("Auto Status", "Running");
-        }),
-        // Run the auto with timeout protection
-        autoCommand.withTimeout(15)
-          .handleInterrupt(() -> {
-            System.out.println("Auto routine interrupted: " + autoName);
-            SmartDashboard.putString("Auto Status", "Interrupted");
-          }),
-        // Indicate auto is complete
-        Commands.runOnce(() -> {
-          System.out.println("Auto routine completed: " + autoName);
-          SmartDashboard.putString("Auto Status", "Completed");
-        })
-      ).withName("Auto_" + autoName);
-    } catch (Exception e) {
-      System.err.println("Error loading auto '" + autoName + "': " + e.getMessage());
-      e.printStackTrace();
-      SmartDashboard.putString("Auto Error", e.getMessage());
-      return Commands.none().withName("ErrorAutoHandler");
-    }
-  }
-
-  /**
-   * Get a command to execute the currently selected path from the path chooser
-   * This is useful for testing paths during teleop
-   * 
-   * @return Command to execute the selected path
-   */
-  public Command runSelectedPath() {
-    return pathChooser.getSelected();
-  }
-
-  /**
-   * Creates a command to run the currently selected autonomous routine from the auto chooser
-   * This allows running autonomously selected routines without switching robot modes
-   * 
-   * @return A command that runs the selected autonomous routine
-   */
-  public Command runSelectedAuto() {
-    return Commands.defer(() -> {
-      // Get the currently selected auto command
-      Command selectedAuto = autoChooser.getSelected();
-      
-      // If there's no command selected or it's just an InstantCommand (Do Nothing)
-      if (selectedAuto == null || 
-          (selectedAuto instanceof InstantCommand && 
-           !(selectedAuto instanceof SequentialCommandGroup))) {
-        System.out.println("No auto selected or 'Do Nothing' selected");
-        SmartDashboard.putString("Current Auto Status", "No auto routine selected");
-        return Commands.none();
-      }
-      
-      System.out.println("Running selected auto routine via button press");
-      
-      // Create a new command sequence using new Commands factory methods
-      return Commands.sequence(
-        Commands.runOnce(() -> {
-          CommandScheduler.getInstance().cancelAll();
-          SmartDashboard.putString("Current Auto Status", "Running Auto: " + getSelectedAutoName());
-        }),
-        selectedAuto,
-        Commands.runOnce(() -> {
-          System.out.println("Auto routine completed");
-          SmartDashboard.putString("Current Auto Status", "Completed: " + getSelectedAutoName());
-        })
-      );
-    }, Set.of()); // Pass an empty set of requirements
-  }
-  
-  /**
-   * Helper method to get the name of the currently selected auto routine
-   * Used for dashboard feedback
-   * 
-   * @return The name of the selected auto routine, or "Unknown" if not found
-   */
-  private String getSelectedAutoName() {
-    Command selected = autoChooser.getSelected();
-    if (selected == null) {
-      return "None";
-    }
-    
-    // Since we can't access the internal data of SendableChooser,
-    // we'll use our auto name lookup map or a generic identifier
-    String name = autoCommandNames.get(selected);
-    return (name != null) ? name : "Selected Auto";
-  }
-
-  /**
-   * Get the selected starting position from the dashboard
-   * @return The selected position (Left, Center, or Right)
-   */
-  public String getSelectedPosition() {
-    return positionChooser != null ? positionChooser.getSelected() : "Center";
-  }
-
-  /**
-   * Updates dashboard indicators for current alliance
+   * Updates dashboard indicators for current alliance and FMS position
    * Called periodically from Robot to ensure indicators stay current
    */
   public void updateAllianceIndicators() {
@@ -540,9 +357,14 @@ public class RobotContainer {
       boolean isRed = alliance.get() == DriverStation.Alliance.Red;
       SmartDashboard.putBoolean("Is Red Alliance", isRed);
       SmartDashboard.putString("Current Alliance", isRed ? "RED" : "BLUE");
+      
+      // Get and display FMS position if available
+      int location = DriverStation.getLocation().orElse(2); // Default to center (2)
+      SmartDashboard.putNumber("FMS Position", location);
     } else {
       SmartDashboard.putBoolean("Is Red Alliance", false);
       SmartDashboard.putString("Current Alliance", "UNKNOWN");
+      SmartDashboard.putNumber("FMS Position", 2); // Default to center
     }
   }
 
@@ -598,5 +420,61 @@ public class RobotContainer {
     } catch (Exception e) {
         System.err.println("Error during auto preloading: " + e.getMessage());
     }
+  }
+
+  /**
+   * List available auto files on the dashboard
+   */
+  private void listAvailableAutos() {
+    try {
+      // List available auto files
+      File autosDir = new File(Filesystem.getDeployDirectory(), "pathplanner/autos");
+      if (autosDir.exists() && autosDir.isDirectory()) {
+        File[] autoFiles = autosDir.listFiles((dir, name) -> name.endsWith(".auto"));
+        if (autoFiles != null) {
+          StringBuilder autosList = new StringBuilder();
+          for (File file : autoFiles) {
+            autosList.append("- ").append(file.getName().replace(".auto", "")).append("\n");
+          }
+          SmartDashboard.putString("Auto Files (Reference Only)", autosList.toString());
+        }
+      }
+    } catch (Exception e) {
+      System.err.println("Error listing auto files: " + e.getMessage());
+    }
+  }
+
+  /**
+   * Creates a command to run the currently selected autonomous routine from the auto chooser
+   * This allows running autonomously selected routines without switching robot modes
+   * 
+   * @return A command that runs the selected autonomous routine
+   */
+  public Command runSelectedAuto() {
+    return Commands.defer(() -> {
+      Command selectedAuto = autoChooser.getSelected();
+      
+      if (selectedAuto == null || 
+          (selectedAuto instanceof InstantCommand && 
+           !(selectedAuto instanceof SequentialCommandGroup))) {
+        System.out.println("No auto selected or 'Do Nothing' selected");
+        SmartDashboard.putString("Current Auto Status", "No auto routine selected");
+        return Commands.none();
+      }
+      
+      System.out.println("Running selected auto routine via button press");
+      
+      return Commands.sequence(
+        Commands.runOnce(() -> {
+          CommandScheduler.getInstance().cancelAll();
+          SmartDashboard.putString("Current Auto Status", "Running Auto");
+        }),
+        selectedAuto,
+        Commands.runOnce(() -> {
+          System.out.println("Auto routine completed");
+          SmartDashboard.putString("Current Auto Status", "Completed");
+        })
+      );
+    }, Set.of()); // Pass an empty set of requirements
   }
 }
