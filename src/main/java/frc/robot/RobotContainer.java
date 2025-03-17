@@ -44,6 +44,7 @@ import frc.robot.commands.vision.Distance;
 import frc.robot.subsystems.climb.ClimbSubsystem;
 import frc.robot.commands.vision.TrackAprilTagCommand;
 import frc.robot.subsystems.drive.DirectionSnapSubsystem;
+import frc.robot.subsystems.drive.DriveController;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorHandler;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
@@ -108,12 +109,13 @@ public class RobotContainer {
   public static final ElevatorHandler         elevatorHandler        = new ElevatorHandler();
   public static final FlopperSubsystem        flopperSubsystem       = new FlopperSubsystem();
   public static final TagInputHandler         tagInputHandler        = new TagInputHandler();
+  public static final DriveController         driveController        = new DriveController();
 
   // Auto
   public static final TrackAprilTagCommand trackCommand = new TrackAprilTagCommand(22,
                                                                                    new Distance(VisionConstants.TRACK_TAG_X,
                                                                                                 VisionConstants.TRACK_TAG_Y));
-  public static final ClimbSubsystem climbSubsystem                 = new ClimbSubsystem();
+  public static final ClimbSubsystem climbSubsystem = new ClimbSubsystem();
 
   //Conditionally create SimulationSubsystem
   //public final SimulationSubsystem simulationSubsystem;
