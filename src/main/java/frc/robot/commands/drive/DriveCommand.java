@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.constants.SwerveConstants;
+import frc.robot.subsystems.drive.DriveController.Controller;
 import swervelib.SwerveController;
 
 public class DriveCommand extends Command {
@@ -25,6 +26,11 @@ public class DriveCommand extends Command {
     }
 
     @Override
+    public void initialize() {
+        RobotContainer.driveController.requestControl(Controller.MANUAL);
+    }
+
+    @Override
     public void execute() {
         // This math is from previous years
         double xVelocity = Math.pow(this.vX.getAsDouble(), 3) * SwerveConstants.DRIVE_SPEED;
@@ -37,9 +43,9 @@ public class DriveCommand extends Command {
         SmartDashboard.putNumber("[DRIVE] Angular Velocity", angularVelocity);
 
         // Drive
-        RobotContainer.swerveSubsystem.drive(new Translation2d(-yVelocity * SwerveConstants.MAX_SPEED,
-                                                               -xVelocity * SwerveConstants.MAX_SPEED),
-                                            angularVelocity * controller.config.maxAngularVelocity);
+        RobotContainer.driveController.drive(Controller.MANUAL, new Translation2d(-yVelocity * SwerveConstants.MAX_SPEED,
+                                                                                  -xVelocity * SwerveConstants.MAX_SPEED),
+                                             angularVelocity * controller.config.maxAngularVelocity);
     }
 
     @Override

@@ -41,7 +41,9 @@ public class MailboxHandler extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putBoolean("[MAILBOX] Allow Shooting", this.allowFeeding);
+        SmartDashboard.putBoolean("[MAILBOX] Allow Shooting", this.allowShoot);
+        SmartDashboard.putBoolean("[MAILBOX] Allow Feeding", this.allowFeeding);
+        SmartDashboard.putBoolean("[MAILBOX] Currently Feeding", this.allowFeeding);
         SmartDashboard.putBoolean("[MAILBOX] Output In Range", this.outputLaserCan.inRange());
         SmartDashboard.putBoolean("[MAILBOX] Input In Range", this.inputLaserCan.inRange());
 

@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.constants.SwerveConstants;
 import frc.robot.constants.VisionConstants;
+import frc.robot.subsystems.drive.DriveController.Controller;
 import frc.robot.subsystems.drive.PIDController;
 
 public class TrackAprilTagCommand extends Command {
@@ -63,7 +64,7 @@ public class TrackAprilTagCommand extends Command {
 
     public void setRelativeDistance(Distance relativeDistance) {
         // Treat as if the target was lost
-        RobotContainer.swerveSubsystem.drive(new Translation2d(0, 0), 0);
+        RobotContainer.driveController.drive(Controller.TAGTRACKING, new Translation2d(0, 0), 0);
         SmartDashboard.putString("Vision/Status", "NO TARGET");
         rotationController.zero();
         forwardController.zero();
@@ -76,7 +77,7 @@ public class TrackAprilTagCommand extends Command {
     }
 
     public void setTargetTag(int targetTag) {
-        RobotContainer.swerveSubsystem.drive(new Translation2d(0, 0), 0);
+        RobotContainer.driveController.drive(Controller.TAGTRACKING, new Translation2d(0, 0), 0);
         SmartDashboard.putString("Vision/Status", "NO TARGET");
         rotationController.zero();
         forwardController.zero();
@@ -102,6 +103,7 @@ public class TrackAprilTagCommand extends Command {
         if(hasTarget
         && RobotContainer.visionSubsystem.getTargetId() == this.targetTag
         && RobotContainer.visionSubsystem.getImageAge() <= VisionConstants.MAX_ACCEPTABLE_DELAY) {
+            RobotContainer.driveController.requestControl(Controller.TAGTRACKING);
             double angle      = RobotContainer.visionSubsystem.getTargetAngle();
             Distance distance = RobotContainer.visionSubsystem.getDistanceAway();
 
@@ -131,7 +133,7 @@ public class TrackAprilTagCommand extends Command {
             SmartDashboard.putNumber("[VISION] Forward Speed", forwardSpeed);
             
             // Drive robot
-            RobotContainer.swerveSubsystem.drive(
+            RobotContainer.driveController.drive(Controller.TAGTRACKING,
                 new Translation2d(forwardSpeed, horizontalSpeed),
                 rotationSpeed
             );
@@ -140,7 +142,8 @@ public class TrackAprilTagCommand extends Command {
             SmartDashboard.putString("Vision/Status", "FOLLOWING TAG " + this.targetTag);
         } else {
             // Stop if wrong tag or no target
-            RobotContainer.swerveSubsystem.drive(new Translation2d(0, 0), 0);
+            RobotContainer.driveController.drive(Controller.TAGTRACKING, new Translation2d(0, 0), 0);
+            RobotContainer.driveController.relinquishControl(Controller.TAGTRACKING);
             SmartDashboard.putString("Vision/Status", "NO TARGET");
             rotationController.zero();
             forwardController.zero();

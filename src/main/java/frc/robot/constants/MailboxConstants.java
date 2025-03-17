@@ -8,7 +8,7 @@ public class MailboxConstants {
 
     public static final double OUTPUT_MOTOR_SPEED      = 0.5;
     public static final double OUTPUT_MOTOR_SPEED_LOW  = 0.25;
-    public static final double OUTPUT_MOTOR_SPEED_SLOW = 0.2;
+    public static final double OUTPUT_MOTOR_SPEED_SLOW = 0.15;
     public static final double FEED_MOTOR_SPEED        = 0.1;
     public static final double REWIND_MOTOR_SPEED      = 0.4;
 
