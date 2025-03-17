@@ -8,22 +8,24 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.ElevatorConstants;
 
 public class ElevatorSubsystem extends SubsystemBase {
-    private final SparkMax     motor;
-    private final DigitalInput limitSwitch;
-    private double             bottomPos;
-    public  boolean            lock;
+    private final SparkMax           motor;
+    private final DigitalInput       limitSwitch;
+    private final ThroughBoreEncoder throughBoreEncoder;
+    private double                   bottomPos;
+    public  boolean                  lock;
 
     public ElevatorSubsystem() {
-        this.motor       = new SparkMax(ElevatorConstants.MOTOR_ONE_ID, MotorType.kBrushless);
-        this.limitSwitch = new DigitalInput(ElevatorConstants.LIMIT_SWITCH_ID);
-        this.lock        = false;
+        this.motor              = new SparkMax(ElevatorConstants.MOTOR_ONE_ID, MotorType.kBrushless);
+        this.limitSwitch        = new DigitalInput(ElevatorConstants.LIMIT_SWITCH_ID);
+        this.throughBoreEncoder = new ThroughBoreEncoder();
+        this.lock               = false;
 
         SmartDashboard.putNumber("[ELEVATOR] Position", -2147483648);
         SmartDashboard.putBoolean("[ELEVATOR] Limit Switch Seen", !this.limitSwitch.get());
     }
 
     public void resetElevatorPos() {
-        this.bottomPos = this.motor.getEncoder().getPosition();
+        this.bottomPos = this.throughBoreEncoder.getDistance();
     }
 
     public void runMotor(double speed) {
@@ -35,7 +37,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public double getPosition() {
-        return -(this.motor.getEncoder().getPosition() - this.bottomPos);
+        return -(this.throughBoreEncoder.getDistance() - this.bottomPos);
     }
 
     @Override

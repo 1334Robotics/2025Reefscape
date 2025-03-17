@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.elevator.ElevatorResetCommand;
+import frc.robot.constants.ElevatorConstants;
 
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -41,6 +42,8 @@ public class Robot extends LoggedRobot {
   private RobotContainer m_robotContainer;
   private final Field2d m_field = new Field2d();
 
+  private boolean elevatorReset = false;
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -49,6 +52,9 @@ public class Robot extends LoggedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+
+    // Put the check to disable the elevator reset on TeleOp enable
+    SmartDashboard.putBoolean("[ELEVATOR] Reset On TeleOp Enable", true);
   }
   @Override
   public void robotInit() {
@@ -155,6 +161,9 @@ public class Robot extends LoggedRobot {
     // Set initial robot pose based on FMS data
     setInitialPose();
     
+    // Enable tracking if needed
+    RobotContainer.trackCommand.enable();
+    
     // Get the selected autonomous command
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
@@ -224,8 +233,12 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     RobotContainer.swerveSubsystem.setFieldRelative(true);
+    RobotContainer.trackCommand.disable();
     // Have some flag to do this only once
-    (new ElevatorResetCommand()).schedule();
+    if(SmartDashboard.getBoolean("[ELEVATOR] Reset On TeleOp Enable", false) && !this.elevatorReset) {
+      (new ElevatorResetCommand()).schedule();
+      this.elevatorReset = true;
+    }
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
