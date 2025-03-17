@@ -1,6 +1,5 @@
 package frc.robot.subsystems.mailbox;
 
-import frc.robot.constants.LaserCanConstants;
 import au.grapplerobotics.ConfigurationFailedException;
 import au.grapplerobotics.LaserCan;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -20,8 +19,6 @@ public class LaserCanSubsystem extends SubsystemBase {
         this.number   = ++lastNumber;
 
         this.validRange = 0;
-
-        configureDevice();
     }
 
     public LaserCanSubsystem(int id, double validRange) {
@@ -29,18 +26,16 @@ public class LaserCanSubsystem extends SubsystemBase {
         this.number   = ++lastNumber;
 
         this.validRange = validRange;
-
-        configureDevice();
     }
 
-    private void configureDevice() {
+    public void configureDevice(Rectangle regionOfInterest) {
         System.out.printf("[LaserCan %d] Configuring LaserCan...\n", this.number);
         try {
             laserCan.setRangingMode(LaserCan.RangingMode.SHORT);
-            laserCan.setRegionOfInterest(new LaserCan.RegionOfInterest(LaserCanConstants.X,
-                                                                       LaserCanConstants.Y,
-                                                                       LaserCanConstants.WIDTH,
-                                                                       LaserCanConstants.HEIGHT));
+            laserCan.setRegionOfInterest(new LaserCan.RegionOfInterest(regionOfInterest.x,
+                                                                       regionOfInterest.y,
+                                                                       regionOfInterest.width,
+                                                                       regionOfInterest.height));
             laserCan.setTimingBudget(LaserCan.TimingBudget.TIMING_BUDGET_33MS);
             System.out.printf("[LaserCan %d] LaserCan configured successfully\n", this.number);
         } catch (ConfigurationFailedException e) {
