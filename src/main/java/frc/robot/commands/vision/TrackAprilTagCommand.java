@@ -7,6 +7,7 @@ import frc.robot.RobotContainer;
 import frc.robot.constants.SwerveConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.drive.DriveController.Controller;
+import frc.robot.subsystems.vision.TagTrackingTarget;
 import frc.robot.subsystems.drive.PIDController;
 
 public class TrackAprilTagCommand extends Command {
@@ -87,16 +88,31 @@ public class TrackAprilTagCommand extends Command {
     }
 
     public void enable() {
+        RobotContainer.driveController.requestControl(Controller.TAGTRACKING);
         this.enabled = true;
     }
 
     public void disable() {
+        RobotContainer.driveController.drive(Controller.TAGTRACKING, new Translation2d(0, 0), 0);
         RobotContainer.driveController.relinquishControl(Controller.TAGTRACKING);
+        SmartDashboard.putString("Vision/Status", "NO TARGET");
+        rotationController.zero();
+        forwardController.zero();
+        horizontalController.zero();
         this.enabled = false;
+        RobotContainer.tagTrackingHandler.setTarget(null);
+    }
+
+    private boolean withinAcceptableError(double angle, Distance distance) {
+        if(Math.abs(180 - angle)               >= VisionConstants.MAX_ALLOWED_ROTATION_ERROR)   return false;
+        if(Math.abs(distance.y - this.targetY) >= VisionConstants.MAX_ALLOWED_FORWARDS_ERROR)   return false;
+        if(Math.abs(distance.x - this.targetX) >= VisionConstants.MAX_ALLOWED_HORIZONTAL_ERROR) return false;
+        return true;
     }
 
     @Override
     public void execute() {
+        SmartDashboard.putBoolean("[VISION] Tracking Enabled", this.enabled);
         if(!this.enabled) return;
 
         boolean hasTarget = RobotContainer.visionSubsystem.isTargetVisible();
@@ -104,7 +120,6 @@ public class TrackAprilTagCommand extends Command {
         if(hasTarget
         && RobotContainer.visionSubsystem.getTargetId() == this.targetTag
         && RobotContainer.visionSubsystem.getImageAge() <= VisionConstants.MAX_ACCEPTABLE_DELAY) {
-            RobotContainer.driveController.requestControl(Controller.TAGTRACKING);
             double angle      = RobotContainer.visionSubsystem.getTargetAngle();
             Distance distance = RobotContainer.visionSubsystem.getDistanceAway();
 
@@ -115,6 +130,11 @@ public class TrackAprilTagCommand extends Command {
             SmartDashboard.putNumber("[VISION] Distance X", distance.x);
             SmartDashboard.putNumber("[VISION] Distance Y", distance.y);
             SmartDashboard.putNumber("[VISION] Target Angle", angle);
+
+            // Check if the error is low enough and stop it
+            if(this.withinAcceptableError(angle, distance)) {
+                this.disable();
+            }
             
             // Calculate drive commands
             rotationController.update(180, angle);
@@ -124,10 +144,10 @@ public class TrackAprilTagCommand extends Command {
             double forwardSpeed    = -forwardController.getOutput() * VisionConstants.DRIVE_SPEED * SwerveConstants.MAX_SPEED;
             double horizontalSpeed = -horizontalController.getOutput() * VisionConstants.DRIVE_SPEED * SwerveConstants.MAX_SPEED;
 
-            // Magic numbers (bad)
-            if(Math.abs(180 - angle) < 1)               rotationSpeed = 0;
-            if(Math.abs(distance.y - this.targetY) < 1) forwardSpeed = 0;
-            if(Math.abs(distance.x - this.targetX) < 1) horizontalSpeed = 0;
+            // Cancel speeds if the robot is within acceptable error
+            if(Math.abs(180 - angle)               < VisionConstants.MAX_ALLOWED_ROTATION_ERROR)   rotationSpeed   = 0;
+            if(Math.abs(distance.y - this.targetY) < VisionConstants.MAX_ALLOWED_FORWARDS_ERROR)   forwardSpeed    = 0;
+            if(Math.abs(distance.x - this.targetX) < VisionConstants.MAX_ALLOWED_HORIZONTAL_ERROR) horizontalSpeed = 0;
 
             // Publish the speeds
             SmartDashboard.putNumber("[VISION] Rotation Speed", rotationSpeed);
@@ -143,12 +163,7 @@ public class TrackAprilTagCommand extends Command {
             SmartDashboard.putString("Vision/Status", "FOLLOWING TAG " + this.targetTag);
         } else {
             // Stop if wrong tag or no target
-            RobotContainer.driveController.drive(Controller.TAGTRACKING, new Translation2d(0, 0), 0);
-            RobotContainer.driveController.relinquishControl(Controller.TAGTRACKING);
-            SmartDashboard.putString("Vision/Status", "NO TARGET");
-            rotationController.zero();
-            forwardController.zero();
-            horizontalController.zero();
+            this.disable();
         }
     }
 

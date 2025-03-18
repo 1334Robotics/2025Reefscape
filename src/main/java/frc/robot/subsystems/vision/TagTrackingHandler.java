@@ -10,11 +10,11 @@ public class TagTrackingHandler extends SubsystemBase {
 
     public TagTrackingHandler() {
         this.target = null;
-        RobotContainer.trackCommand.schedule();
     }
 
     public void setTarget(TagTrackingTarget target) {
         this.target = target;
+        if(this.target == null) return;
         switch(this.target) {
             case SCORING_LEFT:
                 RobotContainer.trackCommand.setRelativeDistance(VisionConstants.LEFT_SCORE_DISTANCE);
@@ -26,10 +26,11 @@ public class TagTrackingHandler extends SubsystemBase {
     }
 
     private String getTargetName() {
+        if(this.target == null) return "No Target";
         return switch(this.target) {
             case SCORING_LEFT  -> "Left scoring target";
             case SCORING_RIGHT -> "Right scoring target";
-            default            -> "No target";
+            default            -> "Unknown target";
         };
     }
 

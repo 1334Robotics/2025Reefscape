@@ -25,8 +25,12 @@ public class DriveController extends SubsystemBase {
         this.requestControl(Controller.MANUAL);
     }
 
+    public void takeAllControlAway() {
+        this.controller = 0;
+        this.requestControl(Controller.MANUAL);
+    }
+
     public boolean requestControl(Controller controller) {
-        
         this.controller |= (1L << controller.priority);
         long highestPriorityBit = Long.highestOneBit(this.controller);
         return highestPriorityBit == (1L << controller.priority);
