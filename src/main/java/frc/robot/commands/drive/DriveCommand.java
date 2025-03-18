@@ -43,6 +43,7 @@ public class DriveCommand extends Command {
         SmartDashboard.putNumber("[DRIVE] Angular Velocity", angularVelocity);
 
         // Drive
+        RobotContainer.driveController.requestControl(Controller.MANUAL);
         RobotContainer.driveController.drive(Controller.MANUAL, new Translation2d(-yVelocity * SwerveConstants.MAX_SPEED,
                                                                                   -xVelocity * SwerveConstants.MAX_SPEED),
                                              angularVelocity * controller.config.maxAngularVelocity);

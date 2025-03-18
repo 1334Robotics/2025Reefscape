@@ -59,6 +59,10 @@ public class Robot extends LoggedRobot {
       Logger.start();
       SmartDashboard.putData("Field", m_field);
       // Get the default instance of the simulation world
+
+      // Setup tracking
+      RobotContainer.trackCommand.disable();
+      RobotContainer.trackCommand.schedule();
   }
 
   /**
@@ -75,6 +79,7 @@ public class Robot extends LoggedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
+    RobotContainer.trackCommand.execute(); // THIS IS BAD. IT SHOULDN'T NEED TO DO THIS
     m_field.setRobotPose(RobotContainer.swerveSubsystem.getPose());
   }
    /** This function is called once when the robot is first started up. */
