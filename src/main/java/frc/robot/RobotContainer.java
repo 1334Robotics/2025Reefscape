@@ -183,11 +183,15 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    AutoConfigurer.configure();
     DriverStation.silenceJoystickConnectionWarning(true);//silence the warning about the joystick connection
     
-    // Register named commands for PathPlanner to use in auto routines
+    // Register named commands BEFORE configuring PathPlanner
+    System.out.println("Registering commands for PathPlanner...");
     registerNamedCommands();
+    System.out.println("Commands registered, now configuring PathPlanner...");
+    
+    // Configure PathPlanner after commands are registered
+    AutoConfigurer.configure();
     
     // Initialize and configure auto chooser
     configureAutoChooser();
@@ -202,9 +206,6 @@ public class RobotContainer {
     SmartDashboard.putString("Current Auto Status", "Ready (Press START button to run)");
     SmartDashboard.putString("Auto Button Help", "Press START button on driver controller to run selected auto");
     
-    // Silence the DriverStation joystick warning - Uncomment if needed
-    //DriverStation.silenceJoystickConnectionWarning(true);
-
     DriveCommand xboxDriveCommand = new DriveCommand(
         () -> MathUtil.applyDeadband(driverController.getLeftX(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
         () -> MathUtil.applyDeadband(driverController.getLeftY(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
@@ -417,11 +418,25 @@ public class RobotContainer {
     NamedCommands.registerCommand("FeedCommand", new MailboxFeedCommand().asProxy());
     NamedCommands.registerCommand("StopCommand", new StopCommand().asProxy());
     
-    // Elevator commands
+    // Elevator position commands
+    NamedCommands.registerCommand("ElevatorBottom", new ElevatorGotoBottomCommand().asProxy());
+    NamedCommands.registerCommand("ElevatorFeed", new ElevatorGotoFeedCommand().asProxy());
     NamedCommands.registerCommand("ElevatorL1", new ElevatorGotoL1Command().asProxy());
     NamedCommands.registerCommand("ElevatorL2", new ElevatorGotoL2Command().asProxy());
     NamedCommands.registerCommand("ElevatorL3", new ElevatorGotoL3Command().asProxy());
     NamedCommands.registerCommand("ElevatorL4", new ElevatorGotoL4Command().asProxy());
+    
+    // Elevator manual control commands
+    NamedCommands.registerCommand("ElevatorUp", new ElevatorUpCommand().asProxy());
+    NamedCommands.registerCommand("ElevatorDown", new ElevatorDownCommand().asProxy());
+    
+    // Mailbox commands
+    NamedCommands.registerCommand("MailboxShoot", new ShootCommand().asProxy());
+    NamedCommands.registerCommand("MailboxFeed", new MailboxFeedCommand().asProxy());
+    NamedCommands.registerCommand("MailboxRewind", new MailboxRewindCommand().asProxy());
+    NamedCommands.registerCommand("MailboxStop", new StopCommand().asProxy());
+    NamedCommands.registerCommand("OutputHigh", new OutputHighCommand().asProxy());
+    NamedCommands.registerCommand("OutputLow", new OutputLowCommand().asProxy());
     
     // Flopper commands
     NamedCommands.registerCommand("FlopperUp", new FlopperUpCommand().asProxy());
