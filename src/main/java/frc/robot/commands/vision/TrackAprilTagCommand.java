@@ -88,6 +88,7 @@ public class TrackAprilTagCommand extends Command {
     }
 
     public void enable() {
+        SmartDashboard.putString("[VISION] Good Stop", "Working");
         RobotContainer.driveController.requestControl(Controller.TAGTRACKING);
         this.enabled = true;
     }
@@ -134,6 +135,7 @@ public class TrackAprilTagCommand extends Command {
             // Check if the error is low enough and stop it
             if(this.withinAcceptableError(angle, distance)) {
                 this.disable();
+                SmartDashboard.putString("[VISION] Good Stop", "Yes");
             }
             
             // Calculate drive commands
@@ -164,6 +166,7 @@ public class TrackAprilTagCommand extends Command {
         } else {
             // Stop if wrong tag or no target
             this.disable();
+            SmartDashboard.putString("[VISION] Good Stop", "No");
         }
     }
 
