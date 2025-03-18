@@ -52,8 +52,8 @@ public final class VisionConstants {
 
     // Drive PID constants
     public static final double DRIVE_KP          = 0.05;
-    public static final double DRIVE_KI          = 0.000;
-    public static final double DRIVE_KD          = 0.001;
+    public static final double DRIVE_KI          = 0.00;
+    public static final double DRIVE_KD          = 0.00001;
     public static final double DRIVE_TAU         = 0;
     public static final double DRIVE_LIM_MIN_INT = -0.3;
     public static final double DRIVE_LIM_MAX_INT = 0.3;
@@ -79,7 +79,7 @@ public final class VisionConstants {
     public static final double ROTATION_SPEED = 0.15;
 
     // Positions
-    public static final Distance RIGHT_SCORE_DISTANCE = new Distance(17, 80);
+    public static final Distance RIGHT_SCORE_DISTANCE = new Distance(24, 80);
     public static final Distance LEFT_SCORE_DISTANCE  = new Distance(-14, 80);
 
     // April tag tracking allowed errors
