@@ -91,6 +91,7 @@ public class TrackAprilTagCommand extends Command {
     }
 
     public void disable() {
+        RobotContainer.driveController.relinquishControl(Controller.TAGTRACKING);
         this.enabled = false;
     }
 
