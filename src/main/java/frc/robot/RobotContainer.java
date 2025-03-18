@@ -436,39 +436,68 @@ public class RobotContainer {
    * Register named commands for use in PathPlanner auto routines
    */
   private void registerNamedCommands() {
-    System.out.println("Registering named commands for PathPlanner...");
+    System.out.println("Starting named command registration...");
     
-    // Register standard robot commands
-    NamedCommands.registerCommand("ShootCommand", new ShootCommand().asProxy());
-    NamedCommands.registerCommand("ZeroGyro", new GyroZeroCommand().asProxy());
-    NamedCommands.registerCommand("FeedCommand", new MailboxFeedCommand().asProxy());
-    NamedCommands.registerCommand("StopCommand", new StopCommand().asProxy());
-    
-    // Elevator position commands
-    NamedCommands.registerCommand("ElevatorBottom", new ElevatorGotoBottomCommand().asProxy());
-    NamedCommands.registerCommand("ElevatorFeed", new ElevatorGotoFeedCommand().asProxy());
-    NamedCommands.registerCommand("ElevatorL1", new ElevatorGotoL1Command().asProxy());
-    NamedCommands.registerCommand("ElevatorL2", new ElevatorGotoL2Command().asProxy());
-    NamedCommands.registerCommand("ElevatorL3", new ElevatorGotoL3Command().asProxy());
-    NamedCommands.registerCommand("ElevatorL4", new ElevatorGotoL4Command().asProxy());
-    
-    // Elevator manual control commands
-    NamedCommands.registerCommand("ElevatorUp", new ElevatorUpCommand().asProxy());
-    NamedCommands.registerCommand("ElevatorDown", new ElevatorDownCommand().asProxy());
-    
-    // Mailbox commands
-    NamedCommands.registerCommand("MailboxShoot", new ShootCommand().asProxy());
-    NamedCommands.registerCommand("MailboxFeed", new MailboxFeedCommand().asProxy());
-    NamedCommands.registerCommand("MailboxRewind", new MailboxRewindCommand().asProxy());
-    NamedCommands.registerCommand("MailboxStop", new StopCommand().asProxy());
-    NamedCommands.registerCommand("OutputHigh", new OutputHighCommand().asProxy());
-    NamedCommands.registerCommand("OutputLow", new OutputLowCommand().asProxy());
-    
-    // Flopper commands
-    NamedCommands.registerCommand("FlopperUp", new FlopperUpCommand().asProxy());
-    NamedCommands.registerCommand("FlopperDown", new FlopperDownCommand().asProxy());
-    
-    System.out.println("Named commands registered successfully!");
+    try {
+      // Create a map to store commands for verification
+      Map<String, Command> commandMap = new HashMap<>();
+      
+      // Elevator Commands
+      commandMap.put("ElevatorBottom", new ElevatorGotoBottomCommand());
+      commandMap.put("ElevatorFeed", new ElevatorGotoFeedCommand());
+      commandMap.put("ElevatorL1", new ElevatorGotoL1Command());
+      commandMap.put("ElevatorL2", new ElevatorGotoL2Command());
+      commandMap.put("ElevatorL3", new ElevatorGotoL3Command());
+      commandMap.put("ElevatorL4", new ElevatorGotoL4Command());
+      commandMap.put("ElevatorUp", new ElevatorUpCommand());
+      commandMap.put("ElevatorDown", new ElevatorDownCommand());
+      
+      // Mailbox Commands
+      commandMap.put("Shoot", new ShootCommand());
+      commandMap.put("Feed", new MailboxFeedCommand());
+      commandMap.put("Stop", new StopCommand());
+      commandMap.put("MailboxRewind", new MailboxRewindCommand());
+      commandMap.put("OutputHigh", new OutputHighCommand());
+      commandMap.put("OutputLow", new OutputLowCommand());
+      
+      // Flopper Commands
+      commandMap.put("FlopperUp", new FlopperUpCommand());
+      commandMap.put("FlopperDown", new FlopperDownCommand());
+      
+      // Other Commands
+      commandMap.put("ZeroGyro", new GyroZeroCommand());
+      
+      // Register all commands and verify
+      System.out.println("\nRegistering commands with PathPlanner:");
+      for (Map.Entry<String, Command> entry : commandMap.entrySet()) {
+        String name = entry.getKey();
+        Command command = entry.getValue();
+        
+        try {
+          // Register command without asProxy to maintain direct subsystem requirements
+          NamedCommands.registerCommand(name, command);
+          System.out.println("✓ Registered: " + name);
+          
+          // Verify command requirements
+          Set<edu.wpi.first.wpilibj2.command.Subsystem> requirements = command.getRequirements();
+          if (requirements.isEmpty()) {
+            System.out.println("  Warning: " + name + " has no subsystem requirements!");
+          } else {
+            System.out.println("  Requirements: " + requirements);
+          }
+        } catch (Exception e) {
+          System.err.println("✗ Failed to register: " + name);
+          System.err.println("  Error: " + e.getMessage());
+        }
+      }
+      
+      System.out.println("\nCommand registration complete!");
+      System.out.println("Total commands registered: " + commandMap.size());
+      
+    } catch (Exception e) {
+      System.err.println("ERROR during command registration: " + e.getMessage());
+      e.printStackTrace();
+    }
   }
   
   /**
