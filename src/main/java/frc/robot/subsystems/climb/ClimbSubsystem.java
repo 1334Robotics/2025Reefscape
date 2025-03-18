@@ -14,9 +14,9 @@ public class ClimbSubsystem extends SubsystemBase {
     // One Neo 550 motor for locking the climb mechanism
     private final SparkMax lockMotor;
 
-    private final Encoder lowerMotor1Encoder = new Encoder(0, 1);
-    private final Encoder lowerMotor2Encoder = new Encoder(2, 3);
-    private final Encoder lockMotorEncoder = new Encoder(4, 5);
+    private final Encoder lowerMotor1Encoder = new Encoder(0, 1); // DIO ports for encoder
+    private final Encoder lowerMotor2Encoder = new Encoder(2, 3); // DIO ports for encoder
+    private final Encoder lockMotorEncoder = new Encoder(4, 5); // DIO ports for encoder
 
     // Conversion factor from encoder ticks to inches
     private static final double TICKS_TO_INCHES = 0.01; // Adjust this value based on your specific encoder and mechanism
