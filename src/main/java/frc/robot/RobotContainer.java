@@ -38,9 +38,12 @@ import frc.robot.subsystems.mailbox.LaserCanSubsystem;
 import frc.robot.subsystems.mailbox.MailboxHandler;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
 import frc.robot.subsystems.vision.TagInputHandler;
+import frc.robot.subsystems.vision.TagTrackingHandler;
 //import frc.robot.subsystems.simulation.SimulationSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.commands.vision.Distance;
+import frc.robot.commands.vision.StartTrackingScoringLeft;
+import frc.robot.commands.vision.StartTrackingScoringRight;
 import frc.robot.subsystems.climb.ClimbSubsystem;
 import frc.robot.commands.vision.TrackAprilTagCommand;
 import frc.robot.subsystems.drive.DirectionSnapSubsystem;
@@ -110,6 +113,7 @@ public class RobotContainer {
   public static final FlopperSubsystem        flopperSubsystem       = new FlopperSubsystem();
   public static final TagInputHandler         tagInputHandler        = new TagInputHandler();
   public static final DriveController         driveController        = new DriveController();
+  public static final TagTrackingHandler      tagTrackingHandler     = new TagTrackingHandler();
 
   // Auto
   public static final TrackAprilTagCommand trackCommand = new TrackAprilTagCommand(22,
@@ -159,6 +163,9 @@ public class RobotContainer {
     SmartDashboard.putData("[ELEVATOR] L2",     new ElevatorGotoL2Command());
     SmartDashboard.putData("[ELEVATOR] L3",     new ElevatorGotoL3Command());
     SmartDashboard.putData("[ELEVATOR] L4",     new ElevatorGotoL4Command());
+
+    SmartDashboard.putData("[TAG TRACKING] Target Scoring Left",  new StartTrackingScoringLeft());
+    SmartDashboard.putData("[TAG TRACKING] Target Scoring Right", new StartTrackingScoringRight());
   }
 
 
