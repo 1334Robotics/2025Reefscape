@@ -369,7 +369,19 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return trackCommand;
+    // Get the selected command from the auto chooser
+    Command selectedCommand = autoChooser.getSelected();
+    
+    // If no command is selected or it's the "Do Nothing" command, use tracking command
+    if (selectedCommand == null || 
+        (selectedCommand instanceof InstantCommand && 
+         !(selectedCommand instanceof SequentialCommandGroup))) {
+      System.out.println("No auto selected or 'Do Nothing' selected - Using tracking command");
+      return trackCommand;
+    }
+    
+    System.out.println("Running selected auto routine: " + selectedCommand.getName());
+    return selectedCommand;
   }
 
   /**
