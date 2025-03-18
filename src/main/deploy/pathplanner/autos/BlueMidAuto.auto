@@ -9,6 +9,18 @@
           "data": {
             "pathName": "AutoDrive21"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": null
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Tag21RightFeed12"
+          }
         }
       ]
     }
