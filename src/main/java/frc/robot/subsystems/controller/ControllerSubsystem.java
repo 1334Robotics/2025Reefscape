@@ -15,8 +15,8 @@ public class ControllerSubsystem extends SubsystemBase {
 
     private static RumbleType getRumbleType(ControllerVibration vibration) {
         return switch(vibration) {
-            case LIGHT -> RumbleType.kLeftRumble;
-            case HEAVY -> RumbleType.kRightRumble;
+            case LIGHT -> RumbleType.kRightRumble;
+            case HEAVY -> RumbleType.kLeftRumble;
         };
     }
 
