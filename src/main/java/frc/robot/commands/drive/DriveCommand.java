@@ -33,6 +33,12 @@ public class DriveCommand extends Command {
 
     @Override
     public void execute() {
+        if(RobotContainer.driverController.getYButton()) {
+            RobotContainer.driveController.requestControl(Controller.MANUAL);
+            RobotContainer.driveController.driveBotRelative(Controller.MANUAL, new Translation2d(1, 0), 0);
+            return;
+        }
+
         // This math is from previous years
         double xVelocity = Math.pow(this.vX.getAsDouble(), 3)          * (goFast ? SwerveConstants.HIGH_DRIVE_SPEED : SwerveConstants.SLOW_DRIVE_SPEED);
         double yVelocity = Math.pow(this.vY.getAsDouble(), 3)          * (goFast ? SwerveConstants.HIGH_DRIVE_SPEED : SwerveConstants.SLOW_DRIVE_SPEED);
