@@ -93,4 +93,6 @@ public final class VisionConstants {
     public static final double MAX_ALLOWED_ROTATION_ERROR   = 2; // In degrees
     public static final double MAX_ALLOWED_HORIZONTAL_ERROR = 1; // In centimeters
     public static final double MAX_ALLOWED_FORWARDS_ERROR   = 5; // In centimeters
+
+    public static final int MAX_ALLOWED_BLANK_FRAMES = 5;
 }
