@@ -439,8 +439,9 @@ public class RobotContainer {
     
     try {
         // Register auto sequence commands
+        NamedCommands.registerCommand("Shoot", new ShootCommand());
         NamedCommands.registerCommand("MailboxShoot", new ShootCommand());
-        System.out.println("✓ Registered MailboxShoot command");
+        System.out.println("✓ Registered Shoot command");
         
         // Register marker event commands
         NamedCommands.registerCommand("ElevatorL1", new ElevatorGotoL1Command());
