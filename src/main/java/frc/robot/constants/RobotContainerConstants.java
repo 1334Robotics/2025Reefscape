@@ -38,4 +38,5 @@ public class RobotContainerConstants {
     public static final double TRACK_RIGHT_TRIGGER_POINT = 0.5;
 
     public static final int BOT_RELATIVE_BUTTON = XboxMappings.Button.A;
+    public static final int SLOW_DOWN_BUTTON    = XboxMappings.Button.B;
 }

@@ -16,6 +16,8 @@ import frc.robot.commands.drive.BotRelativeCommand;
 import frc.robot.commands.drive.DriveCommand;
 import frc.robot.commands.drive.FieldRelativeCommand;
 import frc.robot.commands.drive.RipControlCommand;
+import frc.robot.commands.drive.SlowDownCommand;
+import frc.robot.commands.drive.SpeedUpCommand;
 import frc.robot.commands.elevator.ElevatorDownCommand;
 import frc.robot.commands.elevator.ElevatorGotoBottomCommand;
 import frc.robot.commands.elevator.ElevatorGotoFeedCommand;
@@ -110,6 +112,7 @@ public class RobotContainer {
   private static final Trigger        trackLeftButton      = new Trigger(() -> driverController.getLeftTriggerAxis()  > RobotContainerConstants.TRACK_LEFT_TRIGGER_POINT);
   private static final Trigger        trackRightButton     = new Trigger(() -> driverController.getRightTriggerAxis() > RobotContainerConstants.TRACK_RIGHT_TRIGGER_POINT);
   private static final JoystickButton botRelativeButton    = new JoystickButton(driverController, RobotContainerConstants.BOT_RELATIVE_BUTTON);
+  private static final JoystickButton slowDownButton       = new JoystickButton(driverController, RobotContainerConstants.SLOW_DOWN_BUTTON);
 
   // Subsystems
   public static final GyroSubsystem          gyroSubsystem             = new GyroSubsystem("CANivore");
@@ -131,7 +134,7 @@ public class RobotContainer {
   public static final TrackAprilTagCommand trackCommand    = new TrackAprilTagCommand(22,
                                                                                       new Distance(VisionConstants.TRACK_TAG_X,
                                                                                                    VisionConstants.TRACK_TAG_Y));
-  public static final AutoTagSelector      autoTagSelector = new AutoTagSelector();
+  public static final AutoTagSelector        autoTagSelector = new AutoTagSelector();
 
   //Conditionally create SimulationSubsystem
   //public final SimulationSubsystem simulationSubsystem;
@@ -219,6 +222,8 @@ public class RobotContainer {
     trackRightButton.onTrue(new StartTrackingScoringRight());
     botRelativeButton.onTrue(new BotRelativeCommand());
     botRelativeButton.onFalse(new FieldRelativeCommand());
+    slowDownButton.onTrue(new SlowDownCommand());
+    slowDownButton.onFalse(new SpeedUpCommand());
   }
 
   /**
