@@ -436,48 +436,24 @@ public class RobotContainer {
    * Register named commands for use in PathPlanner auto routines
    */
   private void registerNamedCommands() {
-    System.out.println("Starting named command registration...");
+    System.out.println("Registering PathPlanner commands...");
     
     try {
-        Map<String, Command> commandMap = new HashMap<>();
+        // Register auto sequence commands
+        NamedCommands.registerCommand("MailboxShoot", new ShootCommand());
+        System.out.println("✓ Registered MailboxShoot command");
         
-        // Elevator Commands
-        commandMap.put("ElevatorL1", Commands.sequence(
-            Commands.runOnce(() -> System.out.println("Starting elevator movement to L1")),
-            new ElevatorGotoL1Command(),
-            Commands.runOnce(() -> System.out.println("Elevator reached L1"))
-        ).withName("ElevatorL1"));
+        // Register marker event commands
+        NamedCommands.registerCommand("ElevatorL1", new ElevatorGotoL1Command());
+        System.out.println("✓ Registered ElevatorL1 command (marker event)");
         
-        // Mailbox Commands
-        commandMap.put("MailboxShoot", Commands.sequence(
-            Commands.runOnce(() -> System.out.println("Starting shoot sequence")),
-            new ShootCommand(),
-            Commands.runOnce(() -> System.out.println("Shoot sequence completed"))
-        ).withName("MailboxShoot"));
-        
-        // Register all commands
-        System.out.println("\nRegistering commands with PathPlanner:");
-        for (Map.Entry<String, Command> entry : commandMap.entrySet()) {
-            String name = entry.getKey();
-            Command command = entry.getValue();
-            
-            try {
-                NamedCommands.registerCommand(name, command);
-                System.out.println("✓ Registered: " + name);
-                
-                Set<edu.wpi.first.wpilibj2.command.Subsystem> requirements = command.getRequirements();
-                System.out.println("  Requirements: " + requirements);
-            } catch (Exception e) {
-                System.err.println("✗ Failed to register: " + name);
-                System.err.println("  Error: " + e.getMessage());
-            }
-        }
-        
-        System.out.println("\nCommand registration complete!");
+        // Log registration status to dashboard
+        SmartDashboard.putString("PathPlanner/Commands", "MailboxShoot, ElevatorL1");
+        System.out.println("Command registration complete!");
         
     } catch (Exception e) {
-        System.err.println("ERROR during command registration: " + e.getMessage());
-        e.printStackTrace();
+        System.err.println("Error registering commands: " + e.getMessage());
+        SmartDashboard.putString("PathPlanner/Error", e.getMessage());
     }
   }
   
