@@ -191,9 +191,8 @@ public class RobotContainer {
     System.out.println("1. Registering commands for PathPlanner...");
     registerNamedCommands();
     
-    // Configure PathPlanner after commands are registered
-    System.out.println("2. Configuring PathPlanner...");
-    swerveSubsystem.setupPathPlanner();
+    // PathPlanner is already configured in SwerveSubsystem constructor
+    System.out.println("2. PathPlanner configured in SwerveSubsystem");
     
     // Initialize and configure auto chooser - MUST come after PathPlanner configuration
     System.out.println("3. Configuring Auto Chooser...");
