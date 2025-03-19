@@ -8,6 +8,7 @@ import frc.robot.constants.SwerveConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.drive.DriveController.Controller;
 import frc.robot.subsystems.vision.TagTrackingTarget;
+import frc.robot.subsystems.controller.ControllerVibration;
 import frc.robot.subsystems.drive.PIDController;
 
 public class TrackAprilTagCommand extends Command {
@@ -136,6 +137,7 @@ public class TrackAprilTagCommand extends Command {
             if(this.withinAcceptableError(angle, distance)) {
                 this.disable();
                 SmartDashboard.putString("[VISION] Good Stop", "Yes");
+                RobotContainer.driverControllerSubsystem.vibrate(ControllerVibration.LIGHT);
             }
             
             // Calculate drive commands
