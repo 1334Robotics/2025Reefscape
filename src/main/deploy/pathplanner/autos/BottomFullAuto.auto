@@ -7,19 +7,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Feed12Tag21Right"
+            "pathName": "AutoDrive22"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "MailboxShoot"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 3.0
+            "waitTime": 0.5
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Tag21RightFeed12"
+            "pathName": "AutoTime-Tag22Feed12"
           }
         }
       ]

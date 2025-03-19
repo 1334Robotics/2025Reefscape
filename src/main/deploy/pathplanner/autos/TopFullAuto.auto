@@ -7,13 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "AutoDrive21"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ElevatorL1"
+            "pathName": "AutoDrive20"
           }
         },
         {
@@ -23,9 +17,15 @@
           }
         },
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "AutoTime-Tag21RightFeed12"
+            "pathName": "AutoTime-Tag20Feed13"
           }
         }
       ]

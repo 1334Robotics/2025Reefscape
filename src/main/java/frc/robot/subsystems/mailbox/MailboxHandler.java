@@ -39,6 +39,15 @@ public class MailboxHandler extends SubsystemBase {
         this.rewinding = false;
     }
 
+    // Add methods to check laser can status
+    public boolean isGamePieceAtOutput() {
+        return this.outputLaserCan.inRange();
+    }
+
+    public boolean isGamePieceAtInput() {
+        return this.inputLaserCan.inRange();
+    }
+
     @Override
     public void periodic() {
         SmartDashboard.putBoolean("[MAILBOX] Allow Shooting", this.allowFeeding);
@@ -90,5 +99,13 @@ public class MailboxHandler extends SubsystemBase {
 
     public void allowShoot() {
         this.allowShoot = true;
+    }
+
+    public boolean isAllowedToShoot() {
+        return this.allowShoot;
+    }
+
+    public boolean isShooting() {
+        return this.allowShoot && this.outputLaserCan.inRange();
     }
 }

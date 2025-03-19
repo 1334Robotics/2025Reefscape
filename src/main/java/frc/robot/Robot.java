@@ -161,6 +161,13 @@ public class Robot extends LoggedRobot {
     // Set initial robot pose based on FMS data
     setInitialPose();
     
+    // Small delay to ensure odometry reset is complete
+    try {
+        Thread.sleep(100);
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+    
     // Enable tracking if needed
     RobotContainer.trackCommand.enable();
     
@@ -169,7 +176,10 @@ public class Robot extends LoggedRobot {
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
-      m_autonomousCommand.schedule();
+        System.out.println("Starting autonomous command: " + m_autonomousCommand.getName());
+        m_autonomousCommand.schedule();
+    } else {
+        System.out.println("No autonomous command selected!");
     }
   }
 
