@@ -40,6 +40,7 @@ import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.mailbox.LaserCanSubsystem;
 import frc.robot.subsystems.mailbox.MailboxHandler;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
+import frc.robot.subsystems.vision.AutoTagSelector;
 import frc.robot.subsystems.vision.TagInputHandler;
 import frc.robot.subsystems.vision.TagTrackingHandler;
 //import frc.robot.subsystems.simulation.SimulationSubsystem;
@@ -119,16 +120,17 @@ public class RobotContainer {
   public static final ElevatorSubsystem      elevatorSubsystem         = new ElevatorSubsystem();
   public static final ElevatorHandler        elevatorHandler           = new ElevatorHandler();
   public static final FlopperSubsystem       flopperSubsystem          = new FlopperSubsystem();
+  public static final ClimbSubsystem         climbSubsystem            = new ClimbSubsystem();
   public static final TagInputHandler        tagInputHandler           = new TagInputHandler();
   public static final DriveController        driveController           = new DriveController();
   public static final TagTrackingHandler     tagTrackingHandler        = new TagTrackingHandler();
   public static final ControllerSubsystem    driverControllerSubsystem = new ControllerSubsystem(driverController);
 
   // Auto
-  public static final TrackAprilTagCommand trackCommand = new TrackAprilTagCommand(22,
-                                                                                   new Distance(VisionConstants.TRACK_TAG_X,
-                                                                                                VisionConstants.TRACK_TAG_Y));
-  public static final ClimbSubsystem climbSubsystem = new ClimbSubsystem();
+  public static final TrackAprilTagCommand trackCommand    = new TrackAprilTagCommand(22,
+                                                                                      new Distance(VisionConstants.TRACK_TAG_X,
+                                                                                                   VisionConstants.TRACK_TAG_Y));
+  public static final AutoTagSelector      autoTagSelector = new AutoTagSelector();
 
   //Conditionally create SimulationSubsystem
   //public final SimulationSubsystem simulationSubsystem;

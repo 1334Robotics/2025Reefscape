@@ -1,1 +1,3 @@
 Controller vibration with a successful track
+
+Ensure that auto tag selection works as expected
