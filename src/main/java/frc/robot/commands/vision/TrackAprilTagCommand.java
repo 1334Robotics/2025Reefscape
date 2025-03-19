@@ -127,8 +127,7 @@ public class TrackAprilTagCommand extends Command {
 
         boolean hasTarget = RobotContainer.visionSubsystem.isTargetVisible();
         if(!hasTarget) {
-            // Magic number, bad
-            if(this.framesSinceLastSeen++ > 5) {
+            if(this.framesSinceLastSeen++ > VisionConstants.MAX_ALLOWED_BLANK_FRAMES) {
                 this.disable();
                 SmartDashboard.putString("[VISION] Good Stop", "No");
             }
