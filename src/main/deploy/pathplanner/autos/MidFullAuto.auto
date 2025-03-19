@@ -13,19 +13,19 @@
         {
           "type": "named",
           "data": {
-            "name": "ElevatorL1"
+            "name": "MailboxShoot"
           }
         },
         {
-          "type": "named",
+          "type": "wait",
           "data": {
-            "name": "MailboxShoot"
+            "waitTime": 0.5
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "AutoTime-Tag21RightFeed12"
+            "pathName": "AutoTime-Tag21Feed12"
           }
         }
       ]

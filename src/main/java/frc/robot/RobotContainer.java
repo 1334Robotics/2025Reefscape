@@ -439,64 +439,45 @@ public class RobotContainer {
     System.out.println("Starting named command registration...");
     
     try {
-      // Create a map to store commands for verification
-      Map<String, Command> commandMap = new HashMap<>();
-      
-      // Elevator Commands
-      commandMap.put("ElevatorBottom", new ElevatorGotoBottomCommand());
-      commandMap.put("ElevatorFeed", new ElevatorGotoFeedCommand());
-      commandMap.put("ElevatorL1", new ElevatorGotoL1Command());
-      commandMap.put("ElevatorL2", new ElevatorGotoL2Command());
-      commandMap.put("ElevatorL3", new ElevatorGotoL3Command());
-      commandMap.put("ElevatorL4", new ElevatorGotoL4Command());
-      commandMap.put("ElevatorUp", new ElevatorUpCommand());
-      commandMap.put("ElevatorDown", new ElevatorDownCommand());
-      
-      // Mailbox Commands
-      commandMap.put("Shoot", new ShootCommand());
-      commandMap.put("Feed", new MailboxFeedCommand());
-      commandMap.put("Stop", new StopCommand());
-      commandMap.put("MailboxRewind", new MailboxRewindCommand());
-      commandMap.put("OutputHigh", new OutputHighCommand());
-      commandMap.put("OutputLow", new OutputLowCommand());
-      
-      // Flopper Commands
-      commandMap.put("FlopperUp", new FlopperUpCommand());
-      commandMap.put("FlopperDown", new FlopperDownCommand());
-      
-      // Other Commands
-      commandMap.put("ZeroGyro", new GyroZeroCommand());
-      
-      // Register all commands and verify
-      System.out.println("\nRegistering commands with PathPlanner:");
-      for (Map.Entry<String, Command> entry : commandMap.entrySet()) {
-        String name = entry.getKey();
-        Command command = entry.getValue();
+        Map<String, Command> commandMap = new HashMap<>();
         
-        try {
-          // Register command without asProxy to maintain direct subsystem requirements
-          NamedCommands.registerCommand(name, command);
-          System.out.println("✓ Registered: " + name);
-          
-          // Verify command requirements
-          Set<edu.wpi.first.wpilibj2.command.Subsystem> requirements = command.getRequirements();
-          if (requirements.isEmpty()) {
-            System.out.println("  Warning: " + name + " has no subsystem requirements!");
-          } else {
-            System.out.println("  Requirements: " + requirements);
-          }
-        } catch (Exception e) {
-          System.err.println("✗ Failed to register: " + name);
-          System.err.println("  Error: " + e.getMessage());
+        // Elevator Commands
+        commandMap.put("ElevatorL1", Commands.sequence(
+            Commands.runOnce(() -> System.out.println("Starting elevator movement to L1")),
+            new ElevatorGotoL1Command(),
+            Commands.runOnce(() -> System.out.println("Elevator reached L1"))
+        ).withName("ElevatorL1"));
+        
+        // Mailbox Commands
+        commandMap.put("MailboxShoot", Commands.sequence(
+            Commands.runOnce(() -> System.out.println("Starting shoot sequence")),
+            new ShootCommand(),
+            Commands.runOnce(() -> System.out.println("Shoot sequence completed"))
+        ).withName("MailboxShoot"));
+        
+        // Register all commands
+        System.out.println("\nRegistering commands with PathPlanner:");
+        for (Map.Entry<String, Command> entry : commandMap.entrySet()) {
+            String name = entry.getKey();
+            Command command = entry.getValue();
+            
+            try {
+                NamedCommands.registerCommand(name, command);
+                System.out.println("✓ Registered: " + name);
+                
+                Set<edu.wpi.first.wpilibj2.command.Subsystem> requirements = command.getRequirements();
+                System.out.println("  Requirements: " + requirements);
+            } catch (Exception e) {
+                System.err.println("✗ Failed to register: " + name);
+                System.err.println("  Error: " + e.getMessage());
+            }
         }
-      }
-      
-      System.out.println("\nCommand registration complete!");
-      System.out.println("Total commands registered: " + commandMap.size());
-      
+        
+        System.out.println("\nCommand registration complete!");
+        
     } catch (Exception e) {
-      System.err.println("ERROR during command registration: " + e.getMessage());
-      e.printStackTrace();
+        System.err.println("ERROR during command registration: " + e.getMessage());
+        e.printStackTrace();
     }
   }
   

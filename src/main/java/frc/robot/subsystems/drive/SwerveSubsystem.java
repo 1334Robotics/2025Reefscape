@@ -313,15 +313,39 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public void resetOdometry(Pose2d pose) {
-        swerveDrive.resetOdometry(pose);
+        if (pose == null) {
+            System.err.println("Warning: Attempted to reset odometry with null pose!");
+            return;
+        }
+        
+        try {
+            // First zero the gyro
+            zeroGyro();
+            
+            // Small delay to ensure gyro has time to zero
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                // Ignore interrupted exception
+            }
+            
+            // Then reset the odometry with the new pose
+            swerveDrive.resetOdometry(pose);
+            
+            // Verify the reset was successful
+            Pose2d currentPose = swerveDrive.getPose();
+            if (currentPose != null) {
+                System.out.println("Successfully reset odometry to: " + pose.toString());
+                System.out.println("Current pose: " + currentPose.toString());
+            } else {
+                System.err.println("Warning: Odometry reset may have failed - current pose is null");
+            }
+        } catch (Exception e) {
+            System.err.println("Error resetting odometry: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
-    //adding odometry reset with gyro zeroing
-    public void resetPose(Pose2d pose) {
-        swerveDrive.resetOdometry(pose);
-        zeroGyro();  // Optional: zero gyro when resetting pose
-    }
-    
     public void setFieldRelative(boolean fieldRelative) {
         this.fieldRelative = fieldRelative;
         SmartDashboard.putBoolean("[SWERVE] Field Relative", this.fieldRelative);
@@ -416,74 +440,74 @@ private Pose2d calculateRobotPoseFromVision(Transform3d targetToCamera) {
    */
   public void setupPathPlanner()
   {
-    // Load the RobotConfig from the GUI settings. You should probably
-    // store this in your Constants file
+    // Load the RobotConfig from the GUI settings
     RobotConfig config;
-    try
-    {
-      config = RobotConfig.fromGUISettings();
+    try {
+        config = RobotConfig.fromGUISettings();
 
-      final boolean enableFeedforward = true;
-      // Configure AutoBuilder last
-      AutoBuilder.configure(
-          swerveDrive::getPose, // Robot pose supplier
-          swerveDrive::resetOdometry, // Method to reset odometry (will be called if your auto has a starting pose)
-          swerveDrive::getRobotVelocity, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-          (speedsRobotRelative, moduleFeedForwards) -> {
-            if (enableFeedforward)
-            {
-              swerveDrive.drive(
-                  speedsRobotRelative,
-                  swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
-                  moduleFeedForwards.linearForces()
-                               );
-            } else
-            {
-              swerveDrive.setChassisSpeeds(speedsRobotRelative);
-            }
-          },
-          // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
-          new PPHolonomicDriveController(
-              new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants - should to be tuned for competition
-              new PIDConstants(5.0, 0.0, 0.0)  // Rotation PID constants - should to be tuned for competition
-          ),
-          config,
-          // The robot configuration
-          () -> {
-            // Boolean supplier that controls when the path will be mirrored for the red alliance
-            // This will flip the path being followed to the red side of the field.
-            // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
-            var alliance = DriverStation.getAlliance();
-            boolean isRed = false;
-            if (alliance.isPresent()) {
-              isRed = alliance.get() == DriverStation.Alliance.Red;
-            }
-            
-            // Log current alliance and mirroring state to dashboard
-            SmartDashboard.putBoolean("PathPlanner/IsRedAlliance", isRed);
-            SmartDashboard.putBoolean("PathPlanner/MirroringPaths", isRed);
-            
-            return isRed;
-          },
-          this
-          // Reference to this subsystem to set requirements
-      );
-
-      // Log setup completion
-      System.out.println("PathPlanner initialized with alliance detection");
+        // Ensure we have a valid initial pose
+        var alliance = DriverStation.getAlliance();
+        boolean isBlue = !alliance.isPresent() || alliance.get() == Alliance.Blue;
         
-      // Preload PathPlanner Path finding for faster initial path planning
-      PathfindingCommand.warmupCommand().schedule();
+        // Set default starting pose based on alliance
+        Pose2d defaultPose = isBlue ? 
+            new Pose2d(new Translation2d(Meter.of(5.89), Meter.of(5.5)), Rotation2d.fromDegrees(180)) :
+            new Pose2d(new Translation2d(Meter.of(8.05), Meter.of(5.5)), Rotation2d.fromDegrees(0));
+        
+        // Initialize odometry with default pose if not already set
+        if (swerveDrive.getPose() == null) {
+            System.out.println("Initializing odometry with default pose: " + defaultPose);
+            swerveDrive.resetOdometry(defaultPose);
+        }
+
+        final boolean enableFeedforward = true;
+        // Configure AutoBuilder last
+        AutoBuilder.configure(
+            swerveDrive::getPose,
+            (pose) -> {
+                if (pose != null) {
+                    System.out.println("PathPlanner resetting odometry to: " + pose);
+                    swerveDrive.resetOdometry(pose);
+                } else {
+                    System.err.println("Warning: PathPlanner attempted to reset odometry with null pose!");
+                }
+            },
+            swerveDrive::getRobotVelocity,
+            (speedsRobotRelative, moduleFeedForwards) -> {
+                if (enableFeedforward) {
+                    swerveDrive.drive(
+                        speedsRobotRelative,
+                        swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
+                        moduleFeedForwards.linearForces()
+                    );
+                } else {
+                    swerveDrive.setChassisSpeeds(speedsRobotRelative);
+                }
+            },
+            new PPHolonomicDriveController(
+                new PIDConstants(5.0, 0.0, 0.0),
+                new PIDConstants(5.0, 0.0, 0.0)
+            ),
+            config,
+            () -> {
+                var currentAlliance = DriverStation.getAlliance();
+                boolean isRed = currentAlliance.isPresent() && currentAlliance.get() == Alliance.Red;
+                SmartDashboard.putBoolean("PathPlanner/IsRedAlliance", isRed);
+                SmartDashboard.putBoolean("PathPlanner/MirroringPaths", isRed);
+                return isRed;
+            },
+            this
+        );
+
+        System.out.println("PathPlanner initialized with alliance detection");
+        
+        // Preload PathPlanner Path finding
+        PathfindingCommand.warmupCommand().schedule();
         
     } catch (Exception e) {
-      System.err.println("Error configuring PathPlanner: " + e.getMessage());
-      e.printStackTrace();
+        System.err.println("Error configuring PathPlanner: " + e.getMessage());
+        e.printStackTrace();
     }
-
-    //Preload PathPlanner Path finding
-    // IF USING CUSTOM PATHFINDER ADD BEFORE THIS LINE
-    PathfindingCommand.warmupCommand().schedule();
   }
 
 
