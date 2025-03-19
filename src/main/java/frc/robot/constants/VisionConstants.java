@@ -43,20 +43,27 @@ public final class VisionConstants {
     public static final double TRACK_TAG_Y = 80;
 
     // Rotation PID constants
-    public static final double ROTATION_KP          = 0.05;
-    public static final double ROTATION_KI          = 0.0001;
-    public static final double ROTATION_KD          = 0;
+    public static final double ROTATION_KP          = 0.02;
+    public static final double ROTATION_KI          = 0.000;
+    public static final double ROTATION_KD          = 0.000;
     public static final double ROTATION_TAU         = 0;
     public static final double ROTATION_LIM_MIN_INT = -0.3;
     public static final double ROTATION_LIM_MAX_INT = 0.3;
 
     // Drive PID constants
-    public static final double DRIVE_KP          = 0.03;
-    public static final double DRIVE_KI          = 0.00;
-    public static final double DRIVE_KD          = 0.0000;
-    public static final double DRIVE_TAU         = 0;
-    public static final double DRIVE_LIM_MIN_INT = -0.3;
-    public static final double DRIVE_LIM_MAX_INT = 0.3;
+    public static final double FORWARDS_KP          = 0.08;
+    public static final double FORWARDS_KI          = 0.001;
+    public static final double FORWARDS_KD          = 0.000;
+    public static final double FORWARDS_TAU         = 0;
+    public static final double FORWARDS_LIM_MIN_INT = -0.3;
+    public static final double FORWARDS_LIM_MAX_INT = 0.3;
+    
+    public static final double HORIZONTAL_KP          = 0.05;
+    public static final double HORIZONTAL_KI          = 0.0005;
+    public static final double HORIZONTAL_KD          = 0.000;
+    public static final double HORIZONTAL_TAU         = 0;
+    public static final double HORIZONTAL_LIM_MIN_INT = -0.3;
+    public static final double HORIZONTAL_LIM_MAX_INT = 0.3;
 
     // Camera mounting position relative to robot center (meters)
     public static final double CAMERA_POSITION_X = 0.25;  // Forward/back
@@ -75,15 +82,15 @@ public final class VisionConstants {
     public static final double AREA_TO_STD_DEV_FACTOR = 20.0; // Higher area = lower std dev
 
     // Speed
-    public static final double DRIVE_SPEED    = 0.3;
-    public static final double ROTATION_SPEED = 0.15;
+    public static final double DRIVE_SPEED    = 0.2;
+    public static final double ROTATION_SPEED = 0.2;
 
     // Positions
     public static final Distance RIGHT_SCORE_DISTANCE = new Distance(17, 80);
-    public static final Distance LEFT_SCORE_DISTANCE  = new Distance(-14, 80);
+    public static final Distance LEFT_SCORE_DISTANCE  = new Distance(-18, 80);
 
     // April tag tracking allowed errors
     public static final double MAX_ALLOWED_ROTATION_ERROR   = 2; // In degrees
     public static final double MAX_ALLOWED_HORIZONTAL_ERROR = 1; // In centimeters
-    public static final double MAX_ALLOWED_FORWARDS_ERROR   = 1; // In centimeters
+    public static final double MAX_ALLOWED_FORWARDS_ERROR   = 5; // In centimeters
 }

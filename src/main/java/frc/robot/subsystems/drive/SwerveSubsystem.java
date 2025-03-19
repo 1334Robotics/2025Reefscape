@@ -207,6 +207,10 @@ public class SwerveSubsystem extends SubsystemBase {
         swerveDrive.drive(translation, rotation, this.fieldRelative, false);
     }
 
+    public void driveBotRelative(Translation2d translation, double rotation) {
+        swerveDrive.drive(translation, rotation, false, false);
+    }
+
     public void steer(double steer) {
         swerveDrive.drive(new Translation2d(0, 0), steer * swerveDrive.swerveController.config.maxAngularVelocity,
                           false, false);

@@ -1,1 +1,0 @@
-Ensure that auto tag selection works as expected

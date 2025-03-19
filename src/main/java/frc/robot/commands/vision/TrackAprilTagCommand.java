@@ -19,6 +19,7 @@ public class TrackAprilTagCommand extends Command {
     private double targetX;
     private double targetY;
     private boolean enabled;
+    private int framesSinceLastSeen;
 
     // Explain this later
     private double targetYaw;
@@ -26,6 +27,7 @@ public class TrackAprilTagCommand extends Command {
     public TrackAprilTagCommand(int targetTag, Distance relativeDistance) {
         this.targetTag = targetTag;
         this.enabled = false;
+        this.framesSinceLastSeen = 0;
 
         // Initialize the PID controllers
         rotationController   = new PIDController(VisionConstants.ROTATION_KP,
@@ -40,23 +42,23 @@ public class TrackAprilTagCommand extends Command {
                                                  VisionConstants.ROTATION_LIM_MIN_INT,
                                                  VisionConstants.ROTATION_LIM_MAX_INT,
                                                  1 /* The sampleTime which should never need to be changed (it doesn't do much) */);
-        forwardController   = new PIDController(VisionConstants.DRIVE_KP,
-                                                VisionConstants.DRIVE_KI,
-                                                VisionConstants.DRIVE_KD,
-                                                VisionConstants.DRIVE_TAU,
+        forwardController   = new PIDController(VisionConstants.FORWARDS_KP,
+                                                VisionConstants.FORWARDS_KI,
+                                                VisionConstants.FORWARDS_KD,
+                                                VisionConstants.FORWARDS_TAU,
                                                 -1,
                                                 1,
-                                                VisionConstants.DRIVE_LIM_MIN_INT,
-                                                VisionConstants.DRIVE_LIM_MAX_INT,
+                                                VisionConstants.FORWARDS_LIM_MIN_INT,
+                                                VisionConstants.FORWARDS_LIM_MAX_INT,
                                                 1);
-        horizontalController = new PIDController(VisionConstants.DRIVE_KP,
-                                                 VisionConstants.DRIVE_KI,
-                                                 VisionConstants.DRIVE_KD,
-                                                 VisionConstants.DRIVE_TAU,
+        horizontalController = new PIDController(VisionConstants.HORIZONTAL_KP,
+                                                 VisionConstants.HORIZONTAL_KI,
+                                                 VisionConstants.HORIZONTAL_KD,
+                                                 VisionConstants.HORIZONTAL_TAU,
                                                  -1,
                                                  1,
-                                                 VisionConstants.DRIVE_LIM_MIN_INT,
-                                                 VisionConstants.DRIVE_LIM_MAX_INT,
+                                                 VisionConstants.HORIZONTAL_LIM_MIN_INT,
+                                                 VisionConstants.HORIZONTAL_LIM_MAX_INT,
                                                  1);
 
         this.setRelativeDistance(relativeDistance);
@@ -117,11 +119,22 @@ public class TrackAprilTagCommand extends Command {
         SmartDashboard.putBoolean("[VISION] Tracking Enabled", this.enabled);
         if(!this.enabled) return;
 
+        // Disable if PhotonVision has disconnected
+        if(RobotContainer.visionSubsystem.getImageAge() > VisionConstants.MAX_ACCEPTABLE_DELAY) {
+            this.disable();
+            SmartDashboard.putString("[VISION] Good Stop", "No");
+        }
+
         boolean hasTarget = RobotContainer.visionSubsystem.isTargetVisible();
+        if(!hasTarget) {
+            // Magic number, bad
+            if(this.framesSinceLastSeen++ > 5) {
+                this.disable();
+                SmartDashboard.putString("[VISION] Good Stop", "No");
+            }
+        } else this.framesSinceLastSeen = 0;
         
-        if(hasTarget
-        && RobotContainer.visionSubsystem.getTargetId() == this.targetTag
-        && RobotContainer.visionSubsystem.getImageAge() <= VisionConstants.MAX_ACCEPTABLE_DELAY) {
+        if(RobotContainer.visionSubsystem.getTargetId() == this.targetTag) {
             double angle      = RobotContainer.visionSubsystem.getTargetAngle();
             Distance distance = RobotContainer.visionSubsystem.getDistanceAway();
 

@@ -8,8 +8,9 @@ import frc.robot.RobotContainer;
 public class DriveController extends SubsystemBase {
     public enum Controller {
         MANUAL(1),
-        DIRECTIONSNAP(2),
-        TAGTRACKING(3);
+        FORWARDS(2),
+        DIRECTIONSNAP(3),
+        TAGTRACKING(4);
 
         public final int priority;
         private Controller(int priority) {
@@ -49,6 +50,12 @@ public class DriveController extends SubsystemBase {
         if(!this.hasControl(controller)) return;
 
         RobotContainer.swerveSubsystem.drive(translation, rotation);
+    }
+
+    public void driveBotRelative(Controller controller, Translation2d translation, double rotation) {
+        if(!this.hasControl(controller)) return;
+
+        RobotContainer.swerveSubsystem.driveBotRelative(translation, rotation);
     }
 
     public void steer(Controller controller, double steer) {
