@@ -1,6 +1,7 @@
 package frc.robot.subsystems.elevator;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.RobotContainer;
 import frc.robot.constants.ElevatorConstants;
 import frc.robot.subsystems.drive.PIDController;
@@ -11,6 +12,7 @@ public class ElevatorHandler extends SubsystemBase {
     private boolean                  hitTarget;
     private final PIDController      pidController;
     private boolean                  forceManualControl;  // New flag for forcing manual control
+    private static final String      MANUAL_CONTROL_KEY = "Elevator/Force Manual Control";
     
     public ElevatorHandler() {
         this.targetLevel = null;
@@ -26,6 +28,9 @@ public class ElevatorHandler extends SubsystemBase {
                                                ElevatorConstants.PID_LIM_MIN_INT,
                                                ElevatorConstants.PID_LIM_MAX_INT,
                                                ElevatorConstants.PID_SAMPLE_TIME);
+                                               
+        // Initialize dashboard controls
+        SmartDashboard.putBoolean(MANUAL_CONTROL_KEY, false);
     }
 
     public void setLevel(ElevatorLevel level) {
@@ -40,6 +45,7 @@ public class ElevatorHandler extends SubsystemBase {
     // New methods to control manual mode
     public void setForceManualControl(boolean force) {
         this.forceManualControl = force;
+        SmartDashboard.putBoolean(MANUAL_CONTROL_KEY, force);
         if (force) {
             // Stop any ongoing automated movement
             RobotContainer.elevatorSubsystem.runMotor(0);
@@ -53,6 +59,17 @@ public class ElevatorHandler extends SubsystemBase {
 
     @Override
     public void periodic() {
+        // Check dashboard for manual control toggle
+        boolean dashboardManualControl = SmartDashboard.getBoolean(MANUAL_CONTROL_KEY, false);
+        if (dashboardManualControl != this.forceManualControl) {
+            setForceManualControl(dashboardManualControl);
+        }
+
+        // Update dashboard with current state
+        SmartDashboard.putString("Elevator/Control Mode", 
+            (this.forceManualControl || ElevatorConstants.MANUAL_ELEVATOR_CONTROL) ? 
+            "MANUAL" : "AUTOMATED");
+        
         // 1. Safety check - if in manual mode, let manual control handle everything
         if(this.forceManualControl || ElevatorConstants.MANUAL_ELEVATOR_CONTROL) {
             if (this.targetLevel != null) {
@@ -95,5 +112,12 @@ public class ElevatorHandler extends SubsystemBase {
         double output = -this.pidController.getOutput();
         RobotContainer.elevatorSubsystem.runMotor(output);
         System.out.println("Elevator: Moving with output " + output);
+        
+        // Update dashboard with movement info
+        SmartDashboard.putNumber("Elevator/Target Position", 
+            this.targetLevel != null ? this.targetLevel.position : 0.0);
+        SmartDashboard.putNumber("Elevator/Current Position", currentPosition);
+        SmartDashboard.putNumber("Elevator/Error", error);
+        SmartDashboard.putNumber("Elevator/Motor Output", output);
     }
 }
