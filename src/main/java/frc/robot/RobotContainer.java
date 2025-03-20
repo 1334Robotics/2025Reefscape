@@ -82,6 +82,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Optional;
 
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import java.util.function.DoubleSupplier;
+import frc.robot.subsystems.elevator.ElevatorLevel;
+
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -225,6 +231,14 @@ public class RobotContainer {
   }
 
   private void setupDashboard() {
+    // Clear any existing auto data from SmartDashboard
+    SmartDashboard.clearPersistent("Auto Routines");
+    SmartDashboard.clearPersistent("PathPlanner/currentPath");
+    SmartDashboard.clearPersistent("PathPlanner/activePath");
+    
+    // Get fresh auto chooser from PathPlanner
+    autoChooser = AutoBuilder.buildAutoChooser();
+    
     // Verify auto chooser exists before putting to dashboard
     if (autoChooser != null) {
         SmartDashboard.putData("Auto Routines", autoChooser);
@@ -236,6 +250,35 @@ public class RobotContainer {
     SmartDashboard.putString("Current Auto Status", "Ready (Press START button to run)");
     SmartDashboard.putString("Auto Button Help", "Press START button on driver controller to run selected auto");
     
+    // Create Elevator Control tab
+    ShuffleboardTab elevatorTab = Shuffleboard.getTab("Elevator");
+    
+    // Add manual control toggle with a switch widget
+    elevatorTab.addBoolean("Force Manual Control", () -> elevatorHandler.isForceManualControl())
+        .withWidget(BuiltInWidgets.kToggleSwitch)
+        .withPosition(0, 0)
+        .withSize(2, 1);
+        
+    // Add control mode indicator
+    elevatorTab.addString("Control Mode", 
+        () -> elevatorHandler.isForceManualControl() ? "MANUAL" : "AUTOMATED")
+        .withPosition(2, 0)
+        .withSize(2, 1);
+        
+    // Add position info
+    elevatorTab.addNumber("Current Position", 
+        (DoubleSupplier)(() -> elevatorSubsystem.getPosition()))
+        .withPosition(0, 1)
+        .withSize(2, 1);
+        
+    elevatorTab.addNumber("Target Position",
+        (DoubleSupplier)(() -> {
+            ElevatorLevel level = elevatorHandler.getLevel();
+            return level != null ? level.position : 0.0;
+        }))
+        .withPosition(2, 1)
+        .withSize(2, 1);
+        
     // List available paths for manual selection
     listAvailablePaths();
   }
