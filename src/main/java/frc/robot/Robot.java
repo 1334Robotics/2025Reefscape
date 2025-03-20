@@ -125,19 +125,20 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void teleopInit() {
-    RobotContainer.swerveSubsystem.setFieldRelative(true);
-    RobotContainer.trackCommand.disable();
-    // Have some flag to do this only once
-    if(SmartDashboard.getBoolean("[ELEVATOR] Reset On TeleOp Enable", false) && !this.elevatorReset) {
-      (new ElevatorResetCommand()).schedule();
-      this.elevatorReset = true;
-    }
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
+    }
+
+    RobotContainer.swerveSubsystem.setFieldRelative(true);
+    RobotContainer.trackCommand.disable();
+    // Have some flag to do this only once
+    if(SmartDashboard.getBoolean("[ELEVATOR] Reset On TeleOp Enable", false) && !this.elevatorReset) {
+      (new ElevatorResetCommand()).schedule();
+      this.elevatorReset = true;
     }
   }
 

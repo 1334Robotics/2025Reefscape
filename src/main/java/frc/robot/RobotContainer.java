@@ -131,10 +131,10 @@ public class RobotContainer {
   public static final ControllerSubsystem    driverControllerSubsystem = new ControllerSubsystem(driverController);
 
   // Auto
-  public static final TrackAprilTagCommand trackCommand    = new TrackAprilTagCommand(22,
-                                                                                      new Distance(VisionConstants.TRACK_TAG_X,
-                                                                                                   VisionConstants.TRACK_TAG_Y));
-  public static final AutoTagSelector        autoTagSelector = new AutoTagSelector();
+  public static final TrackAprilTagCommand trackCommand = new TrackAprilTagCommand(22,
+                                                                                   new Distance(VisionConstants.TRACK_TAG_X,
+                                                                                                VisionConstants.TRACK_TAG_Y));
+  public static final AutoTagSelector autoTagSelector = new AutoTagSelector();
 
   //Conditionally create SimulationSubsystem
   //public final SimulationSubsystem simulationSubsystem;

@@ -10,7 +10,6 @@ public class RipControlCommand extends Command {
 
     @Override
     public void initialize() {
-        System.out.println("Here");
         RobotContainer.driveController.takeAllControlAway();
         RobotContainer.trackCommand.disable();
         RobotContainer.directionSnapSubsystem.stop();

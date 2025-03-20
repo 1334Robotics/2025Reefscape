@@ -40,8 +40,8 @@ public class DriveCommand extends Command {
         }
 
         // This math is from previous years
-        double xVelocity = Math.pow(this.vX.getAsDouble(), 3)          * (goFast ? SwerveConstants.HIGH_DRIVE_SPEED : SwerveConstants.SLOW_DRIVE_SPEED);
-        double yVelocity = Math.pow(this.vY.getAsDouble(), 3)          * (goFast ? SwerveConstants.HIGH_DRIVE_SPEED : SwerveConstants.SLOW_DRIVE_SPEED);
+        double xVelocity       = Math.pow(this.vX.getAsDouble(), 3)    * (goFast ? SwerveConstants.HIGH_DRIVE_SPEED : SwerveConstants.SLOW_DRIVE_SPEED);
+        double yVelocity       = Math.pow(this.vY.getAsDouble(), 3)    * (goFast ? SwerveConstants.HIGH_DRIVE_SPEED : SwerveConstants.SLOW_DRIVE_SPEED);
         double angularVelocity = Math.pow(this.omega.getAsDouble(), 3) * (goFast ? SwerveConstants.HIGH_DRIVE_SPEED : SwerveConstants.SLOW_DRIVE_SPEED);
 
         // Update the values within SmartDashboard (The config is off 90 degrees, so this is what needs to happen)
