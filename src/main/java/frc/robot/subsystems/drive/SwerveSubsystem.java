@@ -52,11 +52,9 @@ public class SwerveSubsystem extends SubsystemBase {
     private boolean fieldRelative;
     private SwerveDriveSimulation swerveDriveSimulation;
     private int count = 0;
-    private boolean allowDrive;
 
     public SwerveSubsystem() {
         this.fieldRelative = false;
-        this.allowDrive = true;
         final GyroIO gyroIO;
         final GyroSimulation gyroSimulation;
         final ModuleIO[] moduleIOs;
@@ -206,8 +204,11 @@ public class SwerveSubsystem extends SubsystemBase {
     }
     
     public void drive(Translation2d translation, double rotation) {
-        if(!this.allowDrive) return;
         swerveDrive.drive(translation, rotation, this.fieldRelative, false);
+    }
+
+    public void driveBotRelative(Translation2d translation, double rotation) {
+        swerveDrive.drive(translation, rotation, false, false);
     }
 
     public void steer(double steer) {
@@ -249,19 +250,6 @@ public class SwerveSubsystem extends SubsystemBase {
     public ChassisSpeeds getChassisSpeeds() {
         return swerveDrive.getRobotVelocity();
     }
-
-    public void lockDrive() {
-        /*
-         * What needs to exist is a ControlManager class which tells either DriveCommand
-         * or some autonomous method that it is currently allowed to use the SwerveSubsystem
-         */
-        this.allowDrive = false;
-    }
-
-    public void unlockDrive() {
-        this.allowDrive = true;
-    }
-
     public SwerveDrive getSwerveDrive() {
         return this.swerveDrive;
     }
@@ -270,37 +258,37 @@ public class SwerveSubsystem extends SubsystemBase {
         return swerveDriveSimulation;
     }
 
-private Pose2d calculateRobotPoseFromVision(Transform3d targetToCamera) {
-    // Get the camera position relative to robot center
-    Transform3d robotToCamera = new Transform3d(
-        new Translation3d(
-            VisionConstants.CAMERA_POSITION_X,
-            VisionConstants.CAMERA_POSITION_Y,
-            VisionConstants.CAMERA_POSITION_Z
-        ),
-        new Rotation3d(
-            VisionConstants.CAMERA_PITCH_RADIANS,
-            VisionConstants.CAMERA_YAW_RADIANS,
-            VisionConstants.CAMERA_ROLL_RADIANS
-        )
-    );
+    private Pose2d calculateRobotPoseFromVision(Transform3d targetToCamera) {
+        // Get the camera position relative to robot center
+        Transform3d robotToCamera = new Transform3d(
+            new Translation3d(
+                VisionConstants.CAMERA_POSITION_X,
+                VisionConstants.CAMERA_POSITION_Y,
+                VisionConstants.CAMERA_POSITION_Z
+            ),
+            new Rotation3d(
+                VisionConstants.CAMERA_PITCH_RADIANS,
+                VisionConstants.CAMERA_YAW_RADIANS,
+                VisionConstants.CAMERA_ROLL_RADIANS
+            )
+        );
 
-    // Convert 3D transform to 2D
-    Transform2d transform2d = new Transform2d(
-        new Translation2d(targetToCamera.getX(), targetToCamera.getY()),
-        new Rotation2d(targetToCamera.getRotation().getZ())
-    );
+        // Convert 3D transform to 2D
+        Transform2d transform2d = new Transform2d(
+            new Translation2d(targetToCamera.getX(), targetToCamera.getY()),
+            new Rotation2d(targetToCamera.getRotation().getZ())
+        );
 
-    // Create pose from transform
-    Pose2d cameraPose = new Pose2d().transformBy(transform2d);
-    
-    // Account for camera offset
-    Transform2d cameraOffset = new Transform2d(
-        new Translation2d(robotToCamera.getX(), robotToCamera.getY()),
-        new Rotation2d(robotToCamera.getRotation().getZ())
-    );
-    
-    return cameraPose.transformBy(cameraOffset);
+        // Create pose from transform
+        Pose2d cameraPose = new Pose2d().transformBy(transform2d);
+        
+        // Account for camera offset
+        Transform2d cameraOffset = new Transform2d(
+            new Translation2d(robotToCamera.getX(), robotToCamera.getY()),
+            new Rotation2d(robotToCamera.getRotation().getZ())
+        );
+        
+        return cameraPose.transformBy(cameraOffset);
     }
 
     //calculate the standard deviation of the vision data based on the target area and ambiguity

@@ -3,6 +3,7 @@ package frc.robot.subsystems.drive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.DirectionSnapConstants;
+import frc.robot.subsystems.drive.DriveController.Controller;
 import frc.robot.RobotContainer;
 
 public class DirectionSnapSubsystem extends SubsystemBase {
@@ -28,7 +29,7 @@ public class DirectionSnapSubsystem extends SubsystemBase {
     public void snap(Direction direction) {
         this.targetYaw = direction.degrees;
         this.hitTargetYaw = false;
-        RobotContainer.swerveSubsystem.lockDrive();
+        RobotContainer.driveController.requestControl(Controller.DIRECTIONSNAP);
         pidController.zero();
     }
 
@@ -53,11 +54,11 @@ public class DirectionSnapSubsystem extends SubsystemBase {
             pidController.update(targetYaw, yaw);
             double steer = pidController.getOutput();
             SmartDashboard.putNumber("[DIRECTIONSNAP] Steer", steer);
-            RobotContainer.swerveSubsystem.steer(steer);
+            RobotContainer.driveController.steer(Controller.DIRECTIONSNAP, steer);
 
             // Check if the yaw is within acceptable range
             if(Math.abs(error) <= DirectionSnapConstants.MAX_ACCEPTABLE_YAW_ERROR) {
-                RobotContainer.swerveSubsystem.unlockDrive();
+                RobotContainer.driveController.relinquishControl(Controller.DIRECTIONSNAP);
                 this.hitTargetYaw = true;
             }
         } else {
@@ -70,6 +71,6 @@ public class DirectionSnapSubsystem extends SubsystemBase {
     public void stop() {
         this.hitTargetYaw = true;
         this.pidController.zero();
-        RobotContainer.swerveSubsystem.unlockDrive();
+        RobotContainer.driveController.relinquishControl(Controller.DIRECTIONSNAP);
     }
 }
