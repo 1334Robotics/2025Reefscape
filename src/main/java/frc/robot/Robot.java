@@ -158,28 +158,50 @@ public class Robot extends LoggedRobot {
     // Keep field-relative mode enabled for path following
     RobotContainer.swerveSubsystem.setFieldRelative(true);
     
+    // Force automatic control for autonomous
+    RobotContainer.elevatorHandler.setForceManualControl(false);
+    
+    // First, reset the elevator if it hasn't been reset yet
+    if (!elevatorReset) {
+      System.out.println("Autonomous Init: Zeroing elevator...");
+      Command resetCommand = new ElevatorResetCommand();
+      resetCommand.schedule();
+      // Wait for the reset to complete (up to 2 seconds)
+      int attempts = 0;
+      while (!resetCommand.isFinished() && attempts < 100) {
+        try {
+          Thread.sleep(20);  // Wait 20ms between checks
+          attempts++;
+        } catch (InterruptedException e) {
+          break;
+        }
+      }
+      elevatorReset = true;
+      System.out.println("Elevator zeroing completed");
+    }
+    
     // Set initial robot pose based on FMS data
     setInitialPose();
     
     // Small delay to ensure odometry reset is complete
     try {
-        Thread.sleep(100);
+      Thread.sleep(100);
     } catch (InterruptedException e) {
-        e.printStackTrace();
+      e.printStackTrace();
     }
     
     // Enable tracking if needed
     RobotContainer.trackCommand.enable();
     
-    // Get the selected autonomous command
+    // Get the autonomous command from RobotContainer
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-
-    // schedule the autonomous command (example)
+    
+    // Schedule the autonomous command
     if (m_autonomousCommand != null) {
-        System.out.println("Starting autonomous command: " + m_autonomousCommand.getName());
-        m_autonomousCommand.schedule();
+      System.out.println("Starting autonomous command: " + m_autonomousCommand.getName());
+      m_autonomousCommand.schedule();
     } else {
-        System.out.println("No autonomous command selected!");
+      System.out.println("No autonomous command selected!");
     }
   }
 
@@ -244,15 +266,18 @@ public class Robot extends LoggedRobot {
   public void teleopInit() {
     RobotContainer.swerveSubsystem.setFieldRelative(true);
     RobotContainer.trackCommand.disable();
-    // Have some flag to do this only once
+    
+    // Restore manual control if that's what we're using
+    if (ElevatorConstants.MANUAL_ELEVATOR_CONTROL) {
+      RobotContainer.elevatorHandler.setForceManualControl(true);
+    }
+    
+    // Reset elevator if needed
     if(SmartDashboard.getBoolean("[ELEVATOR] Reset On TeleOp Enable", false) && !this.elevatorReset) {
       (new ElevatorResetCommand()).schedule();
       this.elevatorReset = true;
     }
-    // This makes sure that the autonomous stops running when
-    // teleop starts running. If you want the autonomous to
-    // continue until interrupted by another command, remove
-    // this line or comment it out.
+    
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }

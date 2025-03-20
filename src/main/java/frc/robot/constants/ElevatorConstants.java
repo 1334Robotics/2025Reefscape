@@ -1,7 +1,7 @@
 package frc.robot.constants;
 
 public class ElevatorConstants {
-    public static final boolean MANUAL_ELEVATOR_CONTROL = true;
+    public static final boolean MANUAL_ELEVATOR_CONTROL = false;
 
     public static final int MOTOR_ONE_ID    = 20;
     public static final int LIMIT_SWITCH_ID = 8;
