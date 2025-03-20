@@ -14,23 +14,11 @@ public class ClimbSubsystem extends SubsystemBase {
     // One Neo 550 motor for locking the climb mechanism
     private final SparkMax lockMotor;
 
-    private final Encoder lowerMotor1Encoder = new Encoder(0, 1); // DIO ports for encoder
-    private final Encoder lowerMotor2Encoder = new Encoder(2, 3); // DIO ports for encoder
-    private final Encoder lockMotorEncoder = new Encoder(4, 5); // DIO ports for encoder
-
-    // Conversion factor from encoder ticks to inches
-    private static final double TICKS_TO_INCHES = 0.01; // Adjust this value based on your specific encoder and mechanism
-
     public ClimbSubsystem() {
         // Adjust CAN IDs as needed based on your wiring
         lowerMotor1 = new SparkMax(ClimbConstants.LOWER_MOTOR1_CAN_ID, MotorType.kBrushless);
         lowerMotor2 = new SparkMax(ClimbConstants.LOWER_MOTOR2_CAN_ID, MotorType.kBrushless);
         lockMotor   = new SparkMax(ClimbConstants.LOCK_MOTOR_CAN_ID, MotorType.kBrushless);
-
-        // Initialize encoders if needed
-        lowerMotor1Encoder.setDistancePerPulse(TICKS_TO_INCHES);
-        lowerMotor2Encoder.setDistancePerPulse(TICKS_TO_INCHES);
-        lockMotorEncoder.setDistancePerPulse(TICKS_TO_INCHES);
     }
 
     /**
@@ -41,7 +29,7 @@ public class ClimbSubsystem extends SubsystemBase {
     public void forcePinsDown(){
         lowerMotor1.set(ClimbConstants.FORCE_PIN_MOTOR_SPEED);
         lowerMotor2.set(ClimbConstants.FORCE_PIN_MOTOR_SPEED);
-        SmartDashboard.putString("[Climb] State", "Forcing pins down");
+        SmartDashboard.putString("[CLIMB] State", "Forcing pins down");
     }
 
     /**
@@ -51,18 +39,18 @@ public class ClimbSubsystem extends SubsystemBase {
      */
     public void lockClimb() {
         lockMotor.set(ClimbConstants.LOCK_CLIMB_MOTOR_SPEED);
-        SmartDashboard.putString("[Climb] State", "Locking climb mechanism");
+        SmartDashboard.putString("[CLIMB] State", "Locking climb mechanism");
     }
 
     public void unlockClimb() {
         lockMotor.set(-ClimbConstants.LOCK_CLIMB_MOTOR_SPEED);
-        SmartDashboard.putString("[Climb] State", "Unlocking climb mechanism");
+        SmartDashboard.putString("[CLIMB] State", "Unlocking climb mechanism");
     }
 
     public void forcePinsUp() {
         lowerMotor1.set(-ClimbConstants.FORCE_PIN_MOTOR_SPEED);
         lowerMotor2.set(-ClimbConstants.FORCE_PIN_MOTOR_SPEED);
-        SmartDashboard.putString("[Climb] State", "Forcing pins up");
+        SmartDashboard.putString("[CLIMB] State", "Forcing pins up");
     }
 
     /** Stops all climb motors. */
@@ -74,15 +62,15 @@ public class ClimbSubsystem extends SubsystemBase {
     }
 
     public double getLowerMotor1PositionInches() {
-        return lowerMotor1Encoder.getDistance();
+        return lowerMotor1.getEncoder().getPosition();
     }
 
     public double getLowerMotor2PositionInches() {
-        return lowerMotor2Encoder.getDistance();
+        return lowerMotor2.getEncoder().getPosition();
     }
 
     public double getLockMotorPositionInches() {
-        return lockMotorEncoder.getDistance();
+        return lockMotor.getEncoder().getPosition();
     }
 
     @Override

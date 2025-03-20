@@ -169,6 +169,7 @@ public class VisionSubsystem extends SubsystemBase {
         //     Check for a method like getTimestampSeconds(), getFrameTimestampSeconds(), etc.
         //double captureTimeSeconds = latestResult.getTimestampSeconds(); 
         double captureTimeSeconds = (latestResult != null ? latestResult.getTimestampSeconds() : currentTimeSeconds);
+
         // (3) Convert to milliseconds
         this.imageAge = (currentTimeSeconds - captureTimeSeconds) * 1000;
 
