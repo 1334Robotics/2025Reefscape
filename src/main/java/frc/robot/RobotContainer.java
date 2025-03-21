@@ -113,7 +113,6 @@ public class RobotContainer {
 
   // Controller buttons
   private static final JoystickButton gyroZeroButton       = new JoystickButton(driverController,   RobotContainerConstants.GYRO_ZERO_BUTON);
-  private final JoystickButton runAutoButton           = new JoystickButton(driverController,   RobotContainerConstants.RUN_AUTO_BUTTON);
   private static final POVButton      forwardsSnapButton   = new POVButton(driverController,        RobotContainerConstants.SNAP_FORWARDS_DIRECTION);
   private static final POVButton      leftSnapButton       = new POVButton(driverController,        RobotContainerConstants.SNAP_LEFT_DIRECTION);
   private static final POVButton      rightSnapButton      = new POVButton(driverController,        RobotContainerConstants.SNAP_RIGHT_DIRECTION);
