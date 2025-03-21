@@ -364,8 +364,6 @@ public class RobotContainer {
     mailboxShootButton.onTrue(new ShootCommand());
     mailboxFeedButton.onTrue(new MailboxFeedCommand());
     mailboxRewindButton.whileTrue(new MailboxRewindCommand());
-
-    // Configure elevator controls based on mode
     if(!ElevatorConstants.MANUAL_ELEVATOR_CONTROL) {
       elevatorBottomButton.onTrue(new ElevatorGotoBottomCommand());
       elevatorFeedButton.onTrue(new ElevatorGotoFeedCommand());
@@ -377,6 +375,13 @@ public class RobotContainer {
       elevatorUpButton.whileTrue(new ElevatorUpCommand());
       elevatorDownButton.whileTrue(new ElevatorDownCommand());
     }
+    ripControlButton.onTrue(new RipControlCommand());
+    trackLeftButton.onTrue(new StartTrackingScoringLeft());
+    trackRightButton.onTrue(new StartTrackingScoringRight());
+    botRelativeButton.onTrue(new BotRelativeCommand());
+    botRelativeButton.onFalse(new FieldRelativeCommand());
+    slowDownButton.onTrue(new SlowDownCommand());
+    slowDownButton.onFalse(new SpeedUpCommand());
   }
 
   /**
