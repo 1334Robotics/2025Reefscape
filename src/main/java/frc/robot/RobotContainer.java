@@ -1,6 +1,7 @@
 package frc.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.auto.AutoConfigurer;
+import frc.robot.commands.led.ToggleLedCommand;
 import frc.robot.commands.climb.ForcePinsDownCommand;
 import frc.robot.commands.climb.ForcePinsUpCommand;
 import frc.robot.commands.climb.LockClimbCommand;
@@ -59,6 +60,7 @@ import frc.robot.subsystems.drive.DriveController;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorHandler;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
+import frc.robot.subsystems.led.LedSubsystem;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -67,6 +69,7 @@ import frc.robot.subsystems.flopper.FlopperSubsystem;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -113,6 +116,7 @@ public class RobotContainer {
   private static final Trigger        trackRightButton     = new Trigger(() -> driverController.getRightTriggerAxis() > RobotContainerConstants.TRACK_RIGHT_TRIGGER_POINT);
   private static final JoystickButton botRelativeButton    = new JoystickButton(driverController, RobotContainerConstants.BOT_RELATIVE_BUTTON);
   private static final JoystickButton slowDownButton       = new JoystickButton(driverController, RobotContainerConstants.SLOW_DOWN_BUTTON);
+  private static final JoystickButton LedButton                = new JoystickButton(operatorController, RobotContainerConstants.LED_BUTTON);
 
   // Subsystems
   public static final GyroSubsystem          gyroSubsystem             = new GyroSubsystem("CANivore");
@@ -129,6 +133,7 @@ public class RobotContainer {
   public static final DriveController        driveController           = new DriveController();
   public static final TagTrackingHandler     tagTrackingHandler        = new TagTrackingHandler();
   public static final ControllerSubsystem    driverControllerSubsystem = new ControllerSubsystem(driverController);
+  public static final LedSubsystem ledSubsystem                        = new LedSubsystem(1);   // Adjust channel afterwards 
 
   // Auto
   public static final TrackAprilTagCommand trackCommand = new TrackAprilTagCommand(22,
@@ -224,6 +229,7 @@ public class RobotContainer {
     botRelativeButton.onFalse(new FieldRelativeCommand());
     slowDownButton.onTrue(new SlowDownCommand());
     slowDownButton.onFalse(new SpeedUpCommand());
+    LedButton.onTrue(new ToggleLedCommand(ledSubsystem));
   }
 
   /**
