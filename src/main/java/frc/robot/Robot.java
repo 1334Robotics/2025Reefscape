@@ -91,6 +91,10 @@ public class Robot extends LoggedRobot {
     } catch (Exception e) {
       System.err.println("Error logging library versions: " + e.getMessage());
     }
+
+      // Setup tracking
+      RobotContainer.trackCommand.disable();
+      RobotContainer.trackCommand.schedule();
   }
 
   /**
@@ -107,6 +111,7 @@ public class Robot extends LoggedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
+    RobotContainer.trackCommand.execute(); // THIS IS BAD. IT SHOULDN'T NEED TO DO THIS
     m_field.setRobotPose(RobotContainer.swerveSubsystem.getPose());
     
     // Update alliance indicators on dashboard
@@ -264,6 +269,14 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void teleopInit() {
+    // This makes sure that the autonomous stops running when
+    // teleop starts running. If you want the autonomous to
+    // continue until interrupted by another command, remove
+    // this line or comment it out.
+    if (m_autonomousCommand != null) {
+      m_autonomousCommand.cancel();
+    }
+
     RobotContainer.swerveSubsystem.setFieldRelative(true);
     RobotContainer.trackCommand.disable();
     
@@ -277,7 +290,10 @@ public class Robot extends LoggedRobot {
       (new ElevatorResetCommand()).schedule();
       this.elevatorReset = true;
     }
-    
+    // This makes sure that the autonomous stops running when
+    // teleop starts running. If you want the autonomous to
+    // continue until interrupted by another command, remove
+    // this line or comment it out.
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
