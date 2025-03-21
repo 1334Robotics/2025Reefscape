@@ -1,9 +1,9 @@
 package frc.robot.commands.led;
 
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.led.LedSubsystem;
 
-public class LEDColorCommand extends InstantCommand {
+public class LEDColorCommand extends Command {
     private final LedSubsystem ledSubsystem;
     private final Color color;
 
@@ -37,5 +37,20 @@ public class LEDColorCommand extends InstantCommand {
     @Override
     public void initialize() {
         ledSubsystem.setColor(color.r, color.g, color.b);
+    }
+
+    @Override
+    public void execute() {
+        ledSubsystem.setColor(color.r, color.g, color.b);
+    }
+
+    @Override
+    public boolean isFinished() {
+        return false;
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        ledSubsystem.turnOff();
     }
 }
