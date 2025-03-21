@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
+import frc.robot.constants.AutoConstants;
 import frc.robot.constants.SimulationConstants;
 import frc.robot.constants.SwerveConstants;
 import frc.robot.constants.VisionConstants;
@@ -78,7 +79,7 @@ public class SwerveSubsystem extends SubsystemBase {
   /**
    * Enable vision odometry updates while driving.
    */
-    private final boolean     visionDriveTest = false;
+    private final boolean visionDriveTest = false;
   /**
    * PhotonVision class to keep an accurate odometry.
    */
@@ -168,7 +169,7 @@ public class SwerveSubsystem extends SubsystemBase {
         this.swerveDrive.setHeadingCorrection(true);
         this.swerveDrive.setCosineCompensator(true);
         this.swerveDrive.setHeadingCorrection(false); // Heading correction should only be used while controlling the robot via angle.
-        this.swerveDrive.setCosineCompensator(false);//!SwerveDriveTelemetry.isSimulation); // Disables cosine compensation for simulations since it causes discrepancies not seen in real life.
+        this.swerveDrive.setCosineCompensator(false);// Disables cosine compensation for simulations since it causes discrepancies not seen in real life.
         this.swerveDrive.setAngularVelocityCompensation(true,
                                                true,
                                                0.1); //Correct for skew that gets worse as angular velocity increases. Start with a coefficient of 0.1.
@@ -473,8 +474,8 @@ public class SwerveSubsystem extends SubsystemBase {
                 }
             },
             new PPHolonomicDriveController(
-                new PIDConstants(5.0, 0.0, 0.0),
-                new PIDConstants(5.0, 0.0, 0.0)
+                new PIDConstants(AutoConstants.PATH_PLANNER_KD, AutoConstants.PATH_PLANNER_KI, AutoConstants.PATH_PLANNER_KD),
+                new PIDConstants(AutoConstants.PATH_PLANNER_KD, AutoConstants.PATH_PLANNER_KI, AutoConstants.PATH_PLANNER_KD)
             ),
             config,
             () -> {
