@@ -13,14 +13,14 @@ public class ElevatorConstants {
 
     // No unit
     public static final double ELEVATOR_SLOW_LOW_POS  = 0.15;
-    public static final double ELEVATOR_SLOW_HIGH_POS = 4.15;
+    public static final double ELEVATOR_SLOW_HIGH_POS = 5.00;
 
     // No unit
-    public static final double FEED_POSITION = 0.336602;
-    public static final double L1_POSITION   = 0.738770;
-    public static final double L2_POSITION   = 1.304644;
-    public static final double L3_POSITION   = 2.350679;
-    public static final double L4_POSITION   = 4.304453;
+    public static final double FEED_POSITION = 0.936236;
+    public static final double L1_POSITION   = 1.314453;
+    public static final double L2_POSITION   = 1.938770;
+    public static final double L3_POSITION   = 3.024644;
+    public static final double L4_POSITION   = 5.155067;
 
     public static final double PID_KP          = 0.25;
     public static final double PID_KI          = 0.1;
