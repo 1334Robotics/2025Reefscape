@@ -1,4 +1,5 @@
 package frc.robot.subsystems.elevator;
+
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
