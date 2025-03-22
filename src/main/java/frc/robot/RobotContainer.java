@@ -543,7 +543,6 @@ public class RobotContainer {
    */
   private void prepareForAuto(Command command) {
     try {
-        // Reset odometry if this is a PathPlannerAuto
         if (command instanceof PathPlannerAuto) {
             System.out.println("Preparing for auto execution...");
             
@@ -551,20 +550,25 @@ public class RobotContainer {
             var alliance = DriverStation.getAlliance();
             boolean isBlue = !alliance.isPresent() || alliance.get() == DriverStation.Alliance.Blue;
             
-            // Set default starting pose based on alliance
-            Pose2d startingPose = isBlue ? 
-                new Pose2d(new Translation2d(Units.Meter.of(5.89), Units.Meter.of(5.5)), Rotation2d.fromDegrees(180)) :
-                new Pose2d(new Translation2d(Units.Meter.of(8.05), Units.Meter.of(5.5)), Rotation2d.fromDegrees(0));
+            // Get the auto name to determine starting position
+            String autoName = ((PathPlannerAuto)command).getName();
             
-            // Reset odometry to starting pose
-            swerveSubsystem.resetOdometry(startingPose);
-            System.out.println("Reset odometry to starting pose: " + startingPose);
+            // Log the starting position to the dashboard
+            SmartDashboard.putString("[AUTO] Starting Position", 
+                String.format("%s %s", 
+                    isBlue ? "BLUE" : "RED",
+                    autoName.toLowerCase().contains("top") ? "TOP" : 
+                    autoName.toLowerCase().contains("bottom") ? "BOTTOM" : "MID"));
             
             // Clear any existing path following errors
             SmartDashboard.putNumber("[AUTO] Path Following Error", 0.0);
+            
+            // Note: We no longer need to set the initial pose here as PathPlanner will handle it
+            System.out.println("Auto preparation complete for: " + autoName);
         }
     } catch (Exception e) {
         System.err.println("Error preparing for auto: " + e.getMessage());
+        e.printStackTrace();
     }
   }
 
