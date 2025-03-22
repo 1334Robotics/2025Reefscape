@@ -60,6 +60,7 @@ import frc.robot.subsystems.drive.DriveController;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorHandler;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
+import frc.robot.subsystems.led.LedHandler;
 import frc.robot.subsystems.led.LedSubsystem;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -119,9 +120,11 @@ public class RobotContainer {
   private static final JoystickButton LedButton                = new JoystickButton(operatorController, RobotContainerConstants.LED_BUTTON);
 
   // Subsystems
+  public static final LedSubsystem           ledSubsystem              = new LedSubsystem(1); 
+  public static final LedHandler             ledHandler                = new LedHandler(ledSubsystem);
   public static final GyroSubsystem          gyroSubsystem             = new GyroSubsystem("CANivore");
   public static final MailboxSubsystem       mailboxSubsystem          = new MailboxSubsystem();
-  public static final MailboxHandler         mailboxHandler            = new MailboxHandler();
+  public static final MailboxHandler         mailboxHandler            = new MailboxHandler(ledHandler);
   public static final VisionSubsystem        visionSubsystem           = new VisionSubsystem();
   public static final SwerveSubsystem        swerveSubsystem           = new SwerveSubsystem();
   public static final DirectionSnapSubsystem directionSnapSubsystem    = new DirectionSnapSubsystem();
@@ -133,7 +136,6 @@ public class RobotContainer {
   public static final DriveController        driveController           = new DriveController();
   public static final TagTrackingHandler     tagTrackingHandler        = new TagTrackingHandler();
   public static final ControllerSubsystem    driverControllerSubsystem = new ControllerSubsystem(driverController);
-  public static final LedSubsystem           ledSubsystem              = new LedSubsystem(1);   // Adjust channel afterwards 
 
   // Auto
   public static final TrackAprilTagCommand trackCommand = new TrackAprilTagCommand(22,
