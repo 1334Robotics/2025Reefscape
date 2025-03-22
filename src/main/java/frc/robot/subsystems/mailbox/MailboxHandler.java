@@ -5,6 +5,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.constants.MailboxConstants;
 import frc.robot.subsystems.elevator.ElevatorLevel;
+import frc.robot.subsystems.led.LedHandler;
+import frc.robot.commands.led.LEDColorCommand;
 
 public class MailboxHandler extends SubsystemBase {
     private boolean rewinding;
@@ -13,8 +15,9 @@ public class MailboxHandler extends SubsystemBase {
     public  boolean allowFeeding;
     private final LaserCanSubsystem outputLaserCan;
     private final LaserCanSubsystem inputLaserCan;
+    private final LedHandler ledHandler;
 
-    public MailboxHandler() {
+    public MailboxHandler(LedHandler ledHandler) {
         this.rewinding    = false;
         this.allowShoot   = false;
         this.feeding      = false;
@@ -29,6 +32,7 @@ public class MailboxHandler extends SubsystemBase {
                                                          MailboxConstants.LASERCAN_INPUT_Y,
                                                          MailboxConstants.LASERCAN_INPUT_HEIGHT,
                                                          MailboxConstants.LASERCAN_INPUT_WIDTH));
+        this.ledHandler = ledHandler;
     }
 
     public void startRewinding() {
@@ -41,6 +45,16 @@ public class MailboxHandler extends SubsystemBase {
 
     @Override
     public void periodic() {
+        // Request LED control for mailbox
+        ledHandler.requestControl(LedHandler.Controller.MAILBOX);
+
+        // Update LED based on coral detection
+        if (this.outputLaserCan.inRange() || this.inputLaserCan.inRange()) {
+            ledHandler.setColor(LedHandler.Controller.MAILBOX, LEDColorCommand.Color.GREEN);
+        } else {
+            ledHandler.setColor(LedHandler.Controller.MAILBOX, LEDColorCommand.Color.RED);
+        }
+
         SmartDashboard.putBoolean("[MAILBOX] Allow Shooting", this.allowShoot);
         SmartDashboard.putBoolean("[MAILBOX] Allow Feeding", this.allowFeeding);
         SmartDashboard.putBoolean("[MAILBOX] Currently Feeding", this.allowFeeding);
@@ -88,6 +102,9 @@ public class MailboxHandler extends SubsystemBase {
             RobotContainer.mailboxSubsystem.stop();
             this.allowShoot = false;
         }
+
+        // Optionally relinquish control when done
+        // ledHandler.relinquishControl(LedHandler.Controller.MAILBOX);
     }
 
     public void allowShoot() {

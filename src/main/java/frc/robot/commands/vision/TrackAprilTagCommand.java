@@ -147,9 +147,12 @@ public class TrackAprilTagCommand extends Command {
 
             // Check if the error is low enough and stop it
             if(this.withinAcceptableError(angle, distance)) {
+                RobotContainer.ledHandler.setTagAlignmentStatus(true);
                 this.disable();
                 SmartDashboard.putString("[VISION] Good Stop", "Yes");
                 RobotContainer.driverControllerSubsystem.vibrate(ControllerVibration.LIGHT);
+            } else {
+                RobotContainer.ledHandler.setTagAlignmentStatus(false);
             }
             
             // Calculate drive commands
