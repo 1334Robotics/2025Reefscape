@@ -199,7 +199,7 @@ public class RobotContainer {
           for (File file : autoFiles) {
             autosList.append("- ").append(file.getName().replace(".auto", "")).append("\n");
           }
-          SmartDashboard.putString("Auto Files (Reference Only)", autosList.toString());
+          SmartDashboard.putString("[AUTO] Auto Files (Reference Only)", autosList.toString());
         }
       }
     } catch (Exception e) {
@@ -252,23 +252,23 @@ public class RobotContainer {
 
   private void setupDashboard() {
     // Clear any existing auto data from SmartDashboard
-    SmartDashboard.clearPersistent("Auto Routines");
-    SmartDashboard.clearPersistent("PathPlanner/currentPath");
-    SmartDashboard.clearPersistent("PathPlanner/activePath");
+    SmartDashboard.clearPersistent("[AUTO] Auto Routines");
+    SmartDashboard.clearPersistent("[AUTO] PathPlanner/currentPath");
+    SmartDashboard.clearPersistent("[AUTO] PathPlanner/activePath");
     
     // Get fresh auto chooser from PathPlanner
     autoChooser = AutoBuilder.buildAutoChooser();
     
     // Verify auto chooser exists before putting to dashboard
     if (autoChooser != null) {
-        SmartDashboard.putData("Auto Routines", autoChooser);
+        SmartDashboard.putData("[AUTO] Auto Routines", autoChooser);
         System.out.println("Auto chooser added to dashboard");
     } else {
         System.err.println("ERROR: Cannot add null auto chooser to dashboard!");
     }
     
-    SmartDashboard.putString("Current Auto Status", "Ready (Press START button to run)");
-    SmartDashboard.putString("Auto Button Help", "Press START button on driver controller to run selected auto");
+    SmartDashboard.putString("[AUTO] Current Auto Status", "Ready (Press START button to run)");
+    SmartDashboard.putString("[AUTO] Auto Button Help", "Press START button on driver controller to run selected auto");
     
     // Create Elevator Control tab
     ShuffleboardTab elevatorTab = Shuffleboard.getTab("Elevator");
@@ -331,7 +331,7 @@ public class RobotContainer {
       }
       
       // Put auto chooser on dashboard
-      SmartDashboard.putData("Auto Routines", autoChooser);
+      SmartDashboard.putData("[AUTO] Auto Routines", autoChooser);
       System.out.println("Auto chooser configured and added to dashboard");
       
       // List available autos in the terminal/log for debugging
@@ -413,16 +413,16 @@ public class RobotContainer {
     var alliance = DriverStation.getAlliance();
     if (alliance.isPresent()) {
       boolean isRed = alliance.get() == DriverStation.Alliance.Red;
-      SmartDashboard.putBoolean("Is Red Alliance", isRed);
-      SmartDashboard.putString("Current Alliance", isRed ? "RED" : "BLUE");
+      SmartDashboard.putBoolean("[AUTO] Is Red Alliance", isRed);
+      SmartDashboard.putString("[AUTO] Current Alliance", isRed ? "RED" : "BLUE");
       
       // Get and display FMS position if available
       int location = DriverStation.getLocation().orElse(2); // Default to center (2)
-      SmartDashboard.putNumber("FMS Position", location);
+      SmartDashboard.putNumber("[AUTO] FMS Position", location);
     } else {
-      SmartDashboard.putBoolean("Is Red Alliance", false);
-      SmartDashboard.putString("Current Alliance", "UNKNOWN");
-      SmartDashboard.putNumber("FMS Position", 2); // Default to center
+      SmartDashboard.putBoolean("[AUTO] Is Red Alliance", false);
+      SmartDashboard.putString("[AUTO] Current Alliance", "UNKNOWN");
+      SmartDashboard.putNumber("[AUTO] FMS Position", 2); // Default to center
     }
   }
 
@@ -443,12 +443,12 @@ public class RobotContainer {
         System.out.println("✓ Registered ElevatorL1 command (marker event)");
         
         // Log registration status to dashboard
-        SmartDashboard.putString("PathPlanner/Commands", "MailboxShoot, ElevatorL1");
+        SmartDashboard.putString("[AUTO] PathPlanner/Commands", "MailboxShoot, ElevatorL1");
         System.out.println("Command registration complete!");
         
     } catch (Exception e) {
         System.err.println("Error registering commands: " + e.getMessage());
-        SmartDashboard.putString("PathPlanner/Error", e.getMessage());
+        SmartDashboard.putString("[AUTO] PathPlanner/Error", e.getMessage());
     }
   }
   
@@ -525,7 +525,7 @@ public class RobotContainer {
         System.out.println("  - " + autoName);
       }
       
-      SmartDashboard.putString("Available Autos", autosList.toString());
+      SmartDashboard.putString("[AUTO] Available Autos", autosList.toString());
       
     } catch (Exception e) {
       System.err.println("Error listing auto files: " + e.getMessage());
@@ -547,7 +547,7 @@ public class RobotContainer {
           (selectedAuto instanceof InstantCommand && 
            !(selectedAuto instanceof SequentialCommandGroup))) {
         System.out.println("No auto selected or 'Do Nothing' selected");
-        SmartDashboard.putString("Current Auto Status", "No auto routine selected");
+        SmartDashboard.putString("[AUTO] Current Auto Status", "No auto routine selected");
         return Commands.none();
       }
       
@@ -556,12 +556,12 @@ public class RobotContainer {
       return Commands.sequence(
         Commands.runOnce(() -> {
           CommandScheduler.getInstance().cancelAll();
-          SmartDashboard.putString("Current Auto Status", "Running Auto");
+          SmartDashboard.putString("AUTO] Current Auto Status", "Running Auto");
         }),
         selectedAuto,
         Commands.runOnce(() -> {
           System.out.println("Auto routine completed");
-          SmartDashboard.putString("Current Auto Status", "Completed");
+          SmartDashboard.putString("[AUTO] Current Auto Status", "Completed");
         })
       );
     }, Set.of()); // Pass an empty set of requirements

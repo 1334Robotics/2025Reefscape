@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.elevator.ElevatorResetCommand;
+import frc.robot.constants.AutoConstants;
 import frc.robot.constants.ElevatorConstants;
 
 import org.ironmaple.simulation.SimulatedArena;
@@ -227,26 +228,26 @@ public class Robot extends LoggedRobot {
         // Blue alliance positions
         switch (location) {
           case 1:   // Left
-            startingPose = new Pose2d(5.89, 7.0, Rotation2d.fromDegrees(180));
+            startingPose = AutoConstants.BLUE_LEFT_STARTING_POSE;
             break;
           case 2:   // Center
-            startingPose = new Pose2d(5.89, 5.5, Rotation2d.fromDegrees(180));
+            startingPose = AutoConstants.BLUE_CENTER_STARTING_POSE;
             break;
           case 3: // Right
-            startingPose = new Pose2d(5.89, 1.0, Rotation2d.fromDegrees(180));
+            startingPose = AutoConstants.BLUE_RIGHT_STARTING_POSE;
             break;
         }
       } else {
         // Red alliance positions (mirrored across field center)
         switch (location) {
           case 1:   // Left
-            startingPose = new Pose2d(8.05, 1.0, Rotation2d.fromDegrees(0));
+            startingPose = AutoConstants.RED_LEFT_STARTING_POSE;
             break;
           case 2:   // Center
-            startingPose = new Pose2d(8.05, 5.5, Rotation2d.fromDegrees(0));
+            startingPose = AutoConstants.RED_CENTER_STARTING_POSE;
             break;
           case 3: // Right
-            startingPose = new Pose2d(8.05, 7.0, Rotation2d.fromDegrees(0));
+            startingPose = AutoConstants.RED_RIGHT_STARTING_POSE;
             break;
         }
       }
