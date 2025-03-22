@@ -140,20 +140,21 @@ public class RobotContainer {
   private static final JoystickButton pinsUpButton         = new JoystickButton(operatorController, RobotContainerConstants.CLIMB_UP_BUTTON);
 
   // Subsystems
-  public static final GyroSubsystem          gyroSubsystem             = new GyroSubsystem("CANivore");
-  public static final MailboxSubsystem       mailboxSubsystem          = new MailboxSubsystem();
-  public static final MailboxHandler         mailboxHandler            = new MailboxHandler();
-  public static final VisionSubsystem        visionSubsystem           = new VisionSubsystem();
-  public static final SwerveSubsystem        swerveSubsystem           = new SwerveSubsystem();
-  public static final DirectionSnapSubsystem directionSnapSubsystem    = new DirectionSnapSubsystem();
-  public static final ElevatorSubsystem      elevatorSubsystem         = new ElevatorSubsystem();
-  public static final ElevatorHandler        elevatorHandler           = new ElevatorHandler();
-  public static final FlopperSubsystem       flopperSubsystem          = new FlopperSubsystem();
-  public static final ClimbSubsystem         climbSubsystem            = new ClimbSubsystem();
-  public static final TagInputHandler        tagInputHandler           = new TagInputHandler();
-  public static final DriveController        driveController           = new DriveController();
-  public static final TagTrackingHandler     tagTrackingHandler        = new TagTrackingHandler();
-  public static final ControllerSubsystem    driverControllerSubsystem = new ControllerSubsystem(driverController);
+  public static final GyroSubsystem          gyroSubsystem               = new GyroSubsystem("CANivore");
+  public static final MailboxSubsystem       mailboxSubsystem            = new MailboxSubsystem();
+  public static final MailboxHandler         mailboxHandler              = new MailboxHandler();
+  public static final VisionSubsystem        visionSubsystem             = new VisionSubsystem();
+  public static final SwerveSubsystem        swerveSubsystem             = new SwerveSubsystem();
+  public static final DirectionSnapSubsystem directionSnapSubsystem      = new DirectionSnapSubsystem();
+  public static final ElevatorSubsystem      elevatorSubsystem           = new ElevatorSubsystem();
+  public static final ElevatorHandler        elevatorHandler             = new ElevatorHandler();
+  public static final FlopperSubsystem       flopperSubsystem            = new FlopperSubsystem();
+  public static final ClimbSubsystem         climbSubsystem              = new ClimbSubsystem();
+  public static final TagInputHandler        tagInputHandler             = new TagInputHandler();
+  public static final DriveController        driveController             = new DriveController();
+  public static final TagTrackingHandler     tagTrackingHandler          = new TagTrackingHandler();
+  public static final ControllerSubsystem    driverControllerSubsystem   = new ControllerSubsystem(driverController);
+  public static final ControllerSubsystem    operatorControllerSubsystem = new ControllerSubsystem(operatorController);
 
   // Auto
   public static final TrackAprilTagCommand trackCommand = new TrackAprilTagCommand(22,
