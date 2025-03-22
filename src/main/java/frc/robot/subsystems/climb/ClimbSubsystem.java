@@ -1,7 +1,11 @@
 package frc.robot.subsystems.climb;
 
 import com.revrobotics.spark.SparkMax;
+
+import frc.robot.RobotContainer;
 import frc.robot.constants.ClimbConstants;
+import frc.robot.subsystems.controller.ControllerVibration;
+
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -87,6 +91,7 @@ public class ClimbSubsystem extends SubsystemBase {
         switch(this.state) {
             case CLIMB_DOWN:
                 if(this.overClimbMotorLimits()) {
+                    RobotContainer.operatorControllerSubsystem.vibrate(ControllerVibration.LIGHT);
                     this.state = ClimbState.STOP;
                     lowerMotor1.set(0);
                     lowerMotor2.set(0);
@@ -100,6 +105,7 @@ public class ClimbSubsystem extends SubsystemBase {
                 break;
             case CLIMB_UP:
                 if(this.underClimbMotorLimits()) {
+                    RobotContainer.operatorControllerSubsystem.vibrate(ControllerVibration.LIGHT);
                     this.state = ClimbState.STOP;
                     lowerMotor1.set(0);
                     lowerMotor2.set(0);
@@ -113,6 +119,7 @@ public class ClimbSubsystem extends SubsystemBase {
                 break;
             case LOCK:
                 if(this.overLockMotorLimits()) {
+                    RobotContainer.operatorControllerSubsystem.vibrate(ControllerVibration.LIGHT);
                     this.state = ClimbState.STOP;
                     lowerMotor1.set(0);
                     lowerMotor2.set(0);
@@ -125,6 +132,7 @@ public class ClimbSubsystem extends SubsystemBase {
                 break;
             case UNLOCK:
                 if(this.underLockMotorLimits()) {
+                    RobotContainer.operatorControllerSubsystem.vibrate(ControllerVibration.LIGHT);
                     this.state = ClimbState.STOP;
                     lowerMotor1.set(0);
                     lowerMotor2.set(0);

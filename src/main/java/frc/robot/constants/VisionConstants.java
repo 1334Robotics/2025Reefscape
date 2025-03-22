@@ -86,8 +86,8 @@ public final class VisionConstants {
     public static final double ROTATION_SPEED = 0.2;
 
     // Positions
-    public static final Distance RIGHT_SCORE_DISTANCE = new Distance(17, 80);
-    public static final Distance LEFT_SCORE_DISTANCE  = new Distance(-18, 80);
+    public static final Distance RIGHT_SCORE_DISTANCE = new Distance(19, 80);
+    public static final Distance LEFT_SCORE_DISTANCE  = new Distance(-19, 80);
 
     // April tag tracking allowed errors
     public static final double MAX_ALLOWED_ROTATION_ERROR   = 2; // In degrees
