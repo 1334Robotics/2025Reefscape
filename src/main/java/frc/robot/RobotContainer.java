@@ -303,6 +303,16 @@ public class RobotContainer {
         
     // List available paths for manual selection
     listAvailablePaths();
+
+    this.registerClimbCommands();
+  }
+
+  private void registerClimbCommands() {
+    SmartDashboard.putData("[CLIMB] Lock",            new LockClimbCommand());
+    SmartDashboard.putData("[CLIMB] Unlock",          new UnlockClimbCommand());
+    SmartDashboard.putData("[CLIMB] Stop",            new StopClimbCommand());
+    SmartDashboard.putData("[CLIMB] Force Pins Down", new ForcePinsDownCommand());
+    SmartDashboard.putData("[CLIMB] Force Pins Up",   new ForcePinsUpCommand());
   }
 
   private void setupDefaultCommands() {
