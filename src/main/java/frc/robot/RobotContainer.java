@@ -68,6 +68,8 @@ import frc.robot.subsystems.flopper.FlopperSubsystem;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -98,6 +100,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import java.util.function.DoubleSupplier;
 import frc.robot.subsystems.elevator.ElevatorLevel;
+import swervelib.imu.SwerveIMU;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -139,21 +142,21 @@ public class RobotContainer {
   private static final Trigger        pinsLockButton       = new Trigger(() -> operatorController.getRightTriggerAxis() > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
   private static final JoystickButton pinsUpButton         = new JoystickButton(operatorController, RobotContainerConstants.CLIMB_UP_BUTTON);
 
-  // Subsystems
-  public static final GyroSubsystem          gyroSubsystem             = new GyroSubsystem("CANivore");
-  public static final MailboxSubsystem       mailboxSubsystem          = new MailboxSubsystem();
-  public static final MailboxHandler         mailboxHandler            = new MailboxHandler();
-  public static final VisionSubsystem        visionSubsystem           = new VisionSubsystem();
-  public static final SwerveSubsystem        swerveSubsystem           = new SwerveSubsystem();
-  public static final DirectionSnapSubsystem directionSnapSubsystem    = new DirectionSnapSubsystem();
-  public static final ElevatorSubsystem      elevatorSubsystem         = new ElevatorSubsystem();
-  public static final ElevatorHandler        elevatorHandler           = new ElevatorHandler();
-  public static final FlopperSubsystem       flopperSubsystem          = new FlopperSubsystem();
-  public static final ClimbSubsystem         climbSubsystem            = new ClimbSubsystem();
-  public static final TagInputHandler        tagInputHandler           = new TagInputHandler();
-  public static final DriveController        driveController           = new DriveController();
-  public static final TagTrackingHandler     tagTrackingHandler        = new TagTrackingHandler();
-  public static final ControllerSubsystem    driverControllerSubsystem = new ControllerSubsystem(driverController);
+  // Subsystems - change to private final
+  private static GyroSubsystem gyroSubsystem;
+  private static MailboxSubsystem mailboxSubsystem;
+  private static MailboxHandler mailboxHandler;
+  private static VisionSubsystem visionSubsystem;
+  private static SwerveSubsystem swerveSubsystem;
+  private static DirectionSnapSubsystem directionSnapSubsystem;
+  private static ElevatorSubsystem elevatorSubsystem;
+  private static ElevatorHandler elevatorHandler;
+  private static FlopperSubsystem flopperSubsystem;
+  private static ClimbSubsystem climbSubsystem;
+  private static TagInputHandler tagInputHandler;
+  private static DriveController driveController;
+  private static TagTrackingHandler tagTrackingHandler;
+  private static ControllerSubsystem driverControllerSubsystem;
 
   // Auto
   public static final TrackAprilTagCommand trackCommand = new TrackAprilTagCommand(22,
@@ -215,41 +218,76 @@ public class RobotContainer {
     
     System.out.println("Initializing RobotContainer...");
     
-    // Register named commands BEFORE configuring PathPlanner
+    // 1. Register named commands FIRST
     System.out.println("1. Registering commands for PathPlanner...");
     registerNamedCommands();
     
-    // PathPlanner is already configured in SwerveSubsystem constructor
-    System.out.println("2. PathPlanner configured in SwerveSubsystem");
+    // 2. Create all subsystems
+    System.out.println("2. Creating subsystems...");
+    createSubsystems();
     
-    // Initialize and configure auto chooser - MUST come after PathPlanner configuration
+    // 3. Configure auto chooser
     System.out.println("3. Configuring Auto Chooser...");
     configureAutoChooser();
     
-    // Verify auto chooser was created
-    if (autoChooser == null) {
-        System.err.println("ERROR: Auto chooser is null after configuration!");
-    } else {
-        System.out.println("Auto chooser configured successfully");
-    }
-    
-    // Preload all autonomous routines
-    System.out.println("4. Preloading autonomous routines...");
-    preloadAutonomousRoutines();
-
-    // Configure the trigger bindings
-    System.out.println("5. Configuring button bindings...");
+    // 4. Configure bindings
+    System.out.println("4. Configuring button bindings...");
     configureBindings();
-
-    // Set up dashboard information
-    System.out.println("6. Setting up dashboard information...");
+    
+    // 5. Set up dashboard
+    System.out.println("5. Setting up dashboard information...");
     setupDashboard();
     
-    // Configure default commands
+    // 6. Preload autonomous routines
+    System.out.println("6. Preloading autonomous routines...");
+    preloadAutonomousRoutines();
+    
+    // 7. Configure default commands - MUST be after subsystem creation
     System.out.println("7. Setting up default commands...");
     setupDefaultCommands();
     
     System.out.println("RobotContainer initialization complete!");
+  }
+
+  /**
+   * Creates all subsystems in the correct order to handle dependencies.
+   * This method ensures proper initialization order and error handling.
+   */
+  private void createSubsystems() {
+    try {
+      // Core systems first
+      System.out.println("  a. Initializing core systems...");
+      gyroSubsystem = new GyroSubsystem("CANivore");
+      
+      // Drive systems next (depends on gyro)
+      System.out.println("  b. Initializing drive systems...");
+      swerveSubsystem = new SwerveSubsystem();
+      directionSnapSubsystem = new DirectionSnapSubsystem();
+      driveController = new DriveController();
+      
+      // Mechanism systems
+      System.out.println("  c. Initializing mechanism systems...");
+      elevatorSubsystem = new ElevatorSubsystem();
+      elevatorHandler = new ElevatorHandler();
+      flopperSubsystem = new FlopperSubsystem();
+      mailboxSubsystem = new MailboxSubsystem();
+      mailboxHandler = new MailboxHandler();
+      climbSubsystem = new ClimbSubsystem();
+      
+      // Vision and tracking systems last
+      System.out.println("  d. Initializing vision systems...");
+      visionSubsystem = new VisionSubsystem();
+      tagInputHandler = new TagInputHandler();
+      tagTrackingHandler = new TagTrackingHandler();
+      driverControllerSubsystem = new ControllerSubsystem(driverController);
+      
+      System.out.println("  ✓ All subsystems created successfully");
+      
+    } catch (Exception e) {
+      System.err.println("ERROR: Failed to initialize subsystems: " + e.getMessage());
+      e.printStackTrace();
+      throw new RuntimeException("Critical failure in subsystem initialization", e);
+    }
   }
 
   private void setupDashboard() {
@@ -402,12 +440,146 @@ public class RobotContainer {
     if (selectedCommand == null || 
         (selectedCommand instanceof InstantCommand && 
          !(selectedCommand instanceof SequentialCommandGroup))) {
-      System.out.println("No auto selected or 'Do Nothing' selected - Using tracking command");
-      return trackCommand;
+        System.out.println("No auto selected or 'Do Nothing' selected - Using tracking command");
+        SmartDashboard.putString("[AUTO] Current Auto Status", "Using default tracking command");
+        return trackCommand;
+    }
+    
+    // Verify auto is properly loaded
+    if (selectedCommand instanceof PathPlannerAuto) {
+        PathPlannerAuto auto = (PathPlannerAuto)selectedCommand;
+        if (!verifyAutoLoaded(auto)) {
+            System.err.println("Auto verification failed for '" + auto.getName() + "', attempting reload...");
+            selectedCommand = reloadAuto(auto.getName());
+            if (selectedCommand == null) {
+                System.err.println("Auto reload failed, falling back to tracking command");
+                SmartDashboard.putString("[AUTO] Current Auto Status", "Auto load failed - Using tracking command");
+                return trackCommand;
+            }
+        }
+        
+        // Prepare robot for auto execution
+        prepareForAuto(selectedCommand);
     }
     
     System.out.println("Running selected auto routine: " + selectedCommand.getName());
+    SmartDashboard.putString("[AUTO] Current Auto Status", "Running: " + selectedCommand.getName());
     return selectedCommand;
+  }
+
+  /**
+   * Verifies that an auto routine is properly loaded and ready to run
+   * @param auto The auto routine to verify
+   * @return true if the auto is ready to run, false otherwise
+   */
+  private boolean verifyAutoLoaded(PathPlannerAuto auto) {
+    try {
+        // Check if auto file exists
+        File autoFile = new File(Filesystem.getDeployDirectory(), 
+                               "pathplanner/autos/" + auto.getName() + ".auto");
+        if (!autoFile.exists()) {
+            System.err.println("Auto file does not exist: " + autoFile.getAbsolutePath());
+            return false;
+        }
+
+        // Verify all required subsystems are ready
+        return verifySubsystemsReady();
+        
+    } catch (Exception e) {
+        System.err.println("Error verifying auto: " + e.getMessage());
+        return false;
+    }
+  }
+
+  /**
+   * Verifies that all required subsystems are ready for auto
+   * @return true if all subsystems are ready, false otherwise
+   */
+  private boolean verifySubsystemsReady() {
+    try {
+        // Check critical subsystems
+        if (swerveSubsystem == null || 
+            swerveSubsystem.getSwerveDrive() == null || 
+            swerveSubsystem.getSwerveDrive().getGyro() == null) {
+            System.err.println("Swerve/Gyro not ready");
+            return false;
+        }
+        
+        // Check other required subsystems based on registered commands
+        if (elevatorSubsystem == null) {
+            System.err.println("Elevator subsystem not ready");
+            return false;
+        }
+        
+        if (mailboxSubsystem == null) {
+            System.err.println("Mailbox subsystem not ready");
+            return false;
+        }
+        
+        return true;
+    } catch (Exception e) {
+        System.err.println("Error checking subsystems: " + e.getMessage());
+        return false;
+    }
+  }
+
+  /**
+   * Prepares the robot for auto execution
+   * @param command The command about to be run
+   */
+  private void prepareForAuto(Command command) {
+    try {
+        // Reset odometry if this is a PathPlannerAuto
+        if (command instanceof PathPlannerAuto) {
+            System.out.println("Preparing for auto execution...");
+            
+            // Get alliance
+            var alliance = DriverStation.getAlliance();
+            boolean isBlue = !alliance.isPresent() || alliance.get() == DriverStation.Alliance.Blue;
+            
+            // Set default starting pose based on alliance
+            Pose2d startingPose = isBlue ? 
+                new Pose2d(new Translation2d(Units.Meter.of(5.89), Units.Meter.of(5.5)), Rotation2d.fromDegrees(180)) :
+                new Pose2d(new Translation2d(Units.Meter.of(8.05), Units.Meter.of(5.5)), Rotation2d.fromDegrees(0));
+            
+            // Reset odometry to starting pose
+            swerveSubsystem.resetOdometry(startingPose);
+            System.out.println("Reset odometry to starting pose: " + startingPose);
+            
+            // Clear any existing path following errors
+            SmartDashboard.putNumber("[AUTO] Path Following Error", 0.0);
+        }
+    } catch (Exception e) {
+        System.err.println("Error preparing for auto: " + e.getMessage());
+    }
+  }
+
+  /**
+   * Attempts to reload an auto routine
+   * @param autoName The name of the auto to reload
+   * @return The reloaded auto command, or null if reload failed
+   */
+  private Command reloadAuto(String autoName) {
+    try {
+        System.out.println("Attempting to reload auto: " + autoName);
+        
+        // Force reload the auto file
+        PathPlannerAuto auto = new PathPlannerAuto(autoName);
+        
+        // Update auto chooser
+        autoChooser.addOption(autoName, auto);
+        autoChooser.setDefaultOption(autoName, auto);
+        
+        // Update dashboard
+        SmartDashboard.putData("[AUTO] Auto Routines", autoChooser);
+        
+        System.out.println("Successfully reloaded auto: " + autoName);
+        return auto;
+        
+    } catch (Exception e) {
+        System.err.println("Failed to reload auto '" + autoName + "': " + e.getMessage());
+        return null;
+    }
   }
 
   /**
@@ -561,7 +733,7 @@ public class RobotContainer {
       return Commands.sequence(
         Commands.runOnce(() -> {
           CommandScheduler.getInstance().cancelAll();
-          SmartDashboard.putString("AUTO] Current Auto Status", "Running Auto");
+          SmartDashboard.putString("[AUTO] Current Auto Status", "Running Auto");
         }),
         selectedAuto,
         Commands.runOnce(() -> {
