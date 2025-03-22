@@ -15,7 +15,8 @@ public class LedHandler extends SubsystemBase {
 
     public enum Controller {
         MAILBOX(1),
-        TAG_ALIGNED(2);  // Highest priority for tag alignment
+        ELEVATOR(2),  // Higher priority for elevator status
+        TARGET_HEIGHT(3);  // Highest priority for target height reached
 
         public final int priority;
         private Controller(int priority) {
@@ -33,15 +34,14 @@ public class LedHandler extends SubsystemBase {
         ledSubsystem.setColor(color.r, color.g, color.b);
     }
 
-    public void setTagAlignmentStatus(boolean isAligned) {
-        if (isAligned) {
-            requestControl(Controller.TAG_ALIGNED);
+    public void setHeightReachedStatus(boolean atTargetHeight) {
+        if (atTargetHeight) {
+            requestControl(Controller.TARGET_HEIGHT);
             isBlinking = true;
         } else {
-            if (hasControl(Controller.TAG_ALIGNED)) {
-                relinquishControl(Controller.TAG_ALIGNED);
+            if (hasControl(Controller.TARGET_HEIGHT)) {
+                relinquishControl(Controller.TARGET_HEIGHT);
                 isBlinking = false;
-                blinkState = false;
             }
         }
     }
@@ -66,7 +66,7 @@ public class LedHandler extends SubsystemBase {
         SmartDashboard.putNumber("[LED] Controller", controller);
         SmartDashboard.putNumber("[LED] Active Controller", Long.highestOneBit(this.controller));
 
-        if (isBlinking && hasControl(Controller.TAG_ALIGNED)) {
+        if (isBlinking && hasControl(Controller.TARGET_HEIGHT)) {
             double currentTime = Timer.getFPGATimestamp();
             if (currentTime - lastBlinkTime >= BLINK_INTERVAL) {
                 blinkState = !blinkState;
@@ -76,7 +76,7 @@ public class LedHandler extends SubsystemBase {
                                         LEDColorCommand.Color.GREEN.g, 
                                         LEDColorCommand.Color.GREEN.b);
                 } else {
-                    ledSubsystem.setColor(0, 0, 0); // Reset
+                    ledSubsystem.setColor(0, 0, 0); // Off
                 }
             }
         }
