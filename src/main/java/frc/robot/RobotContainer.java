@@ -64,6 +64,8 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import frc.robot.constants.AutoConstants;
 import frc.robot.subsystems.flopper.FlopperSubsystem;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -142,26 +144,24 @@ public class RobotContainer {
   private static final Trigger        pinsLockButton       = new Trigger(() -> operatorController.getRightTriggerAxis() > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
   private static final JoystickButton pinsUpButton         = new JoystickButton(operatorController, RobotContainerConstants.CLIMB_UP_BUTTON);
 
-  // Subsystems - change to private final
-  private static GyroSubsystem gyroSubsystem;
-  private static MailboxSubsystem mailboxSubsystem;
-  private static MailboxHandler mailboxHandler;
-  private static VisionSubsystem visionSubsystem;
-  private static SwerveSubsystem swerveSubsystem;
-  private static DirectionSnapSubsystem directionSnapSubsystem;
-  private static ElevatorSubsystem elevatorSubsystem;
-  private static ElevatorHandler elevatorHandler;
-  private static FlopperSubsystem flopperSubsystem;
-  private static ClimbSubsystem climbSubsystem;
-  private static TagInputHandler tagInputHandler;
-  private static DriveController driveController;
-  private static TagTrackingHandler tagTrackingHandler;
-  private static ControllerSubsystem driverControllerSubsystem;
+  // Subsystems
+  public static GyroSubsystem gyroSubsystem;
+  public static MailboxSubsystem mailboxSubsystem;
+  public static MailboxHandler mailboxHandler;
+  public static VisionSubsystem visionSubsystem;
+  public static SwerveSubsystem swerveSubsystem;
+  public static DirectionSnapSubsystem directionSnapSubsystem;
+  public static ElevatorSubsystem elevatorSubsystem;
+  public static ElevatorHandler elevatorHandler;
+  public static FlopperSubsystem flopperSubsystem;
+  public static ClimbSubsystem climbSubsystem;
+  public static TagInputHandler tagInputHandler;
+  public static DriveController driveController;
+  public static TagTrackingHandler tagTrackingHandler;
+  public static ControllerSubsystem driverControllerSubsystem;
 
   // Auto
-  public static final TrackAprilTagCommand trackCommand = new TrackAprilTagCommand(22,
-                                                                                   new Distance(VisionConstants.TRACK_TAG_X,
-                                                                                                VisionConstants.TRACK_TAG_Y));
+  public static TrackAprilTagCommand trackCommand;
   public static final AutoTagSelector autoTagSelector = new AutoTagSelector();
 
   //Conditionally create SimulationSubsystem
@@ -218,33 +218,40 @@ public class RobotContainer {
     
     System.out.println("Initializing RobotContainer...");
     
-    // 1. Register named commands FIRST
-    System.out.println("1. Registering commands for PathPlanner...");
-    registerNamedCommands();
-    
-    // 2. Create all subsystems
-    System.out.println("2. Creating subsystems...");
+    // 1. Create all subsystems first
+    System.out.println("1. Creating subsystems...");
     createSubsystems();
     
-    // 3. Configure auto chooser
-    System.out.println("3. Configuring Auto Chooser...");
-    configureAutoChooser();
+    // 2. Setup default commands - Must be after subsystem creation
+    System.out.println("2. Setting up default commands...");
+    setupDefaultCommands();
     
-    // 4. Configure bindings
-    System.out.println("4. Configuring button bindings...");
+    // 3. Configure bindings
+    System.out.println("3. Configuring button bindings...");
     configureBindings();
     
-    // 5. Set up dashboard
-    System.out.println("5. Setting up dashboard information...");
-    setupDashboard();
+    // 4. Initialize commands that depend on subsystems
+    System.out.println("4. Initializing dependent commands...");
+    trackCommand = new TrackAprilTagCommand(22,
+                                          new Distance(VisionConstants.TRACK_TAG_X,
+                                                     VisionConstants.TRACK_TAG_Y));
     
-    // 6. Preload autonomous routines
-    System.out.println("6. Preloading autonomous routines...");
+    // 5. Register named commands for PathPlanner
+    System.out.println("5. Registering commands for PathPlanner...");
+    registerNamedCommands();
+    
+    // 6. Configure PathPlanner
+    System.out.println("6. Configuring PathPlanner...");
+    AutoConfigurer.configure();
+    
+    // 7. Configure auto chooser and preload routines
+    System.out.println("7. Configuring auto chooser and preloading routines...");
+    configureAutoChooser();
     preloadAutonomousRoutines();
     
-    // 7. Configure default commands - MUST be after subsystem creation
-    System.out.println("7. Setting up default commands...");
-    setupDefaultCommands();
+    // 8. Set up dashboard last (after all configurations)
+    System.out.println("8. Setting up dashboard information...");
+    setupDashboard();
     
     System.out.println("RobotContainer initialization complete!");
   }
@@ -255,92 +262,99 @@ public class RobotContainer {
    */
   private void createSubsystems() {
     try {
-      // Core systems first
-      System.out.println("  a. Initializing core systems...");
+      // 1. Initialize gyro first as it's needed by swerve
+      System.out.println("Initializing Gyro...");
       gyroSubsystem = new GyroSubsystem("CANivore");
       
-      // Drive systems next (depends on gyro)
-      System.out.println("  b. Initializing drive systems...");
+      // 2. Initialize swerve drive which depends on gyro
+      System.out.println("Initializing Swerve Drive...");
       swerveSubsystem = new SwerveSubsystem();
+      
+      // 3. Initialize remaining drive-related subsystems
+      System.out.println("Initializing Drive Controls...");
       directionSnapSubsystem = new DirectionSnapSubsystem();
       driveController = new DriveController();
       
-      // Mechanism systems
-      System.out.println("  c. Initializing mechanism systems...");
+      // 4. Initialize remaining subsystems
+      System.out.println("Initializing Other Subsystems...");
       elevatorSubsystem = new ElevatorSubsystem();
       elevatorHandler = new ElevatorHandler();
       flopperSubsystem = new FlopperSubsystem();
       mailboxSubsystem = new MailboxSubsystem();
       mailboxHandler = new MailboxHandler();
       climbSubsystem = new ClimbSubsystem();
-      
-      // Vision and tracking systems last
-      System.out.println("  d. Initializing vision systems...");
       visionSubsystem = new VisionSubsystem();
       tagInputHandler = new TagInputHandler();
       tagTrackingHandler = new TagTrackingHandler();
       driverControllerSubsystem = new ControllerSubsystem(driverController);
       
-      System.out.println("  ✓ All subsystems created successfully");
+      System.out.println("All subsystems initialized successfully");
       
     } catch (Exception e) {
-      System.err.println("ERROR: Failed to initialize subsystems: " + e.getMessage());
+      System.err.println("Failed to initialize subsystems: " + e.getMessage());
       e.printStackTrace();
       throw new RuntimeException("Critical failure in subsystem initialization", e);
     }
   }
 
   private void setupDashboard() {
-    // Clear any existing auto data from SmartDashboard
-    SmartDashboard.clearPersistent("[AUTO] Auto Routines");
-    SmartDashboard.clearPersistent("[AUTO] PathPlanner/currentPath");
-    SmartDashboard.clearPersistent("[AUTO] PathPlanner/activePath");
-    
-    // Get fresh auto chooser from PathPlanner
-    autoChooser = AutoBuilder.buildAutoChooser();
-    
-    // Verify auto chooser exists before putting to dashboard
-    if (autoChooser != null) {
-        SmartDashboard.putData("[AUTO] Auto Routines", autoChooser);
-        System.out.println("Auto chooser added to dashboard");
-    } else {
-        System.err.println("ERROR: Cannot add null auto chooser to dashboard!");
+    try {
+        // Clear any existing auto data from SmartDashboard
+        SmartDashboard.clearPersistent("[AUTO] Auto Routines");
+        SmartDashboard.clearPersistent("[AUTO] PathPlanner/currentPath");
+        SmartDashboard.clearPersistent("[AUTO] PathPlanner/activePath");
+        
+        // Verify auto chooser exists and put it on dashboard
+        if (autoChooser != null) {
+            SmartDashboard.putData("[AUTO] Auto Routines", autoChooser);
+            System.out.println("Auto chooser added to dashboard");
+        } else {
+            System.err.println("ERROR: Auto chooser is null! Check configureAutoChooser()");
+            // Create a default auto chooser as fallback
+            autoChooser = new SendableChooser<>();
+            autoChooser.setDefaultOption("Do Nothing", new InstantCommand());
+            SmartDashboard.putData("[AUTO] Auto Routines", autoChooser);
+        }
+        
+        SmartDashboard.putString("[AUTO] Current Auto Status", "Ready (Press START button to run)");
+        SmartDashboard.putString("[AUTO] Auto Button Help", "Press START button on driver controller to run selected auto");
+        
+        // Create Elevator Control tab
+        ShuffleboardTab elevatorTab = Shuffleboard.getTab("Elevator");
+        
+        // Add manual control toggle with a switch widget
+        elevatorTab.addBoolean("Force Manual Control", () -> elevatorHandler.isForceManualControl())
+            .withWidget(BuiltInWidgets.kToggleSwitch)
+            .withPosition(0, 0)
+            .withSize(2, 1);
+            
+        // Add control mode indicator
+        elevatorTab.addString("Control Mode", 
+            () -> elevatorHandler.isForceManualControl() ? "MANUAL" : "AUTOMATED")
+            .withPosition(2, 0)
+            .withSize(2, 1);
+            
+        // Add position info
+        elevatorTab.addNumber("Current Position", 
+            (DoubleSupplier)(() -> elevatorSubsystem.getPosition()))
+            .withPosition(0, 1)
+            .withSize(2, 1);
+            
+        elevatorTab.addNumber("Target Position",
+            (DoubleSupplier)(() -> {
+                ElevatorLevel level = elevatorHandler.getLevel();
+                return level != null ? level.position : 0.0;
+            }))
+            .withPosition(2, 1)
+            .withSize(2, 1);
+            
+        // List available paths for manual selection
+        listAvailablePaths();
+        
+    } catch (Exception e) {
+        System.err.println("Error setting up dashboard: " + e.getMessage());
+        e.printStackTrace();
     }
-    
-    SmartDashboard.putString("[AUTO] Current Auto Status", "Ready (Press START button to run)");
-    SmartDashboard.putString("[AUTO] Auto Button Help", "Press START button on driver controller to run selected auto");
-    
-    // Create Elevator Control tab
-    ShuffleboardTab elevatorTab = Shuffleboard.getTab("Elevator");
-    
-    // Add manual control toggle with a switch widget
-    elevatorTab.addBoolean("Force Manual Control", () -> elevatorHandler.isForceManualControl())
-        .withWidget(BuiltInWidgets.kToggleSwitch)
-        .withPosition(0, 0)
-        .withSize(2, 1);
-        
-    // Add control mode indicator
-    elevatorTab.addString("Control Mode", 
-        () -> elevatorHandler.isForceManualControl() ? "MANUAL" : "AUTOMATED")
-        .withPosition(2, 0)
-        .withSize(2, 1);
-        
-    // Add position info
-    elevatorTab.addNumber("Current Position", 
-        (DoubleSupplier)(() -> elevatorSubsystem.getPosition()))
-        .withPosition(0, 1)
-        .withSize(2, 1);
-        
-    elevatorTab.addNumber("Target Position",
-        (DoubleSupplier)(() -> {
-            ElevatorLevel level = elevatorHandler.getLevel();
-            return level != null ? level.position : 0.0;
-        }))
-        .withPosition(2, 1)
-        .withSize(2, 1);
-        
-    // List available paths for manual selection
-    listAvailablePaths();
   }
 
   private void setupDefaultCommands() {
