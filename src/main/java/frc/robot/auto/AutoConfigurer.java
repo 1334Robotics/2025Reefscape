@@ -24,7 +24,7 @@ public class AutoConfigurer {
 
         AutoBuilder.configure(
                               RobotContainer.swerveSubsystem::getPose,
-                              RobotContainer.swerveSubsystem::resetPose,
+                              RobotContainer.swerveSubsystem::resetOdometry,
                               RobotContainer.swerveSubsystem::getChassisSpeeds,
                               (speeds, feedforwards) -> RobotContainer.swerveSubsystem.autoDrive(speeds),
                               new PPHolonomicDriveController(
