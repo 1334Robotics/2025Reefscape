@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.elevator.ElevatorResetCommand;
 import frc.robot.constants.AutoConstants;
 import frc.robot.constants.ElevatorConstants;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -217,6 +218,16 @@ public class Robot extends LoggedRobot {
    * correct pose based on the latest alliance and FMS position settings.
    */
   private void setInitialPose() {
+    // Get the selected autonomous command
+    Command selectedCommand = m_robotContainer.getAutonomousCommand();
+    
+    // If we're using a PathPlanner auto, let PathPlanner handle the initial pose
+    if (selectedCommand instanceof PathPlannerAuto) {
+      System.out.println("Using PathPlanner auto - skipping manual pose initialization");
+      return;
+    }
+    
+    // Only set initial pose for non-PathPlanner autos
     var alliance = DriverStation.getAlliance();
     int location = DriverStation.getLocation().orElse(2); // Default to center (2) if not available
     
@@ -251,16 +262,15 @@ public class Robot extends LoggedRobot {
             break;
         }
       }
-      
-      // Log the starting position
-      System.out.println("Setting initial pose to: " + startingPose + 
-                        " (Alliance: " + alliance.get() + 
-                        ", Position: " + location + ")");
-    } else {
-      System.out.println("Warning: Using default starting pose - Alliance not available");
     }
-                      
-    // Reset odometry to the starting pose
+    
+    // Log the pose we're setting
+    System.out.println(String.format("Setting initial pose to: %s (Alliance: %s, Position: %d)",
+        startingPose.toString(),
+        alliance.isPresent() ? alliance.get().toString() : "Unknown",
+        location));
+    
+    // Set the pose
     RobotContainer.swerveSubsystem.resetOdometry(startingPose);
   }
 
