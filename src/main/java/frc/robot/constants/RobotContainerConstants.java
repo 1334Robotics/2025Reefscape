@@ -39,7 +39,4 @@ public class RobotContainerConstants {
 
     public static final int BOT_RELATIVE_BUTTON   = XboxMappings.Button.A;
     public static final int SLOW_DOWN_BUTTON      = XboxMappings.Button.B;
-    
-    // Button to run selected autonomous routine on demand
-    public static final int RUN_AUTO_BUTTON = XboxMappings.Button.Start;
 }

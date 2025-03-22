@@ -32,8 +32,8 @@ public class ElevatorGotoL1Command extends Command {
         isFinishedMoving = error < ElevatorConstants.MAX_ACCEPTABLE_ERROR;
         
         // Log status
-        SmartDashboard.putNumber("Elevator Error", error);
-        SmartDashboard.putBoolean("Elevator At Target", isFinishedMoving);
+        SmartDashboard.putNumber("[ELEVATOR] Elevator Error", error);
+        SmartDashboard.putBoolean("[ELEVATOR] Elevator At Target", isFinishedMoving);
     }
 
     @Override
