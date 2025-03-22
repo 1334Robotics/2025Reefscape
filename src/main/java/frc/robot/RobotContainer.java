@@ -6,7 +6,6 @@ import frc.robot.commands.climb.ForcePinsUpCommand;
 import frc.robot.commands.climb.LockClimbCommand;
 import frc.robot.commands.climb.StopClimbCommand;
 import frc.robot.commands.climb.UnlockClimbCommand;
-import frc.robot.commands.climb.SmartClimbSequenceCommand;
 import frc.robot.commands.directionSnaps.DirectionSnapBackwards;
 import frc.robot.commands.directionSnaps.DirectionSnapForwards;
 import frc.robot.commands.directionSnaps.DirectionSnapLeft;
@@ -174,7 +173,6 @@ public class RobotContainer {
     SmartDashboard.putData("[CLIMB] Lock", new LockClimbCommand());
     SmartDashboard.putData("[CLIMB] Unlock", new UnlockClimbCommand());
     SmartDashboard.putData("[CLIMB] Stop", new StopClimbCommand());
-    SmartDashboard.putData("[CLIMB] Smart Sequence", new SmartClimbSequenceCommand());
     
     SmartDashboard.putData("[ELEVATOR] Bottom", new ElevatorGotoBottomCommand());
     SmartDashboard.putData("[ELEVATOR] Feed",   new ElevatorGotoFeedCommand());

@@ -10,4 +10,12 @@ public final class ClimbConstants {
     public static final double MOTOR1_POS = 2;
     public static final double MOTOR2_POS = 2;
     public static final double LOCK_POS = 1;
+
+    public static final double CLIMB_MOTOR_1_MAX_POS = 1000;
+    public static final double CLIMB_MOTOR_1_MIN_POS = 0;
+    public static final double CLIMB_MOTOR_2_MAX_POS = 1000;
+    public static final double CLIMB_MOTOR_2_MIN_POS = 0;
+    public static final double LOCK_MOTOR_MAX_POS    = 8.604695;
+    public static final double LOCK_MOTOR_MIN_POS    = 0;
+    
 }
