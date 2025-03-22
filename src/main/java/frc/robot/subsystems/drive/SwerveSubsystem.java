@@ -440,7 +440,7 @@ public class SwerveSubsystem extends SubsystemBase {
         
         // Set default starting pose based on alliance
         Pose2d defaultPose = isBlue ? 
-            new Pose2d(new Translation2d(Meter.of(5.89), Meter.of(5.5)), Rotation2d.fromDegrees(180)) :
+            new Pose2d(new Translation2d(Meter.of(7.6), Meter.of(4)), Rotation2d.fromDegrees(180)) :
             new Pose2d(new Translation2d(Meter.of(8.05), Meter.of(5.5)), Rotation2d.fromDegrees(0));
         
         // Initialize odometry with default pose if not already set
