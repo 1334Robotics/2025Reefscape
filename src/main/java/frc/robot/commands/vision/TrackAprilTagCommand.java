@@ -114,6 +114,19 @@ public class TrackAprilTagCommand extends Command {
         return true;
     }
 
+    public boolean isAligned() {
+        if (!enabled || !RobotContainer.visionSubsystem.isTargetVisible()) {
+            return false;
+        }
+        
+        double angle = RobotContainer.visionSubsystem.getTargetAngle();
+        if (angle < 0) angle = 180 - (-180 - angle);
+        
+        Distance distance = RobotContainer.visionSubsystem.getDistanceAway();
+        
+        return withinAcceptableError(angle, distance);
+    }
+
     @Override
     public void execute() {
         SmartDashboard.putBoolean("[VISION] Tracking Enabled", this.enabled);
