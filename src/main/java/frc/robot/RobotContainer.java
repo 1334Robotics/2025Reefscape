@@ -124,12 +124,12 @@ public class RobotContainer {
   public static final LedHandler             ledHandler                = new LedHandler(ledSubsystem);
   public static final GyroSubsystem          gyroSubsystem             = new GyroSubsystem("CANivore");
   public static final MailboxSubsystem       mailboxSubsystem          = new MailboxSubsystem();
-  public static final MailboxHandler         mailboxHandler            = new MailboxHandler(ledHandler);
+  public static final MailboxHandler         mailboxHandler            = new MailboxHandler();
   public static final VisionSubsystem        visionSubsystem           = new VisionSubsystem();
   public static final SwerveSubsystem        swerveSubsystem           = new SwerveSubsystem();
   public static final DirectionSnapSubsystem directionSnapSubsystem    = new DirectionSnapSubsystem();
   public static final ElevatorSubsystem      elevatorSubsystem         = new ElevatorSubsystem();
-  public static final ElevatorHandler        elevatorHandler           = new ElevatorHandler(ledHandler);
+  public static final ElevatorHandler        elevatorHandler           = new ElevatorHandler();
   public static final FlopperSubsystem       flopperSubsystem          = new FlopperSubsystem();
   public static final ClimbSubsystem         climbSubsystem            = new ClimbSubsystem();
   public static final TagInputHandler        tagInputHandler           = new TagInputHandler();
