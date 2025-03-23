@@ -117,8 +117,8 @@ public class ElevatorHandler extends SubsystemBase {
         // Update dashboard with movement info
         SmartDashboard.putNumber("[ELEVATOR] Target Position", 
             this.targetLevel != null ? this.targetLevel.position : 0.0);
-        SmartDashboard.putNumber("Elevator/Current Position", currentPosition);
-        SmartDashboard.putNumber("Elevator/Error", error);
-        SmartDashboard.putNumber("Elevator/Motor Output", output);
+        SmartDashboard.putNumber("[ELEVATOR] Current Position", currentPosition);
+        SmartDashboard.putNumber("[ELEVATOR] Error", error);
+        // SmartDashboard.putNumber("[ELEVATOR] Percentage Error", error);
     }
 }
