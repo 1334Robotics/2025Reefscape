@@ -166,8 +166,6 @@ public class SwerveSubsystem extends SubsystemBase {
         // Enable heading correction and cosine compensator
         this.swerveDrive.setHeadingCorrection(true);
         this.swerveDrive.setCosineCompensator(true);
-        this.swerveDrive.setHeadingCorrection(false); // Heading correction should only be used while controlling the robot via angle.
-        this.swerveDrive.setCosineCompensator(false);// Disables cosine compensation for simulations since it causes discrepancies not seen in real life.
         this.swerveDrive.setAngularVelocityCompensation(true,
                                                true,
                                                0.1); //Correct for skew that gets worse as angular velocity increases. Start with a coefficient of 0.1.
