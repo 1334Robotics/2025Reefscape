@@ -3,6 +3,8 @@ package frc.robot.subsystems.led;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.commands.led.LEDColourCommand;
+import frc.robot.RobotContainer;
+
 public class LedHandler extends SubsystemBase {
     private final LedSubsystem ledSubsystem;
     private long controller = 0;
@@ -46,5 +48,19 @@ public class LedHandler extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putNumber("[LED] Controller", controller);
         SmartDashboard.putNumber("[LED] Active Controller", Long.highestOneBit(this.controller));
+
+        // Check vision system for tag visibility
+        if (RobotContainer.visionSubsystem.isTargetVisible()) {
+            // If we're aligning, show green
+            if (RobotContainer.trackCommand.isAligned()) {
+                setColour(Controller.VISION, LEDColourCommand.Colour.GREEN);
+            } else {
+                // If we see tag but not aligned, show blue
+                setColour(Controller.VISION, LEDColourCommand.Colour.BLUE);
+            }
+        } else {
+            // No tag visible, show red
+            setColour(Controller.VISION, LEDColourCommand.Colour.RED);
+        }
     }
 }
