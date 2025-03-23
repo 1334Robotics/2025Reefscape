@@ -22,8 +22,12 @@ public class ElevatorConstants {
     public static final double L3_POSITION   = 3.024644;
     public static final double L4_POSITION   = 5.155067;
 
-    public static final double PID_KP          = 0.25;
-    public static final double PID_KI          = 0.1;
+    // Set a limit where KI takes effect
+    // D term reduces oscillation
+    // I term pretty much inverses the D term
+    // Put units for setpoints
+    public static final double PID_KP          = 1;
+    public static final double PID_KI          = 0;
     public static final double PID_KD          = 0;
     public static final double PID_TAU         = 0;
     public static final double PID_LIM_MIN     = -0.9;

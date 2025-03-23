@@ -85,8 +85,6 @@ public class SwerveSubsystem extends SubsystemBase {
    */
    private VisionSubsystem vision;
 
-
-
     public SwerveSubsystem() {
         this.fieldRelative = false;
         final GyroIO gyroIO;
