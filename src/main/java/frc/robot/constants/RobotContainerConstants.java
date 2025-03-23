@@ -39,4 +39,6 @@ public class RobotContainerConstants {
 
     public static final int BOT_RELATIVE_BUTTON   = XboxMappings.Button.A;
     public static final int SLOW_DOWN_BUTTON      = XboxMappings.Button.B;
+
+    public static final int LED_BUTTON = XboxMappings.Button.Back;
 }

@@ -5,6 +5,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.constants.MailboxConstants;
 import frc.robot.subsystems.elevator.ElevatorLevel;
+import frc.robot.subsystems.led.LedHandler;
+import frc.robot.commands.led.LEDColourCommand;
 
 public class MailboxHandler extends SubsystemBase {
     private boolean rewinding;
@@ -50,6 +52,7 @@ public class MailboxHandler extends SubsystemBase {
 
     @Override
     public void periodic() {
+
         SmartDashboard.putBoolean("[MAILBOX] Allow Shooting", this.allowShoot);
         SmartDashboard.putBoolean("[MAILBOX] Allow Feeding", this.allowFeeding);
         SmartDashboard.putBoolean("[MAILBOX] Currently Feeding", this.allowFeeding);
@@ -97,6 +100,9 @@ public class MailboxHandler extends SubsystemBase {
             RobotContainer.mailboxSubsystem.stop();
             this.allowShoot = false;
         }
+
+        // Optionally relinquish control when done
+        // ledHandler.relinquishControl(LedHandler.Controller.MAILBOX);
     }
 
     public void allowShoot() {
