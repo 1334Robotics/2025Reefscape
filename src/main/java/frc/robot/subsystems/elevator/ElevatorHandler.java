@@ -35,6 +35,9 @@ public class ElevatorHandler extends SubsystemBase {
     }
 
     public void setLevel(ElevatorLevel level) {
+        // Disallow setting the level while currently feeding
+        if(RobotContainer.mailboxHandler.currentlyFeeding()) return;
+
         this.targetLevel = level;
         this.hitTarget = false;
     }

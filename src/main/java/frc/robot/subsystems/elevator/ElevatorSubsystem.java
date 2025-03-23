@@ -21,7 +21,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         this.throughBoreEncoder = new ThroughBoreEncoder();
         this.lock               = false;
 
-        SmartDashboard.putNumber("[ELEVATOR] Position", -2147483648);
         SmartDashboard.putBoolean("[ELEVATOR] Limit Switch Seen", !this.limitSwitch.get());
     }
 
@@ -45,7 +44,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void periodic() {
         double position = this.getPosition();
 
-        SmartDashboard.putNumber("[ELEVATOR] Position", position);
         SmartDashboard.putBoolean("[ELEVATOR] Limit Switch Seen", !this.limitSwitch.get());
     }
 }
