@@ -37,9 +37,7 @@ public class LedSubsystem extends SubsystemBase {
 
     /** Turns LEDs on to last color (or white if no color set) */
     public void turnOn() {
-        if (!isOn) {
-            setColor(255, 255, 255); // Default white
-        }
+        if(!isOn) this.setColor(255, 255, 255);
     }
 
     /** Toggles between on and off */
