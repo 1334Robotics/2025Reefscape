@@ -88,11 +88,12 @@ public class MailboxHandler extends SubsystemBase {
                 ElevatorLevel level = RobotContainer.elevatorHandler.getLevel();
                 if(level == null || level == ElevatorLevel.BOTTOM || level == ElevatorLevel.FEED) return;
 
-                // Shoots it on high for L2+; on low for L1
-                if(level == ElevatorLevel.L4)    
-                    RobotContainer.mailboxSubsystem.slowOutput();               
-                else
-                    RobotContainer.mailboxSubsystem.output((level != ElevatorLevel.L1));
+                switch(level) {
+                    case L1     -> RobotContainer.mailboxSubsystem.outputL1();
+                    case L2, L3 -> RobotContainer.mailboxSubsystem.output();
+                    case L4     -> RobotContainer.mailboxSubsystem.outputL4();
+                }
+
                 this.allowShoot = false;
                 this.allowFeeding = false;
             }

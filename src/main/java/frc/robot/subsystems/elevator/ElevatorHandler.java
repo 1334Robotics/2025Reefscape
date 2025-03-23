@@ -27,7 +27,8 @@ public class ElevatorHandler extends SubsystemBase {
                                                ElevatorConstants.PID_LIM_MAX,
                                                ElevatorConstants.PID_LIM_MIN_INT,
                                                ElevatorConstants.PID_LIM_MAX_INT,
-                                               ElevatorConstants.PID_SAMPLE_TIME);
+                                               ElevatorConstants.PID_SAMPLE_TIME,
+                                               ElevatorConstants.PID_ISTART);
                                                
         // Initialize dashboard controls
         SmartDashboard.putBoolean(MANUAL_CONTROL_KEY, false);
@@ -73,7 +74,7 @@ public class ElevatorHandler extends SubsystemBase {
         // 1. Safety check - if in manual mode, let manual control handle everything
         if(this.forceManualControl || ElevatorConstants.MANUAL_ELEVATOR_CONTROL) {
             if (this.targetLevel != null) {
-                System.out.println("Elevator: Manual control active, ignoring target " + this.targetLevel);
+                // System.out.println("Elevator: Manual control active, ignoring target " + this.targetLevel);
             }
             return;
         }
@@ -90,20 +91,20 @@ public class ElevatorHandler extends SubsystemBase {
         if(this.previousTargetLevel != this.targetLevel) {
             this.previousTargetLevel = this.targetLevel;
             this.pidController.zero();
-            System.out.println("Elevator: Target changed to " + this.targetLevel + 
-                             " at position " + this.targetLevel.position);
+            /* System.out.println("Elevator: Target changed to " + this.targetLevel + 
+                             " at position " + this.targetLevel.position); */
         }
 
         // 4. Check if at target
         double error = Math.abs(currentPosition - this.targetLevel.position);
-        System.out.println("Elevator: Current=" + currentPosition + 
+        /* System.out.println("Elevator: Current=" + currentPosition + 
                          " Target=" + this.targetLevel.position + 
-                         " Error=" + error);
+                         " Error=" + error); */
         
         if(error < ElevatorConstants.MAX_ACCEPTABLE_ERROR) {
             this.hitTarget = true;
             RobotContainer.elevatorSubsystem.runMotor(0);
-            System.out.println("Elevator: Reached target " + this.targetLevel);
+            // System.out.println("Elevator: Reached target " + this.targetLevel);
             return;
         }
 
@@ -111,7 +112,7 @@ public class ElevatorHandler extends SubsystemBase {
         this.pidController.update(this.targetLevel.position, currentPosition);
         double output = -this.pidController.getOutput();
         RobotContainer.elevatorSubsystem.runMotor(output);
-        System.out.println("Elevator: Moving with output " + output);
+        // System.out.println("Elevator: Moving with output " + output);
         
         // Update dashboard with movement info
         SmartDashboard.putNumber("[ELEVATOR] Target Position", 
