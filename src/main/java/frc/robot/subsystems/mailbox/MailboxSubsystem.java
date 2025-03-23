@@ -40,23 +40,22 @@ public class MailboxSubsystem extends SubsystemBase {
         this.motors[1].set(-MailboxConstants.FEED_MOTOR_SPEED);
     }
 
-    public void output(boolean high) {
-        // This will need limit switches or other timings to tell when output is complete
-        if(high) {
-            this.motors[0].set(MailboxConstants.OUTPUT_MOTOR_SPEED);
-            this.motors[1].set(-MailboxConstants.OUTPUT_MOTOR_SPEED);
-            SmartDashboard.putString("[MAILBOX] State", "Output High");
-        } else {
-            this.motors[0].set(MailboxConstants.OUTPUT_MOTOR_SPEED_SLOW);
-            this.motors[1].set(-MailboxConstants.OUTPUT_MOTOR_SPEED_LOW);
-            SmartDashboard.putString("[MAILBOX] State", "Output Low");
-        }
+    public void output() {
+        this.motors[0].set(MailboxConstants.OUTPUT_MOTOR_SPEED);
+        this.motors[1].set(-MailboxConstants.OUTPUT_MOTOR_SPEED);
+        SmartDashboard.putString("[MAILBOX] State", "Output L2/L3");
     }
 
-    public void slowOutput() {
-        this.motors[0].set(MailboxConstants.OUTPUT_MOTOR_SPEED_SLOW);
-        this.motors[1].set(-MailboxConstants.OUTPUT_MOTOR_SPEED_SLOW);
-        SmartDashboard.putString("[MAILBOX] State", "Output Slow");
+    public void outputL1() {
+        this.motors[0].set(MailboxConstants.OUTPUT_MOTOR_SPEED_L1);
+        this.motors[1].set(-MailboxConstants.OUTPUT_MOTOR_SPEED_L1_LOW);
+        SmartDashboard.putString("[MAILBOX] State", "Output L1");
+    }
+
+    public void outputL4() {
+        this.motors[0].set(MailboxConstants.OUTPUT_MOTOR_SPEED_L4);
+        this.motors[1].set(-MailboxConstants.OUTPUT_MOTOR_SPEED_L4);
+        SmartDashboard.putString("[MAILBOX] State", "Output L4");
     }
 
     public void stop() {

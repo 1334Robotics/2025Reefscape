@@ -9,7 +9,7 @@ public class ElevatorConstants {
     public static final double ELEVATOR_UP_SPEED    = 0.5;
     public static final double ELEVATOR_DOWN_SPEED  = 0.4;
     public static final double ELEVATOR_SLOW_SPEED  = 0.1;
-    public static final double ELEVATOR_RESET_SPEED = 0.2;
+    public static final double ELEVATOR_RESET_SPEED = 0.3;
 
     // No unit
     public static final double ELEVATOR_SLOW_LOW_POS  = 0.15;
@@ -26,8 +26,8 @@ public class ElevatorConstants {
     // D term reduces oscillation
     // I term pretty much inverses the D term
     // Put units for setpoints
-    public static final double PID_KP          = 1;
-    public static final double PID_KI          = 0;
+    public static final double PID_KP          = 0.9;
+    public static final double PID_KI          = 0.07;
     public static final double PID_KD          = 0;
     public static final double PID_TAU         = 0;
     public static final double PID_LIM_MIN     = -0.9;
@@ -35,6 +35,7 @@ public class ElevatorConstants {
     public static final double PID_LIM_MIN_INT = -0.2;
     public static final double PID_LIM_MAX_INT = 0.2;
     public static final double PID_SAMPLE_TIME = 1;
+    public static final double PID_ISTART      = 0.5;
 
     public static final double MAX_ACCEPTABLE_ERROR = 0.005;
 

@@ -6,11 +6,12 @@ public class MailboxConstants {
     public static final int LASERCAN_OUTPUT_ID = 26;
     public static final int LASERCAN_INPUT_ID  = 25;
 
-    public static final double OUTPUT_MOTOR_SPEED      = 0.5;  // L2 & L3
-    public static final double OUTPUT_MOTOR_SPEED_LOW  = 0.10; // L1 one motor
-    public static final double OUTPUT_MOTOR_SPEED_SLOW = 0.20; // L1 & L4
-    public static final double FEED_MOTOR_SPEED        = 0.1;
-    public static final double REWIND_MOTOR_SPEED      = 0.4;
+    public static final double OUTPUT_MOTOR_SPEED        = 0.50; // L2 & L3
+    public static final double OUTPUT_MOTOR_SPEED_L1_LOW = 0.10;
+    public static final double OUTPUT_MOTOR_SPEED_L1     = 0.20;
+    public static final double OUTPUT_MOTOR_SPEED_L4     = 0.20;
+    public static final double FEED_MOTOR_SPEED          = 0.10;
+    public static final double REWIND_MOTOR_SPEED        = 0.40;
 
     public static final double LASERCAN_OUTPUT_CLOSE_READING = 15;
     public static final double LASERCAN_INPUT_CLOSE_READING = 50;
