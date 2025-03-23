@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.led.LedHandler.Controller;
-import frc.robot.commands.led.LEDColorCommand;
+import frc.robot.commands.led.LEDColourCommand;
 
 public class TagTrackingHandler extends SubsystemBase {
     private TagTrackingTarget target;
@@ -42,7 +42,7 @@ public class TagTrackingHandler extends SubsystemBase {
         
         if (this.target == null) {
             RobotContainer.trackCommand.disable();
-            RobotContainer.ledHandler.setColor(Controller.VISION, LEDColorCommand.Color.RED);
+            RobotContainer.ledHandler.setColour(Controller.VISION, LEDColourCommand.Colour.RED);
             return;
         }
 
@@ -51,12 +51,12 @@ public class TagTrackingHandler extends SubsystemBase {
         // Blue when seeing tag, green when aligned
         if (RobotContainer.visionSubsystem.isTargetVisible()) {
             if (RobotContainer.trackCommand.isAligned()) {
-                RobotContainer.ledHandler.setColor(Controller.VISION, LEDColorCommand.Color.GREEN);
+                RobotContainer.ledHandler.setColour(Controller.VISION, LEDColourCommand.Colour.GREEN);
             } else {
-                RobotContainer.ledHandler.setColor(Controller.VISION, LEDColorCommand.Color.BLUE); 
+                RobotContainer.ledHandler.setColour(Controller.VISION, LEDColourCommand.Colour.BLUE); 
             }
         } else {
-            RobotContainer.ledHandler.setColor(Controller.VISION, LEDColorCommand.Color.RED);
+            RobotContainer.ledHandler.setColour(Controller.VISION, LEDColourCommand.Colour.RED);
         }
     }
 }
