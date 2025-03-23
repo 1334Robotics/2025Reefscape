@@ -51,9 +51,11 @@ public class TagTrackingHandler extends SubsystemBase {
         // Blue when seeing tag, green when aligned
         if (RobotContainer.visionSubsystem.isTargetVisible()) {
             if (RobotContainer.trackCommand.isAligned()) {
-                RobotContainer.ledHandler.setColour(Controller.VISION, LEDColourCommand.Colour.GREEN);
+                SmartDashboard.putBoolean("[TAG TRACKING] Aligned", true);
+                RobotContainer.ledHandler.setColour(Controller.VISIONTRACK, LEDColourCommand.Colour.GREEN);
             } else {
-                RobotContainer.ledHandler.setColour(Controller.VISION, LEDColourCommand.Colour.BLUE); 
+                SmartDashboard.putBoolean("[TAG TRACKING] Aligned", false);
+                RobotContainer.ledHandler.setColour(Controller.VISIONTRACK, LEDColourCommand.Colour.BLUE); 
             }
         } else {
             RobotContainer.ledHandler.setColour(Controller.VISION, LEDColourCommand.Colour.RED);

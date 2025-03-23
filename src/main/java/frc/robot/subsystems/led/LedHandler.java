@@ -8,7 +8,8 @@ public class LedHandler extends SubsystemBase {
     private long controller = 0;
 
     public enum Controller {
-        VISION(1);
+        VISION(1),
+        VISIONTRACK(2);
 
         public final int priority;
         private Controller(int priority) {
