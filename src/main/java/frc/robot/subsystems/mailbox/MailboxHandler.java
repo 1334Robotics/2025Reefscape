@@ -71,7 +71,9 @@ public class MailboxHandler extends SubsystemBase {
         }
 
         // Check for a coral waiting to be inputted and feed it in
-        if(this.allowFeeding) {
+        if(this.allowFeeding || this.feeding) {
+            this.allowFeeding = false;
+
             // Check that the elevator level is correct
             if(RobotContainer.elevatorHandler.getLevel() != ElevatorLevel.FEED) return;
 
