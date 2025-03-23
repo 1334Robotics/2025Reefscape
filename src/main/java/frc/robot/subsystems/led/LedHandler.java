@@ -2,7 +2,7 @@ package frc.robot.subsystems.led;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.commands.led.LEDColorCommand;
+import frc.robot.commands.led.LEDColourCommand;
 public class LedHandler extends SubsystemBase {
     private final LedSubsystem ledSubsystem;
     private long controller = 0;
@@ -21,9 +21,9 @@ public class LedHandler extends SubsystemBase {
         this.requestControl(Controller.VISION); // Default control
     }
 
-    public void setColor(Controller controller, LEDColorCommand.Color color) {
+    public void setColour(Controller controller, LEDColourCommand.Colour colour) {
         if (!hasControl(controller)) return;
-        ledSubsystem.setColor(color.r, color.g, color.b);
+        ledSubsystem.setColour(colour.r, colour.g, colour.b);
     }
 
     private boolean hasControl(Controller controller) {

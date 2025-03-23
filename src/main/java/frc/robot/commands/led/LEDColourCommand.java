@@ -3,11 +3,11 @@ package frc.robot.commands.led;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.led.LedSubsystem;
 
-public class LEDColorCommand extends Command {
+public class LEDColourCommand extends Command {
     private final LedSubsystem ledSubsystem;
-    private final Color color;
+    private final Colour colour;
 
-    public enum Color {
+    public enum Colour {
         RED(255, 0, 0),
         GREEN(0, 255, 0),
         BLUE(0, 0, 255),
@@ -21,27 +21,27 @@ public class LEDColorCommand extends Command {
         public final int g; 
         public final int b;
 
-        Color(int r, int g, int b) {
+        Colour(int r, int g, int b) {
             this.r = r;
             this.g = g;
             this.b = b;
         }
     }
 
-    public LEDColorCommand(LedSubsystem ledSubsystem, Color color) {
+    public LEDColourCommand(LedSubsystem ledSubsystem, Colour color) {
         this.ledSubsystem = ledSubsystem;
-        this.color = color;
+        this.colour = color;
         addRequirements(ledSubsystem);
     }
 
     @Override
     public void initialize() {
-        ledSubsystem.setColor(color.r, color.g, color.b);
+        ledSubsystem.setColour(colour.r, colour.g, colour.b);
     }
 
     @Override
     public void execute() {
-        ledSubsystem.setColor(color.r, color.g, color.b);
+        ledSubsystem.setColour(colour.r, colour.g, colour.b);
     }
 
     @Override

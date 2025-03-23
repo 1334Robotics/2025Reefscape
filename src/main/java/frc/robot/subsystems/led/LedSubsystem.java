@@ -21,7 +21,7 @@ public class LedSubsystem extends SubsystemBase {
     }
 
     /** Sets all LEDs to a specific RGB color */
-    public void setColor(int r, int g, int b) {
+    public void setColour(int r, int g, int b) {
         for (int i = 0; i < length; i++) {
             ledBuffer.setRGB(i, r, g, b);
         }
@@ -31,13 +31,13 @@ public class LedSubsystem extends SubsystemBase {
 
     /** Turns all LEDs off */
     public void turnOff() {
-        setColor(0, 0, 0);
+        setColour(0, 0, 0);
         isOn = false;
     }
 
     /** Turns LEDs on to last color (or white if no color set) */
     public void turnOn() {
-        if(!isOn) this.setColor(255, 255, 255);
+        if(!isOn) this.setColour(255, 255, 255);
     }
 
     /** Toggles between on and off */
