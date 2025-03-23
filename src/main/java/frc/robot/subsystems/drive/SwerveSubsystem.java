@@ -12,8 +12,10 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
+import frc.robot.constants.AutoConstants;
 import frc.robot.constants.SimulationConstants;
 import frc.robot.constants.SwerveConstants;
 import frc.robot.constants.VisionConstants;
@@ -47,11 +49,43 @@ import java.io.File;
 import java.io.IOException;
 import org.ironmaple.simulation.SimulatedArena;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.commands.PathfindingCommand;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.DriveFeedforwards;
+import com.pathplanner.lib.util.swerve.SwerveSetpoint;
+import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import swervelib.telemetry.SwerveDriveTelemetry;
+import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
+import static edu.wpi.first.units.Units.Meter;
+import edu.wpi.first.wpilibj2.command.Commands;
+import com.pathplanner.lib.auto.NamedCommands;
+
+
+
 public class SwerveSubsystem extends SubsystemBase {
     private final SwerveDrive swerveDrive;
     private boolean fieldRelative;
     private SwerveDriveSimulation swerveDriveSimulation;
     private int count = 0;
+
+  /**
+   * Enable vision odometry updates while driving.
+   */
+    private final boolean visionDriveTest = false;
+  /**
+   * PhotonVision class to keep an accurate odometry.
+   */
+   private VisionSubsystem vision;
+
+
 
     public SwerveSubsystem() {
         this.fieldRelative = false;
@@ -59,12 +93,32 @@ public class SwerveSubsystem extends SubsystemBase {
         final GyroSimulation gyroSimulation;
         final ModuleIO[] moduleIOs;
         SmartDashboard.putBoolean("[SWERVE] Field Relative", this.fieldRelative);
- 
         
+        // Get alliance dynamically instead of hardcoding
+        boolean blueAlliance = true; // Default to blue if alliance cannot be determined
+        var alliance = DriverStation.getAlliance();
+        if (alliance.isPresent()) {
+            blueAlliance = alliance.get() == DriverStation.Alliance.Blue;
+            SmartDashboard.putString("[SWERVE] Initial Alliance", blueAlliance ? "BLUE" : "RED");
+        } else {
+            SmartDashboard.putString("[SWERVE] Initial Alliance", "UNKNOWN (defaulting to BLUE)");
+        }
+        
+        // Set the starting pose based on the alliance color
+        Pose2d startingPose = blueAlliance ? new Pose2d(new Translation2d(Meter.of(5.89),
+                                                                          Meter.of(5.5)),
+                                                        Rotation2d.fromDegrees(180))
+                                           : new Pose2d(new Translation2d(Meter.of(8.05),
+                                                                          Meter.of(5.5)),
+                                                        Rotation2d.fromDegrees(0));
+        
+        // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary objects being created.
+        SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
         // Create the swerve drive
         File swerveDirectory = new File(Filesystem.getDeployDirectory(), SwerveConstants.SWERVE_DRIVE_DIRECTORY);
         try {
-            this.swerveDrive = new SwerveParser(swerveDirectory).createSwerveDrive(SwerveConstants.MAX_SPEED);
+            this.swerveDrive = new SwerveParser(swerveDirectory).createSwerveDrive(SwerveConstants.MAX_SPEED, startingPose);
+
 
             if (Robot.isSimulation()) {
                 // Create and configure a drivetrain simulation configuration
@@ -92,9 +146,8 @@ public class SwerveSubsystem extends SubsystemBase {
                 this.swerveDriveSimulation = new SwerveDriveSimulation(
                 // Specify Configuration
                 driveTrainSimulationConfig,
-                // Specify starting pose
-                new Pose2d(0, 0, new Rotation2d())
-                );
+                // Specify starting pose - use the same starting pose based on alliance
+                startingPose);
 
                 // Register with simulation world
                 SimulatedArena.getInstance().addDriveTrainSimulation(swerveDriveSimulation);
@@ -110,10 +163,37 @@ public class SwerveSubsystem extends SubsystemBase {
             throw new RuntimeException(e);
         }
         
+    
+        
+        // Enable heading correction and cosine compensator
         this.swerveDrive.setHeadingCorrection(true);
         this.swerveDrive.setCosineCompensator(true);
-    
-}
+        this.swerveDrive.setHeadingCorrection(false); // Heading correction should only be used while controlling the robot via angle.
+        this.swerveDrive.setCosineCompensator(false);// Disables cosine compensation for simulations since it causes discrepancies not seen in real life.
+        this.swerveDrive.setAngularVelocityCompensation(true,
+                                               true,
+                                               0.1); //Correct for skew that gets worse as angular velocity increases. Start with a coefficient of 0.1.
+        this.swerveDrive.setModuleEncoderAutoSynchronize(false,
+                                                1); // Enable if you want to resynchronize your absolute encoders and motor encoders periodically when they are not moving.
+        // swerveDrive.pushOffsetsToEncoders(); // Set the absolute encoder to be used over the internal encoder and push the offsets onto it. Throws warning if not possible
+        if (visionDriveTest)
+        {
+        setupPhotonVision();
+      // Stop the odometry thread if we are using vision that way we can synchronize updates better.
+        swerveDrive.stopOdometryThread();
+        }
+        setupPathPlanner();
+        // Comment out the line that uses RobotModeTriggers
+        // RobotModeTriggers.autonomous().onTrue(Commands.runOnce(this::zeroGyro));
+    }
+
+  /**
+   * Setup the photon vision class.
+   */
+  public void setupPhotonVision()
+  {
+    vision = new VisionSubsystem();
+  }
 
     @Override
     public void periodic() {
@@ -129,6 +209,12 @@ public class SwerveSubsystem extends SubsystemBase {
         // Update odometry with latest module states and gyro reading this should be run in every loop
         swerveDrive.updateOdometry(); 
 
+        // Track alliance and pose for debugging
+        var alliance = DriverStation.getAlliance();
+        boolean isBlue = !alliance.isPresent() || alliance.get() == DriverStation.Alliance.Blue;
+        SmartDashboard.putString("Swerve/CurrentAlliance", isBlue ? "BLUE" : "RED");
+        SmartDashboard.putBoolean("Swerve/IsSimulation", Robot.isSimulation());
+        
         // Secondary feedback loop for the swerve drive with vision
         // 2. If vision target visible & data fresh, use as correction
         if(RobotContainer.visionSubsystem.isTargetVisible() && 
@@ -229,15 +315,39 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public void resetOdometry(Pose2d pose) {
-        swerveDrive.resetOdometry(pose);
+        if (pose == null) {
+            System.err.println("Warning: Attempted to reset odometry with null pose!");
+            return;
+        }
+        
+        try {
+            // First zero the gyro
+            zeroGyro();
+            
+            // Small delay to ensure gyro has time to zero
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                // Ignore interrupted exception
+            }
+            
+            // Then reset the odometry with the new pose
+            swerveDrive.resetOdometry(pose);
+            
+            // Verify the reset was successful
+            Pose2d currentPose = swerveDrive.getPose();
+            if (currentPose != null) {
+                System.out.println("Successfully reset odometry to: " + pose.toString());
+                System.out.println("Current pose: " + currentPose.toString());
+            } else {
+                System.err.println("Warning: Odometry reset may have failed - current pose is null");
+            }
+        } catch (Exception e) {
+            System.err.println("Error resetting odometry: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
-    //adding odometry reset with gyro zeroing
-    public void resetPose(Pose2d pose) {
-        swerveDrive.resetOdometry(pose);
-        zeroGyro();  // Optional: zero gyro when resetting pose
-    }
-    
     public void setFieldRelative(boolean fieldRelative) {
         this.fieldRelative = fieldRelative;
         SmartDashboard.putBoolean("[SWERVE] Field Relative", this.fieldRelative);
@@ -314,5 +424,80 @@ public class SwerveSubsystem extends SubsystemBase {
             new double[] {totalStdDev, totalStdDev, totalStdDev * 2} // Higher rotation uncertainty
         );
     }
+   /**
+   * Setup AutoBuilder for PathPlanner.
+   */
+  public void setupPathPlanner()
+  {
+    // Load the RobotConfig from the GUI settings
+    RobotConfig config;
+    try {
+        config = RobotConfig.fromGUISettings();
+
+        // Ensure we have a valid initial pose
+        var alliance = DriverStation.getAlliance();
+        boolean isBlue = !alliance.isPresent() || alliance.get() == Alliance.Blue;
+        
+        // Set default starting pose based on alliance
+        Pose2d defaultPose = isBlue ? 
+            new Pose2d(new Translation2d(Meter.of(5.89), Meter.of(5.5)), Rotation2d.fromDegrees(180)) :
+            new Pose2d(new Translation2d(Meter.of(8.05), Meter.of(5.5)), Rotation2d.fromDegrees(0));
+        
+        // Initialize odometry with default pose if not already set
+        if (swerveDrive.getPose() == null) {
+            System.out.println("Initializing odometry with default pose: " + defaultPose);
+            swerveDrive.resetOdometry(defaultPose);
+        }
+
+        final boolean enableFeedforward = true;
+        // Configure AutoBuilder last
+        AutoBuilder.configure(
+            swerveDrive::getPose,
+            (pose) -> {
+                if (pose != null) {
+                    System.out.println("PathPlanner resetting odometry to: " + pose);
+                    swerveDrive.resetOdometry(pose);
+                } else {
+                    System.err.println("Warning: PathPlanner attempted to reset odometry with null pose!");
+                }
+            },
+            swerveDrive::getRobotVelocity,
+            (speedsRobotRelative, moduleFeedForwards) -> {
+                if (enableFeedforward) {
+                    swerveDrive.drive(
+                        speedsRobotRelative,
+                        swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
+                        moduleFeedForwards.linearForces()
+                    );
+                } else {
+                    swerveDrive.setChassisSpeeds(speedsRobotRelative);
+                }
+            },
+            new PPHolonomicDriveController(
+                new PIDConstants(AutoConstants.PATH_PLANNER_KD, AutoConstants.PATH_PLANNER_KI, AutoConstants.PATH_PLANNER_KD),
+                new PIDConstants(AutoConstants.PATH_PLANNER_KD, AutoConstants.PATH_PLANNER_KI, AutoConstants.PATH_PLANNER_KD)
+            ),
+            config,
+            () -> {
+                var currentAlliance = DriverStation.getAlliance();
+                boolean isRed = currentAlliance.isPresent() && currentAlliance.get() == Alliance.Red;
+                SmartDashboard.putBoolean("PathPlanner/IsRedAlliance", isRed);
+                SmartDashboard.putBoolean("PathPlanner/MirroringPaths", isRed);
+                return isRed;
+            },
+            this
+        );
+
+        System.out.println("PathPlanner initialized with alliance detection");
+        
+        // Preload PathPlanner Path finding
+        PathfindingCommand.warmupCommand().schedule();
+        
+    } catch (Exception e) {
+        System.err.println("Error configuring PathPlanner: " + e.getMessage());
+        e.printStackTrace();
+    }
+  }
+
 
 }

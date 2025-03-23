@@ -15,7 +15,7 @@ public class DriveCommand extends Command {
     private final DoubleSupplier   vY;
     private final DoubleSupplier   omega;
     private final SwerveController controller;
-    public static boolean goFast;
+    public static boolean goFast = true;
 
     public DriveCommand(DoubleSupplier vX, DoubleSupplier vY, DoubleSupplier omega) {
         this.vX = vX;
