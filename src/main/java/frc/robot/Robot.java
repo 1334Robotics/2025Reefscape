@@ -167,8 +167,6 @@ public class Robot extends LoggedRobot {
     
     // Force automatic control for autonomous
     RobotContainer.elevatorHandler.setForceManualControl(false);
-
-    AutoConfigurer.configure();
     
     // First, reset the elevator if it hasn't been reset yet
     if (!elevatorReset) {

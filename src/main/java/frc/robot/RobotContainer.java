@@ -216,6 +216,9 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    // Configure pathplanner's AutoBuilder
+    AutoConfigurer.configure();
+
     DriverStation.silenceJoystickConnectionWarning(true);
     
     System.out.println("Initializing RobotContainer...");
