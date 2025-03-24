@@ -8,6 +8,7 @@ import frc.robot.constants.ElevatorConstants;
 
 public class ElevatorGotoL1Command extends Command {
     private boolean isFinishedMoving = false;
+    private int logCounter = 0;
 
     public ElevatorGotoL1Command() {
         addRequirements(RobotContainer.elevatorSubsystem);
@@ -18,8 +19,16 @@ public class ElevatorGotoL1Command extends Command {
     public void initialize() {
         System.out.println("ElevatorGotoL1Command: Starting movement to L1");
         isFinishedMoving = false;
+        logCounter = 0;
+        
+        // Log initial state
+        double currentPosition = RobotContainer.elevatorSubsystem.getPosition();
+        double targetPosition = ElevatorLevel.L1.position;
+        System.out.println(String.format("[ELEVATOR] Initial State - Current: %.4f, Target: %.4f, Error: %.4f", 
+            currentPosition, targetPosition, Math.abs(currentPosition - targetPosition)));
+        
         RobotContainer.elevatorHandler.setLevel(ElevatorLevel.L1);
-        SmartDashboard.putString("Elevator Command Status", "Moving to L1");
+        SmartDashboard.putString("[ELEVATOR] Command Status", "Moving to L1");
     }
 
     @Override
@@ -31,9 +40,17 @@ public class ElevatorGotoL1Command extends Command {
         
         isFinishedMoving = error < ElevatorConstants.MAX_ACCEPTABLE_ERROR;
         
-        // Log status
-        SmartDashboard.putNumber("[ELEVATOR] Elevator Error", error);
-        SmartDashboard.putBoolean("[ELEVATOR] Elevator At Target", isFinishedMoving);
+        // Log status every 50 iterations (about once per second)
+        if (logCounter++ % 50 == 0) {
+            System.out.println(String.format("[ELEVATOR] Status - Current: %.4f, Target: %.4f, Error: %.4f, At Target: %b", 
+                currentPosition, targetPosition, error, isFinishedMoving));
+        }
+        
+        // Update dashboard
+        SmartDashboard.putNumber("[ELEVATOR] Current Position", currentPosition);
+        SmartDashboard.putNumber("[ELEVATOR] Target Position", targetPosition);
+        SmartDashboard.putNumber("[ELEVATOR] Error", error);
+        SmartDashboard.putBoolean("[ELEVATOR] At Target", isFinishedMoving);
     }
 
     @Override
@@ -43,12 +60,19 @@ public class ElevatorGotoL1Command extends Command {
 
     @Override
     public void end(boolean interrupted) {
+        // Log final state
+        double currentPosition = RobotContainer.elevatorSubsystem.getPosition();
+        double targetPosition = ElevatorLevel.L1.position;
+        double error = Math.abs(currentPosition - targetPosition);
+        
         if (interrupted) {
-            System.out.println("ElevatorGotoL1Command: Movement interrupted!");
-            SmartDashboard.putString("Elevator Command Status", "Interrupted");
+            System.out.println(String.format("[ELEVATOR] Movement interrupted! Final State - Current: %.4f, Target: %.4f, Error: %.4f", 
+                currentPosition, targetPosition, error));
+            SmartDashboard.putString("[ELEVATOR] Command Status", "Interrupted");
         } else {
-            System.out.println("ElevatorGotoL1Command: Successfully reached L1");
-            SmartDashboard.putString("Elevator Command Status", "Completed");
+            System.out.println(String.format("[ELEVATOR] Successfully reached L1! Final State - Current: %.4f, Target: %.4f, Error: %.4f", 
+                currentPosition, targetPosition, error));
+            SmartDashboard.putString("[ELEVATOR] Command Status", "Completed");
         }
     }
 }

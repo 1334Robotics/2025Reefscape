@@ -63,8 +63,22 @@ public class Robot extends LoggedRobot {
       Logger.start();
       SmartDashboard.putData("Field", m_field);
       
+      // Set initial robot pose based on FMS data
+      setInitialPose();
+      
       // Check and log library versions
       logLibraryVersions();
+
+      // Log alliance status at startup
+      var alliance = DriverStation.getAlliance();
+      if (alliance.isPresent()) {
+          System.out.println("[Alliance] Robot started with alliance: " + alliance.get());
+          SmartDashboard.putString("[Alliance] Current", alliance.get().toString());
+      } else {
+          System.out.println("[Alliance] Warning: No alliance detected at startup");
+          System.out.println("[Alliance] Please set alliance in Simulation GUI -> FMS tab");
+          SmartDashboard.putString("[Alliance] Current", "UNKNOWN");
+      }
   }
 
   /**
@@ -129,23 +143,23 @@ public class Robot extends LoggedRobot {
   public void simulationPeriodic() {
     SimulatedArena.getInstance().simulationPeriodic();
     
-    // Debug alliance and position in simulation
-    if (count++ % 50 == 0) { // Only log every ~1 second
-      var alliance = DriverStation.getAlliance();
-      String allianceStr = alliance.isPresent() ? alliance.get().toString() : "Unknown";
-      Pose2d robotPose = RobotContainer.swerveSubsystem.getPose();
-      SmartDashboard.putString("Simulation/Alliance", allianceStr);
-      SmartDashboard.putString("Simulation/RobotPose", 
-          String.format("X: %.2f, Y: %.2f, Rot: %.2f°", 
-              robotPose.getX(), robotPose.getY(), 
-              robotPose.getRotation().getDegrees()));
+    // Debug alliance and position in simulation - only log every 5 seconds
+    if (count++ % 250 == 0) { // Changed from 50 to 250 (5 seconds)
+        var alliance = DriverStation.getAlliance();
+        String allianceStr = alliance.isPresent() ? alliance.get().toString() : "Unknown";
+        Pose2d robotPose = RobotContainer.swerveSubsystem.getPose();
+        SmartDashboard.putString("Simulation/Alliance", allianceStr);
+        SmartDashboard.putString("Simulation/RobotPose", 
+            String.format("X: %.2f, Y: %.2f, Rot: %.2f°", 
+                robotPose.getX(), robotPose.getY(), 
+                robotPose.getRotation().getDegrees()));
     }
     
     // Log game piece positions
     Logger.recordOutput("FieldSimulation/Algae", 
-    SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+        SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
     Logger.recordOutput("FieldSimulation/Coral", 
-    SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
+        SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
   }
 
   // Counter for periodic debug logs
@@ -186,16 +200,6 @@ public class Robot extends LoggedRobot {
       System.out.println("Elevator zeroing completed");
     }
     
-    // Set initial robot pose based on FMS data
-    setInitialPose();
-    
-    // Small delay to ensure odometry reset is complete
-    try {
-      Thread.sleep(100);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
-    
     // Enable tracking if needed
     RobotContainer.trackCommand.enable();
     
@@ -213,7 +217,7 @@ public class Robot extends LoggedRobot {
 
   /**
    * Sets the initial robot pose based on FMS data
-   * This method is called at the start of autonomous to ensure the robot has the
+   * This method is called at robot startup to ensure the robot has the
    * correct pose based on the latest alliance and FMS position settings.
    */
   private void setInitialPose() {
@@ -221,43 +225,81 @@ public class Robot extends LoggedRobot {
     int location = DriverStation.getLocation().orElse(2); // Default to center (2) if not available
     
     // Default starting pose (Center, Blue alliance)
-    Pose2d startingPose = new Pose2d(5.89, 5.5, Rotation2d.fromDegrees(180));
+    Pose2d startingPose = AutoConstants.BLUE_CENTER_STARTING_POSE;
     
-    if (alliance.isPresent()) {
-      if (alliance.get() == DriverStation.Alliance.Blue) {
-        // Blue alliance positions
-        switch (location) {
-          case 1:   // Left
-            startingPose = AutoConstants.BLUE_LEFT_STARTING_POSE;
-            break;
-          case 2:   // Center
-            startingPose = AutoConstants.BLUE_CENTER_STARTING_POSE;
-            break;
-          case 3: // Right
-            startingPose = AutoConstants.BLUE_RIGHT_STARTING_POSE;
-            break;
+    // If we have position but no alliance color, infer from position
+    if (!alliance.isPresent() && location != 2) {
+        boolean isRed = location == 1 || location == 3;
+        System.out.println("[Alliance Debug] Inferred alliance from position: " + (isRed ? "RED" : "BLUE"));
+        
+        if (isRed) {
+            // Red alliance positions
+            switch (location) {
+                case 1:   // Left
+                    startingPose = AutoConstants.RED_LEFT_STARTING_POSE;
+                    break;
+                case 2:   // Center
+                    startingPose = AutoConstants.RED_CENTER_STARTING_POSE;
+                    break;
+                case 3:   // Right
+                    startingPose = AutoConstants.RED_RIGHT_STARTING_POSE;
+                    break;
+            }
+        } else {
+            // Blue alliance positions
+            switch (location) {
+                case 1:   // Left
+                    startingPose = AutoConstants.BLUE_LEFT_STARTING_POSE;
+                    break;
+                case 2:   // Center
+                    startingPose = AutoConstants.BLUE_CENTER_STARTING_POSE;
+                    break;
+                case 3:   // Right
+                    startingPose = AutoConstants.BLUE_RIGHT_STARTING_POSE;
+                    break;
+            }
         }
-      } else {
-        // Red alliance positions (mirrored across field center)
-        switch (location) {
-          case 1:   // Left
-            startingPose = AutoConstants.RED_LEFT_STARTING_POSE;
-            break;
-          case 2:   // Center
-            startingPose = AutoConstants.RED_CENTER_STARTING_POSE;
-            break;
-          case 3: // Right
-            startingPose = AutoConstants.RED_RIGHT_STARTING_POSE;
-            break;
+        
+        System.out.println("Setting initial pose to: " + startingPose + 
+                          " (Inferred Alliance: " + (isRed ? "RED" : "BLUE") + 
+                          ", Position: " + location + ")");
+    } else if (alliance.isPresent()) {
+        // Use alliance color from FMS
+        if (alliance.get() == DriverStation.Alliance.Blue) {
+            // Blue alliance positions
+            switch (location) {
+                case 1:   // Left
+                    startingPose = AutoConstants.BLUE_LEFT_STARTING_POSE;
+                    break;
+                case 2:   // Center
+                    startingPose = AutoConstants.BLUE_CENTER_STARTING_POSE;
+                    break;
+                case 3:   // Right
+                    startingPose = AutoConstants.BLUE_RIGHT_STARTING_POSE;
+                    break;
+            }
+        } else {
+            // Red alliance positions
+            switch (location) {
+                case 1:   // Left
+                    startingPose = AutoConstants.RED_LEFT_STARTING_POSE;
+                    break;
+                case 2:   // Center
+                    startingPose = AutoConstants.RED_CENTER_STARTING_POSE;
+                    break;
+                case 3:   // Right
+                    startingPose = AutoConstants.RED_RIGHT_STARTING_POSE;
+                    break;
+            }
         }
-      }
-      
-      // Log the starting position
-      System.out.println("Setting initial pose to: " + startingPose + 
-                        " (Alliance: " + alliance.get() + 
-                        ", Position: " + location + ")");
+        
+        System.out.println("Setting initial pose to: " + startingPose + 
+                          " (Alliance: " + alliance.get() + 
+                          ", Position: " + location + ")");
     } else {
-      System.out.println("Warning: Using default starting pose - Alliance not available");
+        System.out.println("Warning: Using default starting pose - Alliance not available");
+        System.out.println("Please check Simulation GUI -> FMS tab");
+        System.out.println("Make sure 'Enabled' is checked and 'Alliance' is set");
     }
                       
     // Reset odometry to the starting pose

@@ -23,4 +23,16 @@ public class SimulationConstants {
     public static final double SCORING_MECH_L4_HEIGHT = 0.46;
     public static final double ROBOT_STARTING_POSE_X = 1.25;
     public static final double ROBOT_STARTING_POSE_Y = 2.25;
+
+    // Elevator simulation constants
+    public static final double ELEVATOR_MASS = 5.0; // kg
+    public static final double ELEVATOR_GEARING = 10.0;
+    public static final double ELEVATOR_DRUM_RADIUS = 0.0254; // meters (1 inch)
+    public static final double ELEVATOR_MIN_HEIGHT = 0.0;
+    public static final double ELEVATOR_MAX_HEIGHT = 2.0; // meters
+    public static final double ELEVATOR_CARRIAGE_MASS = 4.0; // kg
+    public static final double ELEVATOR_GRAVITY = 9.81; // m/s^2
+    public static final double ELEVATOR_LENGTH = 1.0; // meters
+    public static final double ELEVATOR_MOI = 0.1; // kg * m^2
+    public static final double ELEVATOR_EFFICIENCY = 0.7;
 }
