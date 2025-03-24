@@ -154,8 +154,12 @@ public class TrackAprilTagCommand extends Command {
             if(angle < 0) angle = 180 - (-180 - angle);
 
             // Publish the distance
+            SmartDashboard.putNumber("[VISION] Target X", this.targetX);
+            SmartDashboard.putNumber("[VISION] Target Y", this.targetY);
             SmartDashboard.putNumber("[VISION] Distance X", distance.x);
             SmartDashboard.putNumber("[VISION] Distance Y", distance.y);
+            SmartDashboard.putNumber("[VISION] Error X", distance.x - this.targetX);
+            SmartDashboard.putNumber("[VISION] Error Y", distance.y - this.targetY);
             SmartDashboard.putNumber("[VISION] Target Angle", angle);
 
             // Check if the error is low enough and stop it
