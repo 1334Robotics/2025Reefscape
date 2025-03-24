@@ -7,7 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "AutoDrive21"
+            "pathName": "AutoDrive21v2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop"
           }
         },
         {
@@ -19,7 +25,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.2
+            "waitTime": 0.5
           }
         },
         {
@@ -32,6 +38,12 @@
           "type": "wait",
           "data": {
             "waitTime": 0.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ElevatorBottom"
           }
         },
         {

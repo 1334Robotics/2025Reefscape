@@ -68,10 +68,12 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.commands.PathfindingCommand;
 import frc.robot.subsystems.flopper.FlopperSubsystem;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -178,6 +180,10 @@ public class RobotContainer {
   // Path cache to improve performance and memory management
   private final Map<String, PathPlannerPath> pathCache = new HashMap<>();
 
+  // Add these fields at the class level
+  private Optional<DriverStation.Alliance> lastAlliance = Optional.empty();
+  private int lastLocation = 2;
+
   /**
    * List available path files on the dashboard
    */
@@ -254,6 +260,14 @@ public class RobotContainer {
     System.out.println("7. Setting up default commands...");
     setupDefaultCommands();
     
+    // Ensure PathPlanner is fully initialized
+    System.out.println("8. Ensuring PathPlanner initialization...");
+    if (Robot.isSimulation()) {
+        // In simulation, wait for pathfinding warmup
+        PathfindingCommand.warmupCommand().schedule();
+        System.out.println("Pathfinding warmup scheduled");
+    }
+    
     System.out.println("RobotContainer initialization complete!");
   }
 
@@ -313,8 +327,8 @@ public class RobotContainer {
   private void setupDefaultCommands() {
     DriveCommand xboxDriveCommand = new DriveCommand(
         () -> MathUtil.applyDeadband(driverController.getLeftX(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
-        () -> MathUtil.applyDeadband(driverController.getLeftY(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
-        () -> MathUtil.applyDeadband(-driverController.getRightX(), RobotContainerConstants.CONTROLLER_ROTATION_DEADBAND));
+                                                     () -> MathUtil.applyDeadband(driverController.getLeftY(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
+                                                     () -> MathUtil.applyDeadband(-driverController.getRightX(), RobotContainerConstants.CONTROLLER_ROTATION_DEADBAND));
 
     swerveSubsystem.setDefaultCommand(xboxDriveCommand);
   }
@@ -349,7 +363,7 @@ public class RobotContainer {
       e.printStackTrace();
     }
   }
-  
+
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
    * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
@@ -405,12 +419,39 @@ public class RobotContainer {
     if (selectedCommand == null || 
         (selectedCommand instanceof InstantCommand && 
          !(selectedCommand instanceof SequentialCommandGroup))) {
-      System.out.println("No auto selected or 'Do Nothing' selected - Using tracking command");
-      return trackCommand;
+        System.out.println("No auto selected or 'Do Nothing' selected - Using tracking command");
+        return trackCommand;
     }
     
-    System.out.println("Running selected auto routine: " + selectedCommand.getName());
-    return selectedCommand;
+    System.out.println("Starting autonomous command: " + selectedCommand.getClass().getSimpleName());
+    
+    // Create a synchronized command sequence
+    return Commands.sequence(
+        // First ensure PathPlanner is ready
+        Commands.runOnce(() -> {
+            System.out.println("Step 1: Ensuring PathPlanner is ready...");
+            // Force a longer delay to ensure everything is initialized
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                // Ignore interrupted exception
+            }
+            System.out.println("PathPlanner ready check complete");
+        }),
+        // Then ensure elevator is at bottom
+        Commands.runOnce(() -> {
+            System.out.println("Step 2: Ensuring elevator is at bottom...");
+            elevatorHandler.setLevel(ElevatorLevel.BOTTOM);
+            System.out.println("Elevator bottom command issued");
+        }),
+        // Wait for elevator to settle
+        Commands.waitSeconds(1.0),
+        Commands.runOnce(() -> {
+            System.out.println("Step 3: Elevator settle wait complete");
+        }),
+        // Finally run the selected auto command
+        selectedCommand
+    );
   }
 
   /**
@@ -419,18 +460,34 @@ public class RobotContainer {
    */
   public void updateAllianceIndicators() {
     var alliance = DriverStation.getAlliance();
+    int location = DriverStation.getLocation().orElse(2); // Default to center (2)
+    
+    // Only log if there's a change in alliance or position
+    if (lastAlliance != alliance || lastLocation != location) {
+        System.out.println("[Alliance Debug] Alliance changed: " + alliance + ", Position: " + location);
+        lastAlliance = alliance;
+        lastLocation = location;
+    }
+    
+    // Check if we have position but no alliance color
+    if (!alliance.isPresent() && location != 2) {
+        // If we have a position (1 or 3), we can infer the alliance
+        boolean isRed = location == 1 || location == 3;
+        SmartDashboard.putBoolean("[AUTO] Is Red Alliance", isRed);
+        SmartDashboard.putString("[AUTO] Current Alliance", isRed ? "RED" : "BLUE");
+        SmartDashboard.putNumber("[AUTO] FMS Position", location);
+        return;
+    }
+    
     if (alliance.isPresent()) {
-      boolean isRed = alliance.get() == DriverStation.Alliance.Red;
-      SmartDashboard.putBoolean("[AUTO] Is Red Alliance", isRed);
-      SmartDashboard.putString("[AUTO] Current Alliance", isRed ? "RED" : "BLUE");
-      
-      // Get and display FMS position if available
-      int location = DriverStation.getLocation().orElse(2); // Default to center (2)
-      SmartDashboard.putNumber("[AUTO] FMS Position", location);
+        boolean isRed = alliance.get() == DriverStation.Alliance.Red;
+        SmartDashboard.putBoolean("[AUTO] Is Red Alliance", isRed);
+        SmartDashboard.putString("[AUTO] Current Alliance", isRed ? "RED" : "BLUE");
+        SmartDashboard.putNumber("[AUTO] FMS Position", location);
     } else {
-      SmartDashboard.putBoolean("[AUTO] Is Red Alliance", false);
-      SmartDashboard.putString("[AUTO] Current Alliance", "UNKNOWN");
-      SmartDashboard.putNumber("[AUTO] FMS Position", 2); // Default to center
+        SmartDashboard.putBoolean("[AUTO] Is Red Alliance", false);
+        SmartDashboard.putString("[AUTO] Current Alliance", "UNKNOWN");
+        SmartDashboard.putNumber("[AUTO] FMS Position", 2); // Default to center
     }
   }
 
@@ -441,17 +498,19 @@ public class RobotContainer {
     System.out.println("Registering PathPlanner commands...");
     
     try {
-        // Register auto sequence commands
+        // Register commands for PathPlanner
+        System.out.println("Registering PathPlanner commands...");
+        
+        // Register all commands as regular commands, not marker events
         NamedCommands.registerCommand("Shoot", new ShootCommand());
-        NamedCommands.registerCommand("MailboxShoot", new ShootCommand());
-        System.out.println("✓ Registered Shoot command");
-        
-        // Register marker event commands
         NamedCommands.registerCommand("ElevatorL1", new ElevatorGotoL1Command());
-        System.out.println("✓ Registered ElevatorL1 command (marker event)");
+        NamedCommands.registerCommand("ElevatorBottom", new ElevatorGotoBottomCommand());
+        NamedCommands.registerCommand("ElevatorL2", new ElevatorGotoL2Command());
+        NamedCommands.registerCommand("ElevatorL3", new ElevatorGotoL3Command());
+        NamedCommands.registerCommand("ElevatorL4", new ElevatorGotoL4Command());
+        NamedCommands.registerCommand("Stop", Commands.runOnce(() -> swerveSubsystem.drive(new Translation2d(0, 0), 0)));
         
-        // Log registration status to dashboard
-        SmartDashboard.putString("[AUTO] PathPlanner/Commands", "MailboxShoot, ElevatorL1");
+        System.out.println("✓ Registered all commands as regular commands");
         System.out.println("Command registration complete!");
         
     } catch (Exception e) {
@@ -564,7 +623,7 @@ public class RobotContainer {
       return Commands.sequence(
         Commands.runOnce(() -> {
           CommandScheduler.getInstance().cancelAll();
-          SmartDashboard.putString("AUTO] Current Auto Status", "Running Auto");
+          SmartDashboard.putString("[AUTO] Current Auto Status", "Running Auto");
         }),
         selectedAuto,
         Commands.runOnce(() -> {

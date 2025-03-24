@@ -8,6 +8,7 @@ public class PIDController {
     private final double sampleTime;
     private double proportionalTerm, integralTerm, differentialTerm;
     private double prevError, prevMeasurement;
+    private double prevOutput;
 
     public PIDController(double kP, double kI, double kD, double tau, double limMin,
                double limMax, double limMinInt, double limMaxInt, double sampleTime) {
@@ -27,6 +28,7 @@ public class PIDController {
         this.differentialTerm = 0;
         this.prevError        = 0;
         this.prevMeasurement  = 0;
+        this.prevOutput       = 0;
     }
 
     public void update(double target, double measurement) {
@@ -55,7 +57,12 @@ public class PIDController {
         if(output > this.limMax) output = this.limMax;
         if(output < this.limMin) output = this.limMin;
 
+        this.prevOutput = output;
         return output;
+    }
+
+    public double getPreviousOutput() {
+        return this.prevOutput;
     }
 
     public void zero() {
@@ -64,5 +71,6 @@ public class PIDController {
         this.proportionalTerm = 0;
         this.integralTerm     = 0;
         this.differentialTerm = 0;
+        this.prevOutput       = 0;
     }
 }

@@ -96,9 +96,13 @@ public class ElevatorHandler extends SubsystemBase {
 
         // 4. Check if at target
         double error = Math.abs(currentPosition - this.targetLevel.position);
-        System.out.println("Elevator: Current=" + currentPosition + 
-                         " Target=" + this.targetLevel.position + 
-                         " Error=" + error);
+        
+        // Only log position if error is significant or we're close to target
+        if (error > 0.5 || error < 0.1) {
+            System.out.println("Elevator: Current=" + currentPosition + 
+                             " Target=" + this.targetLevel.position + 
+                             " Error=" + error);
+        }
         
         if(error < ElevatorConstants.MAX_ACCEPTABLE_ERROR) {
             this.hitTarget = true;
@@ -111,7 +115,11 @@ public class ElevatorHandler extends SubsystemBase {
         this.pidController.update(this.targetLevel.position, currentPosition);
         double output = -this.pidController.getOutput();
         RobotContainer.elevatorSubsystem.runMotor(output);
-        System.out.println("Elevator: Moving with output " + output);
+        
+        // Only log output if it's significantly different from previous
+        if (Math.abs(output - this.pidController.getPreviousOutput()) > 0.1) {
+            System.out.println("Elevator: Moving with output " + output);
+        }
         
         // Update dashboard with movement info
         SmartDashboard.putNumber("Elevator/Target Position", 
