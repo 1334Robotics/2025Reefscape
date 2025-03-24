@@ -85,8 +85,6 @@ public class SwerveSubsystem extends SubsystemBase {
    */
    private VisionSubsystem vision;
 
-
-
     public SwerveSubsystem() {
         this.fieldRelative = false;
         final GyroIO gyroIO;
@@ -168,8 +166,6 @@ public class SwerveSubsystem extends SubsystemBase {
         // Enable heading correction and cosine compensator
         this.swerveDrive.setHeadingCorrection(true);
         this.swerveDrive.setCosineCompensator(true);
-        this.swerveDrive.setHeadingCorrection(false); // Heading correction should only be used while controlling the robot via angle.
-        this.swerveDrive.setCosineCompensator(false);// Disables cosine compensation for simulations since it causes discrepancies not seen in real life.
         this.swerveDrive.setAngularVelocityCompensation(true,
                                                true,
                                                0.1); //Correct for skew that gets worse as angular velocity increases. Start with a coefficient of 0.1.
@@ -440,7 +436,7 @@ public class SwerveSubsystem extends SubsystemBase {
         
         // Set default starting pose based on alliance
         Pose2d defaultPose = isBlue ? 
-            new Pose2d(new Translation2d(Meter.of(5.89), Meter.of(5.5)), Rotation2d.fromDegrees(180)) :
+            new Pose2d(new Translation2d(Meter.of(7.6), Meter.of(4)), Rotation2d.fromDegrees(180)) :
             new Pose2d(new Translation2d(Meter.of(8.05), Meter.of(5.5)), Rotation2d.fromDegrees(0));
         
         // Initialize odometry with default pose if not already set

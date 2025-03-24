@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.auto.AutoConfigurer;
 import frc.robot.commands.elevator.ElevatorResetCommand;
 import frc.robot.constants.AutoConstants;
 import frc.robot.constants.ElevatorConstants;
@@ -166,6 +167,8 @@ public class Robot extends LoggedRobot {
     
     // Force automatic control for autonomous
     RobotContainer.elevatorHandler.setForceManualControl(false);
+
+    AutoConfigurer.configure();
     
     // First, reset the elevator if it hasn't been reset yet
     if (!elevatorReset) {

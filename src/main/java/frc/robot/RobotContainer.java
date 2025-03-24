@@ -7,7 +7,6 @@ import frc.robot.commands.climb.ForcePinsUpCommand;
 import frc.robot.commands.climb.LockClimbCommand;
 import frc.robot.commands.climb.StopClimbCommand;
 import frc.robot.commands.climb.UnlockClimbCommand;
-import frc.robot.commands.climb.SmartClimbSequenceCommand;
 import frc.robot.commands.directionSnaps.DirectionSnapBackwards;
 import frc.robot.commands.directionSnaps.DirectionSnapForwards;
 import frc.robot.commands.directionSnaps.DirectionSnapLeft;
@@ -30,11 +29,9 @@ import frc.robot.commands.elevator.ElevatorUpCommand;
 import frc.robot.commands.flopper.FlopperDownCommand;
 import frc.robot.commands.flopper.FlopperUpCommand;
 import frc.robot.commands.gyro.GyroZeroCommand;
-import frc.robot.commands.mailbox.OutputLowCommand;
 import frc.robot.commands.mailbox.ShootCommand;
 import frc.robot.commands.mailbox.MailboxFeedCommand;
 import frc.robot.commands.mailbox.MailboxRewindCommand;
-import frc.robot.commands.mailbox.OutputHighCommand;
 import frc.robot.commands.mailbox.StopCommand;
 import frc.robot.constants.ElevatorConstants;
 import frc.robot.constants.RobotContainerConstants;
@@ -136,29 +133,32 @@ public class RobotContainer {
   private static final POVButton      elevatorL3Button     = new POVButton(operatorController, RobotContainerConstants.ELEVATOR_L3_BUTTON);
   private static final POVButton      elevatorL4Button     = new POVButton(operatorController, RobotContainerConstants.ELEVATOR_L4_BUTTON);
   private static final JoystickButton ripControlButton     = new JoystickButton(driverController, RobotContainerConstants.RIP_CONTROL_BUTTON);
-  private static final Trigger        trackLeftButton      = new Trigger(() -> driverController.getLeftTriggerAxis()  > RobotContainerConstants.TRACK_LEFT_TRIGGER_POINT);
-  private static final Trigger        trackRightButton     = new Trigger(() -> driverController.getRightTriggerAxis() > RobotContainerConstants.TRACK_RIGHT_TRIGGER_POINT);
+  private static final Trigger        trackLeftButton      = new Trigger(() -> driverController.getLeftTriggerAxis()  > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
+  private static final Trigger        trackRightButton     = new Trigger(() -> driverController.getRightTriggerAxis() > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
   private static final JoystickButton botRelativeButton    = new JoystickButton(driverController, RobotContainerConstants.BOT_RELATIVE_BUTTON);
   private static final JoystickButton slowDownButton       = new JoystickButton(driverController, RobotContainerConstants.SLOW_DOWN_BUTTON);
-  private static final JoystickButton LedButton                = new JoystickButton(operatorController, RobotContainerConstants.LED_BUTTON);
+  private static final Trigger        pinsDownButton       = new Trigger(() -> operatorController.getLeftTriggerAxis()  > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
+  private static final Trigger        pinsLockButton       = new Trigger(() -> operatorController.getRightTriggerAxis() > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
+  private static final JoystickButton pinsUpButton         = new JoystickButton(operatorController, RobotContainerConstants.CLIMB_UP_BUTTON);
 
   // Subsystems
   public static final LedSubsystem           ledSubsystem              = new LedSubsystem(1); 
   public static final LedHandler             ledHandler                = new LedHandler(ledSubsystem);
-  public static final GyroSubsystem          gyroSubsystem             = new GyroSubsystem("CANivore");
-  public static final MailboxSubsystem       mailboxSubsystem          = new MailboxSubsystem();
-  public static final MailboxHandler         mailboxHandler            = new MailboxHandler();
-  public static final VisionSubsystem        visionSubsystem           = new VisionSubsystem();
-  public static final SwerveSubsystem        swerveSubsystem           = new SwerveSubsystem();
-  public static final DirectionSnapSubsystem directionSnapSubsystem    = new DirectionSnapSubsystem();
-  public static final ElevatorSubsystem      elevatorSubsystem         = new ElevatorSubsystem();
-  public static final ElevatorHandler        elevatorHandler           = new ElevatorHandler();
-  public static final FlopperSubsystem       flopperSubsystem          = new FlopperSubsystem();
-  public static final ClimbSubsystem         climbSubsystem            = new ClimbSubsystem();
-  public static final TagInputHandler        tagInputHandler           = new TagInputHandler();
-  public static final DriveController        driveController           = new DriveController();
-  public static final TagTrackingHandler     tagTrackingHandler        = new TagTrackingHandler();
-  public static final ControllerSubsystem    driverControllerSubsystem = new ControllerSubsystem(driverController);
+  public static final GyroSubsystem          gyroSubsystem               = new GyroSubsystem("CANivore");
+  public static final MailboxSubsystem       mailboxSubsystem            = new MailboxSubsystem();
+  public static final MailboxHandler         mailboxHandler              = new MailboxHandler();
+  public static final VisionSubsystem        visionSubsystem             = new VisionSubsystem();
+  public static final SwerveSubsystem        swerveSubsystem             = new SwerveSubsystem();
+  public static final DirectionSnapSubsystem directionSnapSubsystem      = new DirectionSnapSubsystem();
+  public static final ElevatorSubsystem      elevatorSubsystem           = new ElevatorSubsystem();
+  public static final ElevatorHandler        elevatorHandler             = new ElevatorHandler();
+  public static final FlopperSubsystem       flopperSubsystem            = new FlopperSubsystem();
+  public static final ClimbSubsystem         climbSubsystem              = new ClimbSubsystem();
+  public static final TagInputHandler        tagInputHandler             = new TagInputHandler();
+  public static final DriveController        driveController             = new DriveController();
+  public static final TagTrackingHandler     tagTrackingHandler          = new TagTrackingHandler();
+  public static final ControllerSubsystem    driverControllerSubsystem   = new ControllerSubsystem(driverController);
+  public static final ControllerSubsystem    operatorControllerSubsystem = new ControllerSubsystem(operatorController);
 
   // Auto
   public static final TrackAprilTagCommand trackCommand = new TrackAprilTagCommand(22,
@@ -308,6 +308,16 @@ public class RobotContainer {
         
     // List available paths for manual selection
     listAvailablePaths();
+
+    this.registerClimbCommands();
+  }
+
+  private void registerClimbCommands() {
+    SmartDashboard.putData("[CLIMB] Lock",            new LockClimbCommand());
+    SmartDashboard.putData("[CLIMB] Unlock",          new UnlockClimbCommand());
+    SmartDashboard.putData("[CLIMB] Stop",            new StopClimbCommand());
+    SmartDashboard.putData("[CLIMB] Force Pins Down", new ForcePinsDownCommand());
+    SmartDashboard.putData("[CLIMB] Force Pins Up",   new ForcePinsUpCommand());
   }
 
   private void setupDefaultCommands() {
@@ -389,7 +399,9 @@ public class RobotContainer {
     botRelativeButton.onFalse(new FieldRelativeCommand());
     slowDownButton.onTrue(new SlowDownCommand());
     slowDownButton.onFalse(new SpeedUpCommand());
-    LedButton.onTrue(new ToggleLedCommand(ledSubsystem));
+    pinsDownButton.whileTrue(new ForcePinsDownCommand());
+    pinsLockButton.whileTrue(new LockClimbCommand());
+    pinsUpButton.whileTrue(new ForcePinsUpCommand());
   }
 
   /**

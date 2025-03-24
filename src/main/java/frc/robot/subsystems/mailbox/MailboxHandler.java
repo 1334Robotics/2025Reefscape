@@ -50,9 +50,12 @@ public class MailboxHandler extends SubsystemBase {
         return this.inputLaserCan.inRange();
     }
 
+    public boolean currentlyFeeding() {
+        return this.feeding;
+    }
+
     @Override
     public void periodic() {
-
         SmartDashboard.putBoolean("[MAILBOX] Allow Shooting", this.allowShoot);
         SmartDashboard.putBoolean("[MAILBOX] Allow Feeding", this.allowFeeding);
         SmartDashboard.putBoolean("[MAILBOX] Currently Feeding", this.allowFeeding);
@@ -68,7 +71,12 @@ public class MailboxHandler extends SubsystemBase {
         }
 
         // Check for a coral waiting to be inputted and feed it in
-        if(this.allowFeeding) {
+        if(this.allowFeeding || this.feeding) {
+            this.allowFeeding = false;
+
+            // Check that the elevator level is correct
+            if(RobotContainer.elevatorHandler.getLevel() != ElevatorLevel.FEED) return;
+
             if(!this.outputLaserCan.inRange()) {
                 this.feeding = true;
                 this.allowShoot = false;
@@ -88,11 +96,12 @@ public class MailboxHandler extends SubsystemBase {
                 ElevatorLevel level = RobotContainer.elevatorHandler.getLevel();
                 if(level == null || level == ElevatorLevel.BOTTOM || level == ElevatorLevel.FEED) return;
 
-                // Shoots it on high for L2+; on low for L1
-                if(level == ElevatorLevel.L4)    
-                    RobotContainer.mailboxSubsystem.slowOutput();               
-                else
-                    RobotContainer.mailboxSubsystem.output((level != ElevatorLevel.L1));
+                switch(level) {
+                    case L1     -> RobotContainer.mailboxSubsystem.outputL1();
+                    case L2, L3 -> RobotContainer.mailboxSubsystem.output();
+                    case L4     -> RobotContainer.mailboxSubsystem.outputL4();
+                }
+
                 this.allowShoot = false;
                 this.allowFeeding = false;
             }

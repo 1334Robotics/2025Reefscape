@@ -34,11 +34,10 @@ public class RobotContainerConstants {
 
     public static final int RIP_CONTROL_BUTTON = XboxMappings.Button.Back;
 
-    public static final double TRACK_LEFT_TRIGGER_POINT  = 0.5;
-    public static final double TRACK_RIGHT_TRIGGER_POINT = 0.5;
-
+    public static final double TRIGGER_ACTIVATE_POINT = 0.5;
+    
     public static final int BOT_RELATIVE_BUTTON   = XboxMappings.Button.A;
     public static final int SLOW_DOWN_BUTTON      = XboxMappings.Button.B;
 
-    public static final int LED_BUTTON = XboxMappings.Button.Back;
+    public static final int CLIMB_UP_BUTTON = XboxMappings.Button.Start;
 }

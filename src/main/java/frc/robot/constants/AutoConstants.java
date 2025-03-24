@@ -17,13 +17,10 @@ public class AutoConstants {
     public static final double PATH_PLANNER_KI = 0;
     public static final double PATH_PLANNER_KD = 0;
 
-    // blue alliance starting pose
-    public static final Pose2d BLUE_LEFT_STARTING_POSE = new Pose2d(5.89, 7.0, Rotation2d.fromDegrees(180));
-    public static final Pose2d BLUE_CENTER_STARTING_POSE = new Pose2d(5.89, 5.5, Rotation2d.fromDegrees(180));
-    public static final Pose2d BLUE_RIGHT_STARTING_POSE = new Pose2d(5.89, 1.0, Rotation2d.fromDegrees(180));
-    // red alliance starting pose 
-    public static final Pose2d RED_LEFT_STARTING_POSE = new Pose2d(8.05, 1.0, Rotation2d.fromDegrees(180));
-    public static final Pose2d RED_CENTER_STARTING_POSE = new Pose2d(8.05, 5.5, Rotation2d.fromDegrees(180));
-    public static final Pose2d RED_RIGHT_STARTING_POSE = new Pose2d(8.05, 7.0, Rotation2d.fromDegrees(180));
-    
+    public static final Pose2d BLUE_LEFT_STARTING_POSE = new Pose2d(7.6, 1, Rotation2d.fromDegrees(180));    // Blue Bottom
+    public static final Pose2d BLUE_CENTER_STARTING_POSE = new Pose2d(7.6, 4, Rotation2d.fromDegrees(180));  // Blue Middle
+    public static final Pose2d BLUE_RIGHT_STARTING_POSE = new Pose2d(7.6, 7, Rotation2d.fromDegrees(180));   // Blue Top
+    public static final Pose2d RED_LEFT_STARTING_POSE = new Pose2d(10, 7.036, Rotation2d.fromDegrees(180));  // Red Top
+    public static final Pose2d RED_CENTER_STARTING_POSE = new Pose2d(10, 4, Rotation2d.fromDegrees(180));    // Red Middle
+    public static final Pose2d RED_RIGHT_STARTING_POSE = new Pose2d(10, 1.599, Rotation2d.fromDegrees(180)); // Red Bottom
 }
