@@ -23,10 +23,11 @@ public class VisionPoseEstimator extends SubsystemBase {
     private final PhotonPoseEstimator photonPoseEstimator;
     public VisionPoseEstimator() {
         cam = new PhotonCamera("Arducam_OV9782_USB_Camera");
-        Transform3d robotToCam = new Transform3d(new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0,0,0)); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
-            //CHANGE TO ACTURAL VALUES VERY IMPORTANT, We also seemed to missed this when we made the first one
+        //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
+        Transform3d robotToCam = new Transform3d(new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0,0,0));
+        //CHANGE TO ACTURAL VALUES VERY IMPORTANT, We also seemed to missed this when we made the first one
         AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
-        photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.CLOSEST_TO_REFERENCE_POSE, robotToCam);
+        photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCam);
     }
     public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
         photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
