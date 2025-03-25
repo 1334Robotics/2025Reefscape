@@ -66,22 +66,12 @@ public class VisionSubsystemSim extends SubsystemBase implements VisionSubsystem
             latestResult = null; // Clear the result if no new data is available
         }
 
-        // Log vision data
-        Logger.recordOutput("Vision/TargetID", getTargetId());
-        Logger.recordOutput("Vision/Yaw", getTargetYaw());
-        Logger.recordOutput("Vision/Pitch", getTargetPitch());
-        Logger.recordOutput("Vision/Area", getTargetArea());
-        Logger.recordOutput("Vision/PoseAmbiguity", getTargetPoseAmbiguity());
-
         if (latestResult != null && latestResult.hasTargets()) {
             PhotonTrackedTarget target = latestResult.getBestTarget();
-            Logger.recordOutput("Vision/TargetYaw", target.getYaw());
-            Logger.recordOutput("Vision/TargetDistance", target.getBestCameraToTarget().getTranslation().getNorm());
-            Logger.recordOutput("Vision/TargetID", target.getFiducialId());
-        } else {
-            Logger.recordOutput("Vision/TargetYaw", 0.0);
-            Logger.recordOutput("Vision/TargetDistance", 0.0);
-            Logger.recordOutput("Vision/TargetID", -1);
+            double simulatedYaw = simulateNoise(target.getYaw());
+            double simulatedDistance = simulateNoise(target.getBestCameraToTarget().getTranslation().getNorm());
+            Logger.recordOutput("Vision/SimulatedYaw", simulatedYaw);
+            Logger.recordOutput("Vision/SimulatedDistance", simulatedDistance);
         }
 
         // Log visible target poses
@@ -96,9 +86,6 @@ public class VisionSubsystemSim extends SubsystemBase implements VisionSubsystem
         }
 
         Logger.recordOutput("Vision/VisibleTargetPoses", visibleTargetPoses.toArray(new Pose2d[0]));
-        
-        // Log robot pose
-        Logger.recordOutput("Robot/Pose", robotPoseSupplier.get());
 
         // Log valid pose estimations
         if (latestResult != null && latestResult.hasTargets()) {
@@ -113,6 +100,13 @@ public class VisionSubsystemSim extends SubsystemBase implements VisionSubsystem
             }
             Logger.recordOutput("Vision/ValidPoseEstimations", validPoseEstimations.toArray(new Pose3d[0]));
         }
+
+        Optional<Pose2d> robotPose = getRobotPose();
+            if (robotPose.isPresent()) {
+                Logger.recordOutput("Vision/RobotPose", robotPose.get());
+            } else {
+                Logger.recordOutput("Vision/RobotPose", new Pose2d());
+            }
 
         // Log AprilTag detection lines
         if (latestResult != null && latestResult.hasTargets()) {
@@ -155,6 +149,19 @@ public class VisionSubsystemSim extends SubsystemBase implements VisionSubsystem
             SmartDashboard.putNumber("[VISION] Pose Ambiguity", 0.0);
             SmartDashboard.putNumber("[VISION] Skew", 0.0);
         }
+    }
+
+    public Optional<Pose2d> getRobotPose() {
+        if (latestResult != null && latestResult.hasTargets()) {
+            PhotonTrackedTarget target = latestResult.getBestTarget();
+            Optional<Pose3d> tagPose = fieldLayout.getTagPose(target.getFiducialId());
+            if (tagPose.isPresent()) {
+                // Calculate the robot's pose based on the tag's pose and the camera's transform
+                Pose3d robotPose = tagPose.get().transformBy(VisionConstants.ROBOT_TO_CAMERA.inverse());
+                return Optional.of(robotPose.toPose2d());
+            }
+        }
+        return Optional.empty();
     }
 
     public boolean isTargetVisible() {
@@ -208,5 +215,13 @@ public class VisionSubsystemSim extends SubsystemBase implements VisionSubsystem
             return latestResult.getBestTarget();
         }
         return null; // Return null if no target is detected
+    }
+
+    private double simulateLatency() {
+        return 0.1 + (Math.random() * 0.05); // Simulate 100ms ± 50ms latency
+    }
+    
+    private double simulateNoise(double value) {
+        return value + (Math.random() - 0.5) * 0.1; // Add ±5% noise
     }
 }

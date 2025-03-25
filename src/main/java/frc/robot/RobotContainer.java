@@ -103,7 +103,8 @@ public class RobotContainer {
   public static final SwerveSubsystem swerveSubsystem               = new SwerveSubsystem();
   public static final SolenoidSubsystem solenoidSubsystem           = new SolenoidSubsystem();
   public static final DirectionSnapSubsystem directionSnapSubsystem = new DirectionSnapSubsystem();
-  public static final IntakeSubsystem intakeSubsystem = new IntakeSubsystem(new IntakeIOSim(swerveSubsystem.getSwerveDriveSimulation()));
+  private static final IntakeIOSim intakeIOSim = new IntakeIOSim(swerveSubsystem.getSwerveDriveSimulation());
+  public static final IntakeSubsystem intakeSubsystem = new IntakeSubsystem(intakeIOSim);
 
   public final VisionSubsystem visionSubsystem;
   public final VisionSubsystemSim visionSubsystemSim;
@@ -151,13 +152,11 @@ public class RobotContainer {
 
     //Conditionally initialize the simulation subsystem
     if (Robot.isSimulation()) {
-      simulationSubsystem = new SimulationSubsystem(swerveSubsystem.getSwerveDriveSimulation(), swerveSubsystem);
+      simulationSubsystem = new SimulationSubsystem(swerveSubsystem.getSwerveDriveSimulation(), swerveSubsystem, intakeIOSim);
       simulationSubsystem.setInitialPose(new Pose2d(SimulationConstants.ROBOT_STARTING_POSE_X, SimulationConstants.ROBOT_STARTING_POSE_Y, Rotation2d.fromDegrees(0)));
-      System.out.println("DEBUG: runIntake() called");
-      simulationSubsystem.runIntake();
-    } else {
+  } else {
       simulationSubsystem = null;
-    }
+  }
 
     SmartDashboard.putData("Elevator L1", new RaiseElevatorCommand(ElevatorHeightCalculation.L1));
     SmartDashboard.putData("Elevator L2", new RaiseElevatorCommand(ElevatorHeightCalculation.L2));
@@ -165,7 +164,6 @@ public class RobotContainer {
     SmartDashboard.putData("Elevator L4", new RaiseElevatorCommand(ElevatorHeightCalculation.L4));
     SmartDashboard.putData("Elevator Lower", new LowerElevatorCommand());
   }
-
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the

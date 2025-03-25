@@ -6,6 +6,7 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.targeting.PhotonPipelineMetadata;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.List;
 
@@ -143,22 +144,21 @@ public class VisionSubsystem extends SubsystemBase implements VisionSubsystemBas
         // (4) Send to dashboard
         SmartDashboard.putNumber("[VISION] Image Age (ms)", imageAgeMs);
 
-        if (hasTarget) {
+        if (latestResult != null && latestResult.hasTargets()) {
             PhotonTrackedTarget target = latestResult.getBestTarget();
-            SmartDashboard.putNumber("[VISION] Target ID", target.getFiducialId());
-            SmartDashboard.putNumber("[VISION] Yaw", target.getYaw());
-            SmartDashboard.putNumber("[VISION] Pitch", target.getPitch());
-            SmartDashboard.putNumber("[VISION] Area", target.getArea());
-            SmartDashboard.putNumber("[VISION] Pose Ambiguity", target.getPoseAmbiguity());
-            SmartDashboard.putNumber("[VISION] Skew", target.getSkew());
+            Logger.recordOutput("Vision/TargetYaw", target.getYaw());
+            Logger.recordOutput("Vision/TargetPitch", target.getPitch());
+            Logger.recordOutput("Vision/TargetArea", target.getArea());
+            Logger.recordOutput("Vision/TargetID", target.getFiducialId());
+            Logger.recordOutput("Vision/TargetDistance", target.getBestCameraToTarget().getTranslation().getNorm());
+            Logger.recordOutput("Vision/PoseAmbiguity", target.getPoseAmbiguity());
         } else {
-            // Clear values when no target is visible
-            SmartDashboard.putNumber("[VISION] Target ID", -1);
-            SmartDashboard.putNumber("[VISION] Yaw", 0.0);
-            SmartDashboard.putNumber("[VISION] Pitch", 0.0);
-            SmartDashboard.putNumber("[VISION] Area", 0.0);
-            SmartDashboard.putNumber("[VISION] Pose Ambiguity", 0.0);
-            SmartDashboard.putNumber("[VISION] Skew", 0.0);
+            Logger.recordOutput("Vision/TargetYaw", 0.0);
+            Logger.recordOutput("Vision/TargetPitch", 0.0);
+            Logger.recordOutput("Vision/TargetArea", 0.0);
+            Logger.recordOutput("Vision/TargetID", -1);
+            Logger.recordOutput("Vision/TargetDistance", 0.0);
+            Logger.recordOutput("Vision/PoseAmbiguity", 0.0);
         }
     }
 }

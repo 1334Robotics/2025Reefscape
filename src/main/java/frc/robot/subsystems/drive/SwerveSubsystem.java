@@ -1,10 +1,11 @@
 package frc.robot.subsystems.drive;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;//NEW CAL
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -29,12 +30,14 @@ import org.littletonrobotics.junction.Logger;
 import java.io.File;
 import java.io.IOException;
 import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 
 
 public class SwerveSubsystem extends SubsystemBase {
     private final SwerveDrive swerveDrive;
     private boolean fieldRelative;
     private SwerveDriveSimulation swerveDriveSimulation;
+    private final SwerveDriveKinematics swerveDriveKinematics;
     private int count = 0;
     private boolean allowDrive;
     private final GyroIO gyroIO;
@@ -45,6 +48,14 @@ public class SwerveSubsystem extends SubsystemBase {
         final GyroSimulation gyroSimulation;
         final ModuleIO[] moduleIOs;
         SmartDashboard.putBoolean("[SWERVE] Field Relative", this.fieldRelative);
+
+        // Initialize kinematics with module positions
+        swerveDriveKinematics = new SwerveDriveKinematics(
+        new Translation2d(SimulationConstants.TRACK_WIDTH.in(Units.Meters) / 2, SimulationConstants.TRACK_LENGTH.in(Units.Meters) / 2), // Front left
+        new Translation2d(SimulationConstants.TRACK_WIDTH.in(Units.Meters) / 2, -SimulationConstants.TRACK_LENGTH.in(Units.Meters) / 2), // Front right
+        new Translation2d(-SimulationConstants.TRACK_WIDTH.in(Units.Meters) / 2, SimulationConstants.TRACK_LENGTH.in(Units.Meters) / 2), // Back left
+        new Translation2d(-SimulationConstants.TRACK_WIDTH.in(Units.Meters) / 2, -SimulationConstants.TRACK_LENGTH.in(Units.Meters) / 2)  // Back right
+    );
         
         // Create the swerve drive
         File swerveDirectory = new File(Filesystem.getDeployDirectory(), SwerveConstants.SWERVE_DRIVE_DIRECTORY);
@@ -105,9 +116,46 @@ public class SwerveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        Logger.recordOutput("Swerve/ChassisSpeeds", getChassisSpeeds());
-
-        Logger.recordOutput("FieldSimulation/RobotPose", new Pose3d(swerveDrive.getPose()));
+        if (Robot.isSimulation()) {
+            // Update odometry based on simulated module states
+            SwerveModuleSimulation[] modules = swerveDriveSimulation.getModules();
+            SwerveModuleState[] simulatedStates = new SwerveModuleState[4];
+            for (int i = 0; i < 4; i++) {
+                // Convert angular velocity to linear velocity
+                double angularVelocity = modules[i].getDriveWheelFinalSpeed().in(Units.RadiansPerSecond); // Get angular velocity in rad/s
+                double linearVelocity = angularVelocity * SimulationConstants.WHEEL_RADIUS.in(Units.Meters); // Convert to m/s
+    
+                simulatedStates[i] = new SwerveModuleState(
+                    linearVelocity, // Use linear velocity in m/s
+                    modules[i].getSteerAbsoluteFacing() // Get the module's rotation
+                );
+            }
+    
+            // Calculate the robot's pose using SwerveDriveKinematics
+            ChassisSpeeds chassisSpeeds = swerveDriveKinematics.toChassisSpeeds(simulatedStates);
+            Pose2d newPose = new Pose2d(
+                swerveDrive.getPose().getTranslation().plus(
+                    new Translation2d(
+                        chassisSpeeds.vxMetersPerSecond * 0.02, // Multiply by the loop time (20 ms)
+                        chassisSpeeds.vyMetersPerSecond * 0.02
+                    )
+                ),
+                swerveDrive.getPose().getRotation().plus(
+                    new Rotation2d(chassisSpeeds.omegaRadiansPerSecond * 0.02)
+                )
+            );
+    
+            // Update the odometry
+            swerveDrive.resetOdometry(newPose);
+        }
+    
+        // Log and debug data
+        var pose = getPose();
+        SmartDashboard.putString("Swerve/Pose", 
+            String.format("X: %.2f, Y: %.2f, Rot: %.2f",
+                pose.getX(),
+                pose.getY(),
+                pose.getRotation().getDegrees()));
 
         // Update the encoder positions
         SwerveModule[] modules = this.swerveDrive.getModules();
@@ -129,13 +177,6 @@ public class SwerveSubsystem extends SubsystemBase {
         // Debug swerve state
         SmartDashboard.putNumber("Swerve/UpdateCount", count++);
 
-        var pose = getPose();
-        SmartDashboard.putString("Swerve/Pose", 
-            String.format("X: %.2f, Y: %.2f, Rot: %.2f",
-                pose.getX(),
-                pose.getY(),
-                pose.getRotation().getDegrees()));
-
         var speeds = getChassisSpeeds();
         SmartDashboard.putNumber("Swerve/VX", speeds.vxMetersPerSecond);
         SmartDashboard.putNumber("Swerve/VY", speeds.vyMetersPerSecond);
@@ -147,6 +188,14 @@ public class SwerveSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("Swerve/Module" + i + "/Speed", states[i].speedMetersPerSecond);
             SmartDashboard.putNumber("Swerve/Module" + i + "/Angle", states[i].angle.getDegrees());
         }
+
+        // Log swerve module states
+        SwerveModuleState[] SimStates = swerveDrive.getStates();
+        Logger.recordOutput("Swerve/ModuleStates", SimStates);
+
+        // Log chassis speeds
+        ChassisSpeeds SimSpeeds = swerveDrive.getRobotVelocity();
+        Logger.recordOutput("Swerve/ChassisSpeeds", SimSpeeds);
     }
 
     public void autoDrive(ChassisSpeeds speeds) {
@@ -177,6 +226,9 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public void resetOdometry(Pose2d pose) {
         swerveDrive.resetOdometry(pose);
+        if (Robot.isSimulation()) {
+            swerveDriveSimulation.setSimulationWorldPose(pose);
+        }
     }
 
     //adding odometry reset with gyro zeroing

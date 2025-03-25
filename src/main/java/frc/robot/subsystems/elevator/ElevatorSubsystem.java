@@ -7,7 +7,11 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import org.littletonrobotics.junction.Logger;
 
 public class ElevatorSubsystem extends SubsystemBase {
     // Hardware
@@ -70,10 +74,21 @@ public class ElevatorSubsystem extends SubsystemBase {
         primaryPositionInches = primaryMotor.getPosition().getValueAsDouble() * ElevatorConstants.GEAR_RATIO;
         secondaryPositionInches = secondaryMotor.getPosition().getValueAsDouble() * ElevatorConstants.GEAR_RATIO;
 
+        // Log the elevator's pose as a child of the robot's pose
+        Pose3d elevatorPose = new Pose3d(
+            new Translation3d(0.2, 0.1, getCurrentHeight() * 0.0254), // Convert inches to meters
+            new Rotation3d() // No rotation for the elevator
+        );
+        Logger.recordOutput("Robot/Elevator", elevatorPose);
+
         // Put values on NetworkTables for simulation visualization
         SmartDashboard.putNumber("[ELEVATOR] Primary Position (inches)", primaryPositionInches);
         SmartDashboard.putNumber("[ELEVATOR] Secondary Position (inches)", secondaryPositionInches);
         SmartDashboard.putNumber("[ELEVATOR] Manual Power", manualPower);
+
+        Logger.recordOutput("Elevator/CurrentHeight", getCurrentHeight());
+        Logger.recordOutput("Elevator/TargetHeight", primaryTargetInches);
+        Logger.recordOutput("Elevator/AtTarget", isAtTarget());
     }
     
     @Override
@@ -93,6 +108,10 @@ public class ElevatorSubsystem extends SubsystemBase {
         // Convert meters to motor rotations for simulation
         primaryMotor.getSimState().setRawRotorPosition(primarySimPosition / (2 * Math.PI * ElevatorConstants.PRIMARY_DRUM_RADIUS_INCHES));
         secondaryMotor.getSimState().setRawRotorPosition(secondarySimPosition / (2 * Math.PI * ElevatorConstants.SECONDARY_DRUM_RADIUS_INCHES));
+
+        // Log simulated positions for debugging
+        Logger.recordOutput("Elevator/SimulatedPrimaryPosition", primarySimPosition);
+        Logger.recordOutput("Elevator/SimulatedSecondaryPosition", secondarySimPosition);
     }
     
     public Command moveToPosition(double heightInches) {
