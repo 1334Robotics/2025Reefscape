@@ -274,7 +274,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public void autoDrive(ChassisSpeeds speeds) {
-        swerveDrive.drive(speeds);
+        swerveDrive.setChassisSpeeds(speeds);
     }
 
     public void zeroGyro() {
