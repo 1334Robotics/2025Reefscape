@@ -7,12 +7,19 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.RobotContainer;
 import frc.robot.constants.AutoConstants;
 
 public class AutoConfigurer {
+    public static boolean allowDrive = false;
+    
+    private static void autoDrive(ChassisSpeeds speeds) {
+        if(allowDrive) RobotContainer.swerveSubsystem.autoDrive(speeds);
+    }
+
     public static void configure() {
         RobotConfig config;
         try {
@@ -26,7 +33,7 @@ public class AutoConfigurer {
                               RobotContainer.swerveSubsystem::getPose,
                               RobotContainer.swerveSubsystem::resetOdometry,
                               RobotContainer.swerveSubsystem::getChassisSpeeds,
-                              (speeds, feedforwards) -> RobotContainer.swerveSubsystem.autoDrive(speeds),
+                              (speeds, feedforwards) -> AutoConfigurer.autoDrive(speeds),
                               new PPHolonomicDriveController(
                                                              new PIDConstants(AutoConstants.TRANSLATION_KP,
                                                                               AutoConstants.TRANSLATION_KI,

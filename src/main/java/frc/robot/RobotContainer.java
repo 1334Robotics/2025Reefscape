@@ -1,6 +1,8 @@
 package frc.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.auto.AutoCache;
 import frc.robot.auto.AutoConfigurer;
+import frc.robot.auto.AutoPath;
 import frc.robot.commands.led.ToggleLedCommand;
 import frc.robot.commands.climb.ForcePinsDownCommand;
 import frc.robot.commands.climb.ForcePinsUpCommand;
@@ -85,6 +87,7 @@ import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import java.util.List;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.io.File;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -166,153 +169,10 @@ public class RobotContainer {
                                                                                                 VisionConstants.TRACK_TAG_Y));
   public static final AutoTagSelector autoTagSelector = new AutoTagSelector();
 
-  //Conditionally create SimulationSubsystem
-  //public final SimulationSubsystem simulationSubsystem;
-
-  // Auto chooser for PathPlanner
-  private SendableChooser<Command> autoChooser;
-
-  // Map to store auto names for dashboard reporting
-  private final Map<Command, String> autoCommandNames = new HashMap<>();
-
-  // Path cache to improve performance and memory management
-  private final Map<String, PathPlannerPath> pathCache = new HashMap<>();
-
-  /**
-   * List available path files on the dashboard
-   */
-  private void listAvailablePaths() {
-    try {
-      // Use Filesystem to get the deploy directory in a platform-independent way
-      File pathsDir = new File(Filesystem.getDeployDirectory(), "pathplanner/paths");
-      if (pathsDir.exists() && pathsDir.isDirectory()) {
-        File[] pathFiles = pathsDir.listFiles((dir, name) -> name.endsWith(".path"));
-        if (pathFiles != null) {
-          // Create a text listing of available paths for reference
-          StringBuilder pathsList = new StringBuilder();
-          for (File file : pathFiles) {
-            pathsList.append("- ").append(file.getName().replace(".path", "")).append("\n");
-          }
-          SmartDashboard.putString("Path Files (Reference Only)", pathsList.toString());
-        }
-      }
-      
-      // Also list available auto files
-      File autosDir = new File(Filesystem.getDeployDirectory(), "pathplanner/autos");
-      if (autosDir.exists() && autosDir.isDirectory()) {
-        File[] autoFiles = autosDir.listFiles((dir, name) -> name.endsWith(".auto"));
-        if (autoFiles != null) {
-          StringBuilder autosList = new StringBuilder();
-          for (File file : autoFiles) {
-            autosList.append("- ").append(file.getName().replace(".auto", "")).append("\n");
-          }
-          SmartDashboard.putString("[AUTO] Auto Files (Reference Only)", autosList.toString());
-        }
-      }
-    } catch (Exception e) {
-      System.err.println("Error listing path files: " + e.getMessage());
-    }
-  }
-
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // Configure pathplanner's AutoBuilder
-    AutoConfigurer.configure();
-
-    DriverStation.silenceJoystickConnectionWarning(true);
-    
-    System.out.println("Initializing RobotContainer...");
-    
-    // Register named commands BEFORE configuring PathPlanner
-    System.out.println("1. Registering commands for PathPlanner...");
-    registerNamedCommands();
-    
-    // PathPlanner is already configured in SwerveSubsystem constructor
-    System.out.println("2. PathPlanner configured in SwerveSubsystem");
-    
-    // Initialize and configure auto chooser - MUST come after PathPlanner configuration
-    System.out.println("3. Configuring Auto Chooser...");
-    configureAutoChooser();
-    
-    // Verify auto chooser was created
-    if (autoChooser == null) {
-        System.err.println("ERROR: Auto chooser is null after configuration!");
-    } else {
-        System.out.println("Auto chooser configured successfully");
-    }
-    
-    // Preload all autonomous routines
-    System.out.println("4. Preloading autonomous routines...");
-    preloadAutonomousRoutines();
-
-    // Configure the trigger bindings
-    System.out.println("5. Configuring button bindings...");
     configureBindings();
-
-    // Set up dashboard information
-    System.out.println("6. Setting up dashboard information...");
-    setupDashboard();
-    
-    // Configure default commands
-    System.out.println("7. Setting up default commands...");
     setupDefaultCommands();
-    
-    System.out.println("RobotContainer initialization complete!");
-  }
-
-  private void setupDashboard() {
-    // Clear any existing auto data from SmartDashboard
-    SmartDashboard.clearPersistent("[AUTO] Auto Routines");
-    SmartDashboard.clearPersistent("[AUTO] PathPlanner/currentPath");
-    SmartDashboard.clearPersistent("[AUTO] PathPlanner/activePath");
-    
-    // Get fresh auto chooser from PathPlanner
-    autoChooser = AutoBuilder.buildAutoChooser();
-    
-    // Verify auto chooser exists before putting to dashboard
-    if (autoChooser != null) {
-        SmartDashboard.putData("[AUTO] Auto Routines", autoChooser);
-        System.out.println("Auto chooser added to dashboard");
-    } else {
-        System.err.println("ERROR: Cannot add null auto chooser to dashboard!");
-    }
-    
-    SmartDashboard.putString("[AUTO] Current Auto Status", "Ready (Press START button to run)");
-    SmartDashboard.putString("[AUTO] Auto Button Help", "Press START button on driver controller to run selected auto");
-    
-    // Create Elevator Control tab
-    ShuffleboardTab elevatorTab = Shuffleboard.getTab("Elevator");
-    
-    // Add manual control toggle with a switch widget
-    elevatorTab.addBoolean("Force Manual Control", () -> elevatorHandler.isForceManualControl())
-        .withWidget(BuiltInWidgets.kToggleSwitch)
-        .withPosition(0, 0)
-        .withSize(2, 1);
-        
-    // Add control mode indicator
-    elevatorTab.addString("Control Mode", 
-        () -> elevatorHandler.isForceManualControl() ? "MANUAL" : "AUTOMATED")
-        .withPosition(2, 0)
-        .withSize(2, 1);
-        
-    // Add position info
-    elevatorTab.addNumber("Current Position", 
-        (DoubleSupplier)(() -> elevatorSubsystem.getPosition()))
-        .withPosition(0, 1)
-        .withSize(2, 1);
-        
-    elevatorTab.addNumber("Target Position",
-        (DoubleSupplier)(() -> {
-            ElevatorLevel level = elevatorHandler.getLevel();
-            return level != null ? level.position : 0.0;
-        }))
-        .withPosition(2, 1)
-        .withSize(2, 1);
-        
-    // List available paths for manual selection
-    listAvailablePaths();
-
-    this.registerClimbCommands();
+    registerClimbCommands();
   }
 
   private void registerClimbCommands() {
@@ -331,37 +191,6 @@ public class RobotContainer {
 
     swerveSubsystem.setDefaultCommand(xboxDriveCommand);
   }
-
-  private void configureAutoChooser() {
-    try {
-      System.out.println("Starting auto chooser configuration...");
-      
-      // Build an auto chooser using PathPlanner's built-in method
-      autoChooser = AutoBuilder.buildAutoChooser("Do Nothing");
-      
-      if (autoChooser == null) {
-        System.err.println("ERROR: AutoBuilder.buildAutoChooser returned null!");
-        return;
-      }
-      
-      // Verify the chooser has options
-      var options = autoChooser.getSelected();
-      if (options == null) {
-        System.out.println("Warning: Auto chooser has no selected option - this is expected if 'Do Nothing' is the only option");
-      }
-      
-      // Put auto chooser on dashboard
-      SmartDashboard.putData("[AUTO] Auto Routines", autoChooser);
-      System.out.println("Auto chooser configured and added to dashboard");
-      
-      // List available autos in the terminal/log for debugging
-      listAvailableAutos();
-      
-    } catch (Exception e) {
-      System.err.println("Error configuring auto chooser: " + e.getMessage());
-      e.printStackTrace();
-    }
-  }
   
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
@@ -373,6 +202,8 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+    DriverStation.silenceJoystickConnectionWarning(true);
+
     gyroZeroButton.onTrue(new GyroZeroCommand()); 
     forwardsSnapButton.onTrue(new DirectionSnapForwards());
     leftSnapButton.onTrue(new DirectionSnapLeft());
@@ -413,180 +244,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // Get the selected command from the auto chooser
-    Command selectedCommand = autoChooser.getSelected();
-    
-    // If no command is selected or it's the "Do Nothing" command, use tracking command
-    if (selectedCommand == null || 
-        (selectedCommand instanceof InstantCommand && 
-         !(selectedCommand instanceof SequentialCommandGroup))) {
-      System.out.println("No auto selected or 'Do Nothing' selected - Using tracking command");
-      return trackCommand;
-    }
-    
-    System.out.println("Running selected auto routine: " + selectedCommand.getName());
-    return selectedCommand;
-  }
-
-  /**
-   * Updates dashboard indicators for current alliance and FMS position
-   * Called periodically from Robot to ensure indicators stay current
-   */
-  public void updateAllianceIndicators() {
-    var alliance = DriverStation.getAlliance();
-    if (alliance.isPresent()) {
-      boolean isRed = alliance.get() == DriverStation.Alliance.Red;
-      SmartDashboard.putBoolean("[AUTO] Is Red Alliance", isRed);
-      SmartDashboard.putString("[AUTO] Current Alliance", isRed ? "RED" : "BLUE");
-      
-      // Get and display FMS position if available
-      int location = DriverStation.getLocation().orElse(2); // Default to center (2)
-      SmartDashboard.putNumber("[AUTO] FMS Position", location);
-    } else {
-      SmartDashboard.putBoolean("[AUTO] Is Red Alliance", false);
-      SmartDashboard.putString("[AUTO] Current Alliance", "UNKNOWN");
-      SmartDashboard.putNumber("[AUTO] FMS Position", 2); // Default to center
-    }
-  }
-
-  /**
-   * Register named commands for use in PathPlanner auto routines
-   */
-  private void registerNamedCommands() {
-    System.out.println("Registering PathPlanner commands...");
-    
-    try {
-        // Register auto sequence commands
-        NamedCommands.registerCommand("Shoot", new ShootCommand());
-        NamedCommands.registerCommand("MailboxShoot", new ShootCommand());
-        System.out.println("✓ Registered Shoot command");
-        
-        // Register marker event commands
-        NamedCommands.registerCommand("ElevatorL1", new ElevatorGotoL1Command());
-        System.out.println("✓ Registered ElevatorL1 command (marker event)");
-        
-        // Log registration status to dashboard
-        SmartDashboard.putString("[AUTO] PathPlanner/Commands", "MailboxShoot, ElevatorL1");
-        System.out.println("Command registration complete!");
-        
-    } catch (Exception e) {
-        System.err.println("Error registering commands: " + e.getMessage());
-        SmartDashboard.putString("[AUTO] PathPlanner/Error", e.getMessage());
-    }
-  }
-  
-  /**
-   * Preload all autonomous routines to prevent delays during competitions
-   */
-  private void preloadAutonomousRoutines() {
-    try {
-        // Get all auto files
-        File autosDir = new File(Filesystem.getDeployDirectory(), "pathplanner/autos");
-        if (autosDir.exists() && autosDir.isDirectory()) {
-            File[] autoFiles = autosDir.listFiles((dir, name) -> name.endsWith(".auto"));
-            if (autoFiles != null) {
-                System.out.println("Preloading " + autoFiles.length + " auto routines...");
-                for (File file : autoFiles) {
-                    String autoName = file.getName().replace(".auto", "");
-                    try {
-                        // Create the command to ensure it's loaded in memory
-                        new PathPlannerAuto(autoName);
-                        System.out.println("  - Preloaded auto: " + autoName);
-                    } catch (Exception e) {
-                        System.err.println("  - Error preloading auto '" + autoName + "': " + e.getMessage());
-                    }
-                }
-                System.out.println("Auto preloading complete!");
-            }
-        }
-    } catch (Exception e) {
-        System.err.println("Error during auto preloading: " + e.getMessage());
-    }
-  }
-
-  /**
-   * List available auto files on the dashboard
-   */
-  private void listAvailableAutos() {
-    System.out.println("Checking for available auto files...");
-    try {
-      // Get the deploy directory path
-      File deployDir = Filesystem.getDeployDirectory();
-      File autosDir = new File(deployDir, "pathplanner/autos");
-      
-      System.out.println("Looking for autos in: " + autosDir.getAbsolutePath());
-      
-      if (!autosDir.exists()) {
-        System.err.println("ERROR: Autos directory does not exist!");
-        System.err.println("Please ensure you have created the directory: " + autosDir.getAbsolutePath());
-        return;
-      }
-      
-      if (!autosDir.isDirectory()) {
-        System.err.println("ERROR: Autos path exists but is not a directory!");
-        return;
-      }
-      
-      File[] autoFiles = autosDir.listFiles((dir, name) -> name.endsWith(".auto"));
-      
-      if (autoFiles == null) {
-        System.err.println("ERROR: Unable to list files in autos directory");
-        return;
-      }
-      
-      if (autoFiles.length == 0) {
-        System.out.println("No .auto files found in " + autosDir.getAbsolutePath());
-        System.out.println("Please create at least one auto routine in PathPlanner");
-        return;
-      }
-      
-      System.out.println("Found " + autoFiles.length + " auto files:");
-      StringBuilder autosList = new StringBuilder();
-      for (File file : autoFiles) {
-        String autoName = file.getName().replace(".auto", "");
-        autosList.append("- ").append(autoName).append("\n");
-        System.out.println("  - " + autoName);
-      }
-      
-      SmartDashboard.putString("[AUTO] Available Autos", autosList.toString());
-      
-    } catch (Exception e) {
-      System.err.println("Error listing auto files: " + e.getMessage());
-      e.printStackTrace();
-    }
-  }
-
-  /**
-   * Creates a command to run the currently selected autonomous routine from the auto chooser
-   * This allows running autonomously selected routines without switching robot modes
-   * 
-   * @return A command that runs the selected autonomous routine
-   */
-  public Command runSelectedAuto() {
-    return Commands.defer(() -> {
-      Command selectedAuto = autoChooser.getSelected();
-      
-      if (selectedAuto == null || 
-          (selectedAuto instanceof InstantCommand && 
-           !(selectedAuto instanceof SequentialCommandGroup))) {
-        System.out.println("No auto selected or 'Do Nothing' selected");
-        SmartDashboard.putString("[AUTO] Current Auto Status", "No auto routine selected");
-        return Commands.none();
-      }
-      
-      System.out.println("Running selected auto routine via button press");
-      
-      return Commands.sequence(
-        Commands.runOnce(() -> {
-          CommandScheduler.getInstance().cancelAll();
-          SmartDashboard.putString("AUTO] Current Auto Status", "Running Auto");
-        }),
-        selectedAuto,
-        Commands.runOnce(() -> {
-          System.out.println("Auto routine completed");
-          SmartDashboard.putString("[AUTO] Current Auto Status", "Completed");
-        })
-      );
-    }, Set.of()); // Pass an empty set of requirements
+    return AutoCache.getAuto("Test Auto").getCommand();
   }
 }

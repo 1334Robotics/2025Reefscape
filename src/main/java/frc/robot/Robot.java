@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.auto.AutoCache;
 import frc.robot.auto.AutoConfigurer;
 import frc.robot.commands.elevator.ElevatorResetCommand;
 import frc.robot.constants.AutoConstants;
@@ -66,6 +67,12 @@ public class Robot extends LoggedRobot {
       
       // Check and log library versions
       logLibraryVersions();
+
+      // Cache paths
+      AutoCache.init();
+      AutoCache.getPath("Test Path");
+      AutoCache.getAuto("Test Auto");
+      AutoCache.afterLoad();
   }
 
   /**
@@ -115,9 +122,6 @@ public class Robot extends LoggedRobot {
     CommandScheduler.getInstance().run();
     RobotContainer.trackCommand.execute(); // THIS IS BAD. IT SHOULDN'T NEED TO DO THIS
     m_field.setRobotPose(RobotContainer.swerveSubsystem.getPose());
-    
-    // Update alliance indicators on dashboard
-    m_robotContainer.updateAllianceIndicators();
   }
    /** This function is called once when the robot is first started up. */
   @Override
@@ -291,13 +295,6 @@ public class Robot extends LoggedRobot {
     if(SmartDashboard.getBoolean("[ELEVATOR] Reset On TeleOp Enable", false) && !this.elevatorReset) {
       (new ElevatorResetCommand()).schedule();
       this.elevatorReset = true;
-    }
-    // This makes sure that the autonomous stops running when
-    // teleop starts running. If you want the autonomous to
-    // continue until interrupted by another command, remove
-    // this line or comment it out.
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
     }
   }
 
