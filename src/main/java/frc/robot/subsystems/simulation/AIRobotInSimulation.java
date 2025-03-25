@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -64,8 +63,8 @@ public class AIRobotInSimulation extends SubsystemBase {
         new Pose2d(1.6, 4, new Rotation2d())
     };
     /* Store instances of AI robots in a static array. */
-    public static final AIRobotInSimulation[] instances = new AIRobotInSimulation[6];
-    SendableChooser<Command> behaviorChooser = new SendableChooser<>();
+    public static final AIRobotInSimulation[] instances = new AIRobotInSimulation[5];
+    private final SendableChooser<Command> behaviorChooser;
 
     /* The drivetrain configuration for the opponent robots in the maple-sim simulation. */
     private static final DriveTrainSimulationConfig DRIVETRAIN_CONFIG =
@@ -102,9 +101,7 @@ public class AIRobotInSimulation extends SubsystemBase {
                     Commands.none(),
                     PathPlannerPath.fromPathFile("opponent robot cycle path 0 backwards"),
                     Commands.none(),
-                    new XboxController(2));
-
-            // Same of the following:
+                    new XboxController(1));
 
             instances[1] = new AIRobotInSimulation(1);
             instances[1].buildBehaviorChooser(
@@ -112,7 +109,7 @@ public class AIRobotInSimulation extends SubsystemBase {
                     Commands.none(),
                     PathPlannerPath.fromPathFile("opponent robot cycle path 1 backwards"),
                     Commands.none(),
-                    new XboxController(3));
+                    new XboxController(2));
 
             instances[2] = new AIRobotInSimulation(2);
             instances[2].buildBehaviorChooser(
@@ -120,7 +117,7 @@ public class AIRobotInSimulation extends SubsystemBase {
                     Commands.none(),
                     PathPlannerPath.fromPathFile("opponent robot cycle path 2 backwards"),
                     Commands.none(),
-                    new XboxController(4));
+                    new XboxController(3));
 
             instances[3] = new AIRobotInSimulation(3);
             instances[3].buildBehaviorChooser(
@@ -128,7 +125,7 @@ public class AIRobotInSimulation extends SubsystemBase {
                     Commands.none(),
                     PathPlannerPath.fromPathFile("opponent robot cycle path 3 backwards"),
                     Commands.none(),
-                    new XboxController(5));
+                    new XboxController(4));
 
             instances[4] = new AIRobotInSimulation(4);
             instances[4].buildBehaviorChooser(
@@ -136,16 +133,7 @@ public class AIRobotInSimulation extends SubsystemBase {
                     Commands.none(),
                     PathPlannerPath.fromPathFile("opponent robot cycle path 4 backwards"),
                     Commands.none(),
-                    new XboxController(6));
-
-                instances[5] = new AIRobotInSimulation(5);
-            instances[5].buildBehaviorChooser(
-                    PathPlannerPath.fromPathFile("opponent robot cycle path 5"),
-                    Commands.none(),
-                    PathPlannerPath.fromPathFile("opponent robot cycle path 5 backwards"),
-                    Commands.none(),
-                    new XboxController(7));
-
+                    new XboxController(5));
         } catch (Exception e) {
             DriverStation.reportError("failed to load opponent robot simulation path, error:" + e.getMessage(), false);
         }
@@ -159,6 +147,7 @@ public class AIRobotInSimulation extends SubsystemBase {
         System.out.println("DEBUG: Initializing AI robot " + id);
         this.id = id;
         this.queeningPose = ROBOT_QUEENING_POSITIONS[id];
+        this.behaviorChooser = new SendableChooser<>();
         this.driveSimulation =
                 new SelfControlledSwerveDriveSimulation(new SwerveDriveSimulation(DRIVETRAIN_CONFIG, queeningPose));
 
@@ -207,12 +196,6 @@ public class AIRobotInSimulation extends SubsystemBase {
 
         // Display the behavior chooser on the dashboard for the user to select the desired robot behavior
         SmartDashboard.putData("AIRobotBehaviors/Opponent Robot " + id + " Behavior", behaviorChooser);
-
-        // Explicitly add the SendableChooser to the AIRobotBehaviors tab in Shuffleboard
-        Shuffleboard.getTab("AIRobotBehaviors")
-                .add("Opponent Robot " + id + " Behavior", behaviorChooser)
-                .withPosition(0, id) // Adjust position as needed
-                .withSize(2, 1); // Adjust size as needed
     }
 
     /**

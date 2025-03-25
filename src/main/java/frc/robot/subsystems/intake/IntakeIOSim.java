@@ -12,6 +12,7 @@ import frc.robot.constants.SimulationConstants;
 public class IntakeIOSim implements IntakeIO{
     private final IntakeSimulation intakeSimulation;
     private final SwerveDriveSimulation swerveDriveSimulation;
+    private boolean isRunning;
 
     public IntakeIOSim(SwerveDriveSimulation swerveDriveSimulation) {
         this.swerveDriveSimulation = swerveDriveSimulation;
@@ -37,6 +38,7 @@ public class IntakeIOSim implements IntakeIO{
     @Override
     public void setRunning(boolean runIntake) {
         System.out.println("DEBUG: Intake setRunning(" + runIntake + ")");
+        this.isRunning = runIntake;
         if (runIntake) {
             System.out.println("DEBUG: Starting intake");
             intakeSimulation.startIntake(); // Extends the intake out from the chassis frame and starts detecting contacts with game pieces
@@ -51,6 +53,7 @@ public class IntakeIOSim implements IntakeIO{
         boolean hasCoral = intakeSimulation.getGamePiecesAmount() != 0;
         return hasCoral;
     }
+
 
     @Override
     public void launchCoral() {
@@ -75,5 +78,10 @@ public class IntakeIOSim implements IntakeIO{
             // The coral is ejected at a 35-degree slope
             Units.Degrees.of(-35)));
         }
+    }
+
+    @Override
+    public boolean isRunning() {
+        return isRunning; // Return the running state
     }
 }

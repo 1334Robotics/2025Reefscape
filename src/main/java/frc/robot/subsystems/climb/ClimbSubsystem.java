@@ -4,7 +4,11 @@ import com.revrobotics.spark.SparkMax;
 import frc.robot.constants.ClimbConstants;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import org.littletonrobotics.junction.Logger;
 
 public class ClimbSubsystem extends SubsystemBase {
     // Two lower Neo motors for forcing the pins down
@@ -63,5 +67,14 @@ public class ClimbSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Climb/LowerMotor1 Output", lowerMotor1.get());
         SmartDashboard.putNumber("Climb/LowerMotor2 Output", lowerMotor2.get());
         SmartDashboard.putNumber("Climb/LockMotor Output", lockMotor.get());
+
+        // Log the state of the climb mechanism
+        Pose3d pin1Pose = new Pose3d(new Translation3d(-0.2, 0.1, lowerMotor1.getEncoder().getPosition()), new Rotation3d());
+        Pose3d pin2Pose = new Pose3d(new Translation3d(-0.2, -0.1, lowerMotor2.getEncoder().getPosition()), new Rotation3d());
+        Pose3d lockPose = new Pose3d(new Translation3d(0, 0, lockMotor.getEncoder().getPosition()), new Rotation3d());
+
+        Logger.recordOutput("Climb/Pin1Pose", pin1Pose);
+        Logger.recordOutput("Climb/Pin2Pose", pin2Pose);
+        Logger.recordOutput("Climb/LockPose", lockPose);
     }
 }

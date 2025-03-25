@@ -7,4 +7,6 @@ public interface IntakeIO {
     public boolean isCoralInsideIntake();
 
     public void launchCoral();
+
+    public boolean isRunning();
 }

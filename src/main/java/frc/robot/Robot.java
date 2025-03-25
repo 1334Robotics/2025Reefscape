@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -76,17 +77,19 @@ public class Robot extends LoggedRobot {
   public void simulationInit() {
     SimulatedArena.getInstance();
     AIRobotInSimulation.startOpponentRobotSimulations();
+    // Use m_robotContainer instead of robotContainer
+    if (m_robotContainer.simulationSubsystem != null) {
+      System.out.println("DEBUG: runIntake() called in simulationInit()");
+      m_robotContainer.simulationSubsystem.runIntake();
+    }
   }
 
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {
     SimulatedArena.getInstance().simulationPeriodic();
-    // Log game piece positions
-    Logger.recordOutput("FieldSimulation/Algae", 
-    SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
-    Logger.recordOutput("FieldSimulation/Coral", 
-    SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
+    Logger.recordOutput("Power/BatteryVoltage", RobotController.getBatteryVoltage());
+    Logger.recordOutput("Power/TotalCurrent", RobotController.getInputCurrent());
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
