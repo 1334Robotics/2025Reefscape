@@ -4,10 +4,12 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.RobotContainer;
 
 public class AutoCache {
     private static Map<String, AutoItem> paths = null;
@@ -51,5 +53,8 @@ public class AutoCache {
 
         // Enable real swerve
         AutoConfigurer.allowDrive = true;
+
+        // Run the swerve wheels at 0 speed
+        RobotContainer.swerveSubsystem.autoDrive(new ChassisSpeeds(0, 0, 0));
     }
 }

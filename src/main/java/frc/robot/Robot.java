@@ -192,8 +192,8 @@ public class Robot extends LoggedRobot {
       System.out.println("Elevator zeroing completed");
     }
     
-    // Set initial robot pose based on FMS data
-    setInitialPose();
+    // Set initial robot pose based on the selected position within SmartDashboard
+    AutoConfigurer.setInitialPose();
     
     // Small delay to ensure odometry reset is complete
     try {
@@ -215,59 +215,6 @@ public class Robot extends LoggedRobot {
     } else {
       System.out.println("No autonomous command selected!");
     }
-  }
-
-  /**
-   * Sets the initial robot pose based on FMS data
-   * This method is called at the start of autonomous to ensure the robot has the
-   * correct pose based on the latest alliance and FMS position settings.
-   */
-  private void setInitialPose() {
-    var alliance = DriverStation.getAlliance();
-    int location = DriverStation.getLocation().orElse(2); // Default to center (2) if not available
-    
-    // Default starting pose (Center, Blue alliance)
-    Pose2d startingPose = new Pose2d(5.89, 5.5, Rotation2d.fromDegrees(180));
-    
-    if (alliance.isPresent()) {
-      if (alliance.get() == DriverStation.Alliance.Blue) {
-        // Blue alliance positions
-        switch (location) {
-          case 1:   // Left
-            startingPose = AutoConstants.BLUE_LEFT_STARTING_POSE;
-            break;
-          case 2:   // Center
-            startingPose = AutoConstants.BLUE_CENTER_STARTING_POSE;
-            break;
-          case 3: // Right
-            startingPose = AutoConstants.BLUE_RIGHT_STARTING_POSE;
-            break;
-        }
-      } else {
-        // Red alliance positions (mirrored across field center)
-        switch (location) {
-          case 1:   // Left
-            startingPose = AutoConstants.RED_LEFT_STARTING_POSE;
-            break;
-          case 2:   // Center
-            startingPose = AutoConstants.RED_CENTER_STARTING_POSE;
-            break;
-          case 3: // Right
-            startingPose = AutoConstants.RED_RIGHT_STARTING_POSE;
-            break;
-        }
-      }
-      
-      // Log the starting position
-      System.out.println("Setting initial pose to: " + startingPose + 
-                        " (Alliance: " + alliance.get() + 
-                        ", Position: " + location + ")");
-    } else {
-      System.out.println("Warning: Using default starting pose - Alliance not available");
-    }
-                      
-    // Reset odometry to the starting pose
-    RobotContainer.swerveSubsystem.resetOdometry(startingPose);
   }
 
   /** This function is called periodically during autonomous. */
