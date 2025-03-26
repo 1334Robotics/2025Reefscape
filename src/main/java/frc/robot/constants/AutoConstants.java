@@ -16,7 +16,8 @@ public class AutoConstants {
     public static final double PATH_PLANNER_KP = 5;
     public static final double PATH_PLANNER_KI = 0;
     public static final double PATH_PLANNER_KD = 0;
-
+    
+    // The rotation of 180 is definitiely a suspect for the bot starting 180
     public static final Pose2d BLUE_LEFT_STARTING_POSE = new Pose2d(7.6, 1, Rotation2d.fromDegrees(180));    // Blue Bottom
     public static final Pose2d BLUE_CENTER_STARTING_POSE = new Pose2d(7.6, 4, Rotation2d.fromDegrees(180));  // Blue Middle
     public static final Pose2d BLUE_RIGHT_STARTING_POSE = new Pose2d(7.6, 7, Rotation2d.fromDegrees(180));   // Blue Top

@@ -55,6 +55,7 @@ public class Robot extends LoggedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+    AutoConfigurer.configure();
 
     // Put the check to disable the elevator reset on TeleOp enable
     SmartDashboard.putBoolean("[ELEVATOR] Reset On TeleOp Enable", true);
@@ -170,7 +171,7 @@ public class Robot extends LoggedRobot {
     RobotContainer.swerveSubsystem.setFieldRelative(true);
     
     // Force automatic control for autonomous
-    RobotContainer.elevatorHandler.setForceManualControl(false);
+    RobotContainer.elevatorHandler.setForceManualControl(false); // GET RID OF
     
     // First, reset the elevator if it hasn't been reset yet
     if (!elevatorReset) {
