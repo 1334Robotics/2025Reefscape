@@ -20,6 +20,7 @@ import frc.robot.constants.SimulationConstants;
 import frc.robot.constants.SwerveConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.vision.VisionSubsystem;
+import frc.robot.subsystems.vision.VisionPoseEstimator;
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
 import swervelib.SwerveModule;
@@ -36,6 +37,7 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
@@ -44,9 +46,15 @@ import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.targeting.PhotonTrackedTarget;
+import org.photonvision.EstimatedRobotPose;
+import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.targeting.PhotonPipelineResult;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 import org.ironmaple.simulation.SimulatedArena;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -75,6 +83,8 @@ public class SwerveSubsystem extends SubsystemBase {
     private boolean fieldRelative;
     private SwerveDriveSimulation swerveDriveSimulation;
     private int count = 0;
+    private final SwerveDrivePoseEstimator m_poseEstimator;
+    private final VisionPoseEstimator visionPoseEstimator;
 
   /**
    * Enable vision odometry updates while driving.
@@ -161,7 +171,15 @@ public class SwerveSubsystem extends SubsystemBase {
             throw new RuntimeException(e);
         }
         
-    
+        // Initialize SwerveDrivePoseEstimator
+        m_poseEstimator = new SwerveDrivePoseEstimator(
+            swerveDrive.kinematics,
+            swerveDrive.getGyro().getRotation3d().toRotation2d(),
+            swerveDrive.getModulePositions(),      // Get all module positions
+            startingPose,
+            VecBuilder.fill(0.05, 0.05, edu.wpi.first.math.util.Units.degreesToRadians(5)), // State measurement standard deviations
+            VecBuilder.fill(0.5, 0.5, edu.wpi.first.math.util.Units.degreesToRadians(30))  // Vision measurement standard deviations
+        );
         
         // Enable heading correction and cosine compensator
         this.swerveDrive.setHeadingCorrection(true);
@@ -181,6 +199,7 @@ public class SwerveSubsystem extends SubsystemBase {
         setupPathPlanner();
         // Comment out the line that uses RobotModeTriggers
         // RobotModeTriggers.autonomous().onTrue(Commands.runOnce(this::zeroGyro));
+        visionPoseEstimator = new VisionPoseEstimator();
     }
 
   /**
@@ -279,6 +298,30 @@ public class SwerveSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("Swerve/Module" + i + "/Speed", states[i].speedMetersPerSecond);
             SmartDashboard.putNumber("Swerve/Module" + i + "/Angle", states[i].angle.getDegrees());
         }
+        // Update odometry measurements
+        m_poseEstimator.update(
+            swerveDrive.getGyro().getRotation3d().toRotation2d(),
+            swerveDrive.getModulePositions()
+        );
+
+        // Update with vision measurements using PhotonPoseEstimator
+        Optional<EstimatedRobotPose> result = visionPoseEstimator.getEstimatedGlobalPose(
+            m_poseEstimator.getEstimatedPosition());
+
+        if (result.isPresent()) {
+            EstimatedRobotPose estimation = result.get();
+            // Convert Pose3d to Pose2d
+            Pose2d visionMeasurement = estimation.estimatedPose.toPose2d();
+            // Add the vision measurement to the pose estimator with timestamp
+            m_poseEstimator.addVisionMeasurement(
+                visionMeasurement,
+                estimation.timestampSeconds
+            );
+        }
+
+        // Log the current pose
+        Pose2d estimatedPose = m_poseEstimator.getEstimatedPosition();
+        SmartDashboard.putString("Swerve/Estimated Pose", estimatedPose.toString());
     }
 
     public SwerveController getSwerveController() {
