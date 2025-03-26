@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.elevator.ElevatorResetCommand;
 import frc.robot.constants.AutoConstants;
 import frc.robot.constants.ElevatorConstants;
@@ -203,8 +204,8 @@ public class Robot extends LoggedRobot {
     // Enable tracking if needed
     RobotContainer.trackCommand.enable();
     
-    // Get the autonomous command from RobotContainer
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    // Get the autonomous command from the robot container
+    m_autonomousCommand = new WaitCommand(0.01).andThen(m_robotContainer.getAutonomousCommand());
     
     // Schedule the autonomous command
     if (m_autonomousCommand != null) {

@@ -13,19 +13,13 @@
         {
           "type": "named",
           "data": {
-            "name": "Stop"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
             "name": "ElevatorL1"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.5
+            "waitTime": 1.0
           }
         },
         {
@@ -44,6 +38,18 @@
           "type": "named",
           "data": {
             "name": "ElevatorBottom"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.0
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
           }
         },
         {
