@@ -170,12 +170,12 @@ public class RobotContainer {
   public static final AutoTagSelector autoTagSelector = new AutoTagSelector();
 
   public RobotContainer() {
-    configureBindings();
-    setupDefaultCommands();
-    registerClimbCommands();
+    RobotContainer.configureBindings();
+    RobotContainer.setupDefaultCommands();
+    RobotContainer.registerClimbCommands();
   }
 
-  private void registerClimbCommands() {
+  private static void registerClimbCommands() {
     SmartDashboard.putData("[CLIMB] Lock",            new LockClimbCommand());
     SmartDashboard.putData("[CLIMB] Unlock",          new UnlockClimbCommand());
     SmartDashboard.putData("[CLIMB] Stop",            new StopClimbCommand());
@@ -183,7 +183,7 @@ public class RobotContainer {
     SmartDashboard.putData("[CLIMB] Force Pins Up",   new ForcePinsUpCommand());
   }
 
-  private void setupDefaultCommands() {
+  private static void setupDefaultCommands() {
     DriveCommand xboxDriveCommand = new DriveCommand(
         () -> MathUtil.applyDeadband(driverController.getLeftX(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
         () -> MathUtil.applyDeadband(driverController.getLeftY(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
@@ -201,7 +201,7 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
-  private void configureBindings() {
+  private static void configureBindings() {
     DriverStation.silenceJoystickConnectionWarning(true);
 
     gyroZeroButton.onTrue(new GyroZeroCommand()); 

@@ -20,7 +20,6 @@ public class AutoCache {
     public static void init() {
         if(AutoCache.cache == null) AutoCache.cache = new AutoCache();
 
-        // Turn off real swerve
         AutoConfigurer.configure();
     }
 

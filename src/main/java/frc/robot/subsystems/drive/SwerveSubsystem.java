@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
+import frc.robot.auto.AutoConfigurer;
 import frc.robot.constants.AutoConstants;
 import frc.robot.constants.SimulationConstants;
 import frc.robot.constants.SwerveConstants;
@@ -47,6 +48,8 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
+
 import org.ironmaple.simulation.SimulatedArena;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -131,7 +134,7 @@ public class SwerveSubsystem extends SubsystemBase {
                         .withBumperSize(Units.Inches.of(30), Units.Inches.of(30));
                 
                 
-                /* Create a swerve drive simulation */
+                /* Create a swerve drive simulation */ // FIX
                 this.swerveDriveSimulation = new SwerveDriveSimulation(
                 // Specify Configuration
                 driveTrainSimulationConfig,
@@ -150,8 +153,6 @@ public class SwerveSubsystem extends SubsystemBase {
         catch(IOException e) {
             throw new RuntimeException(e);
         }
-        
-    
         
         // Enable heading correction and cosine compensator
         this.swerveDrive.setHeadingCorrection(true);
