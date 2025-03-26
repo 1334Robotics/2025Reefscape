@@ -4,6 +4,7 @@ import frc.robot.XboxMappings;
 public class RobotContainerConstants {
     public static final int DRIVER_CONTROLLER_PORT      = 0;
     public static final int OPERATOR_CONTROLLER_PORT    = 1;
+    public static final int TEST_CONTROLLER_PORT        = 2;
 
     public static final int MAILBOX_SHOOT_BUTTON  = XboxMappings.Button.A;
     public static final int MAILBOX_FEED_BUTTON   = XboxMappings.Button.Y;

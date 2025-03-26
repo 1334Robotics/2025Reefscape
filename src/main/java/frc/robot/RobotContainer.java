@@ -102,8 +102,6 @@ import java.util.function.DoubleSupplier;
 import frc.robot.subsystems.elevator.ElevatorLevel;
 
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.commands.drive.Pathfind;
 
 /**
@@ -116,6 +114,7 @@ public class RobotContainer {
   // Controllers
   public static final XboxController driverController   = new XboxController(RobotContainerConstants.DRIVER_CONTROLLER_PORT);
   public static final XboxController operatorController = new XboxController(RobotContainerConstants.OPERATOR_CONTROLLER_PORT);
+  public static final XboxController testController     = new XboxController(RobotContainerConstants.TEST_CONTROLLER_PORT);
 
   // Controller buttons
   private static final JoystickButton gyroZeroButton       = new JoystickButton(driverController,   RobotContainerConstants.GYRO_ZERO_BUTON);
@@ -145,7 +144,7 @@ public class RobotContainer {
   private static final Trigger        pinsDownButton       = new Trigger(() -> operatorController.getLeftTriggerAxis()  > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
   private static final Trigger        pinsLockButton       = new Trigger(() -> operatorController.getRightTriggerAxis() > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
   private static final JoystickButton pinsUpButton         = new JoystickButton(operatorController, RobotContainerConstants.CLIMB_UP_BUTTON);
-  private static final JoystickButton pathfindButton       = new JoystickButton(driverController, XboxMappings.Button.LeftBumper);
+  private static final JoystickButton pathfindButton       = new JoystickButton(testController, XboxMappings.Button.A);
 
   // Subsystems
   public static final LedSubsystem           ledSubsystem              = new LedSubsystem(1); 
@@ -165,6 +164,7 @@ public class RobotContainer {
   public static final TagTrackingHandler     tagTrackingHandler          = new TagTrackingHandler();
   public static final ControllerSubsystem    driverControllerSubsystem   = new ControllerSubsystem(driverController);
   public static final ControllerSubsystem    operatorControllerSubsystem = new ControllerSubsystem(operatorController);
+  public static final ControllerSubsystem    testControllerSubsystem     = new ControllerSubsystem(testController);
 
   // Auto
   public static final TrackAprilTagCommand trackCommand = new TrackAprilTagCommand(22,
@@ -408,7 +408,6 @@ public class RobotContainer {
     pinsDownButton.whileTrue(new ForcePinsDownCommand());
     pinsLockButton.whileTrue(new LockClimbCommand());
     pinsUpButton.whileTrue(new ForcePinsUpCommand());
-        // Pathfind to a specific pose when left bumper is pressed
     pathfindButton.onTrue(
         Pathfind.pathfindToPose(
             new Pose2d(5.0, 3.0, new Rotation2d(Math.PI)) // Example target pose - adjust as needed
