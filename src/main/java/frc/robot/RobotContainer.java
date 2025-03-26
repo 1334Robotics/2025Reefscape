@@ -101,6 +101,11 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import java.util.function.DoubleSupplier;
 import frc.robot.subsystems.elevator.ElevatorLevel;
 
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.commands.drive.Pathfind;
+
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -140,6 +145,7 @@ public class RobotContainer {
   private static final Trigger        pinsDownButton       = new Trigger(() -> operatorController.getLeftTriggerAxis()  > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
   private static final Trigger        pinsLockButton       = new Trigger(() -> operatorController.getRightTriggerAxis() > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
   private static final JoystickButton pinsUpButton         = new JoystickButton(operatorController, RobotContainerConstants.CLIMB_UP_BUTTON);
+  private static final JoystickButton pathfindButton       = new JoystickButton(driverController, XboxMappings.Button.LeftBumper);
 
   // Subsystems
   public static final LedSubsystem           ledSubsystem              = new LedSubsystem(1); 
@@ -402,6 +408,12 @@ public class RobotContainer {
     pinsDownButton.whileTrue(new ForcePinsDownCommand());
     pinsLockButton.whileTrue(new LockClimbCommand());
     pinsUpButton.whileTrue(new ForcePinsUpCommand());
+        // Pathfind to a specific pose when left bumper is pressed
+    pathfindButton.onTrue(
+        Pathfind.pathfindToPose(
+            new Pose2d(5.0, 3.0, new Rotation2d(Math.PI)) // Example target pose - adjust as needed
+        )
+    );
   }
 
   /**
