@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.constants.AutoConstants;
+import frc.robot.RobotContainer;
 
 public class AutoStartHandler {
     private final SendableChooser<AutoStartPosition> startPositionChooser;
@@ -37,5 +37,11 @@ public class AutoStartHandler {
         AutoStartPosition startPosition = this.startPositionChooser.getSelected();
         if(startPosition == null) return null;
         return startPosition.getStartPose();
+    }
+
+    public void periodic() {
+        if(getStartPose() == null) return;
+
+        RobotContainer.swerveSubsystem.resetOdometry(getStartPose());
     }
 }
