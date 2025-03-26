@@ -408,11 +408,19 @@ public class RobotContainer {
     pinsDownButton.whileTrue(new ForcePinsDownCommand());
     pinsLockButton.whileTrue(new LockClimbCommand());
     pinsUpButton.whileTrue(new ForcePinsUpCommand());
-    pathfindButton.onTrue(
-        Pathfind.pathfindToPose(
-            new Pose2d(5.0, 3.0, new Rotation2d(Math.PI)) // Example target pose - adjust as needed
-        )
-    );
+    
+    // Define a field-relative target position (replace with actual field coordinates)
+    // This example uses coordinates for a scoring position or other important field location
+    final Pose2d fieldTarget = new Pose2d(8.0, 4.0, Rotation2d.fromDegrees(180));
+    
+    // Configure pathfind button to navigate to the field-relative target position
+    pathfindButton.onTrue(Commands.runOnce(() -> {
+        // The robot's current pose is already vision-corrected through the pose estimator
+        System.out.println("Pathfinding from current position to: " + fieldTarget);
+        
+        // Schedule pathfinding command to the target
+        Pathfind.pathfindToPose(fieldTarget).schedule();
+    }));
   }
 
   /**
