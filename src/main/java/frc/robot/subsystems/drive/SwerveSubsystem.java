@@ -305,15 +305,6 @@ public class SwerveSubsystem extends SubsystemBase {
             
             // Then reset the odometry with the new pose
             swerveDrive.resetOdometry(pose);
-            
-            // Verify the reset was successful
-            Pose2d currentPose = swerveDrive.getPose();
-            if (currentPose != null) {
-                System.out.println("Successfully reset odometry to: " + pose.toString());
-                System.out.println("Current pose: " + currentPose.toString());
-            } else {
-                System.err.println("Warning: Odometry reset may have failed - current pose is null");
-            }
         } catch (Exception e) {
             System.err.println("Error resetting odometry: " + e.getMessage());
             e.printStackTrace();

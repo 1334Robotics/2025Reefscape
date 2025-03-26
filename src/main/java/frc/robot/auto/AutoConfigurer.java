@@ -64,4 +64,8 @@ public class AutoConfigurer {
 
         RobotContainer.swerveSubsystem.resetOdometry(initialPose);
     }
+
+    public static void updateInitialPose() {
+        AutoConfigurer.autoStartHandler.periodic();
+    }
 }

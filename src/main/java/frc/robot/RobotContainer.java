@@ -164,9 +164,7 @@ public class RobotContainer {
   public static final ControllerSubsystem    operatorControllerSubsystem = new ControllerSubsystem(operatorController);
 
   // Auto
-  public static final TrackAprilTagCommand trackCommand = new TrackAprilTagCommand(22,
-                                                                                   new Distance(VisionConstants.TRACK_TAG_X,
-                                                                                                VisionConstants.TRACK_TAG_Y));
+  public static final TrackAprilTagCommand trackCommand = new TrackAprilTagCommand();
   public static final AutoTagSelector autoTagSelector = new AutoTagSelector();
 
   public RobotContainer() {
