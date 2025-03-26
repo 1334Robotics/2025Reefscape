@@ -498,12 +498,12 @@ public class SwerveSubsystem extends SubsystemBase {
             },
             // Configure the controllers
             new PPHolonomicDriveController(
-                new PIDConstants(AutoConstants.PATH_PLANNER_KP, 
-                               AutoConstants.PATH_PLANNER_KI, 
-                               AutoConstants.PATH_PLANNER_KD),  // Translation PID
-                new PIDConstants(AutoConstants.PATH_PLANNER_KP, 
-                               AutoConstants.PATH_PLANNER_KI, 
-                               AutoConstants.PATH_PLANNER_KD)   // Rotation PID
+                new PIDConstants(AutoConstants.PATH_PLANNER_TRANSLATION_KP, 
+                               AutoConstants.PATH_PLANNER_TRANSLATION_KI, 
+                               AutoConstants.PATH_PLANNER_TRANSLATION_KD),  // Translation PID
+                new PIDConstants(AutoConstants.PATH_PLANNER_ROTATION_KP, 
+                               AutoConstants.PATH_PLANNER_ROTATION_KI, 
+                               AutoConstants.PATH_PLANNER_ROTATION_KD)   // Rotation PID
             ),
             config,
             // Alliance color handler
@@ -520,9 +520,9 @@ public class SwerveSubsystem extends SubsystemBase {
         System.out.println("[PathPlanner] Configuration complete");
         
         // Log PID values for tuning
-        SmartDashboard.putNumber("[AUTO] Translation kP", AutoConstants.PATH_PLANNER_KP);
-        SmartDashboard.putNumber("[AUTO] Translation kI", AutoConstants.PATH_PLANNER_KI);
-        SmartDashboard.putNumber("[AUTO] Translation kD", AutoConstants.PATH_PLANNER_KD);
+        SmartDashboard.putNumber("[AUTO] Translation kP", AutoConstants.PATH_PLANNER_TRANSLATION_KP);
+        SmartDashboard.putNumber("[AUTO] Translation kI", AutoConstants.PATH_PLANNER_TRANSLATION_KI);
+        SmartDashboard.putNumber("[AUTO] Translation kD", AutoConstants.PATH_PLANNER_TRANSLATION_KD);
         
         // Preload PathPlanner pathfinding
         if (Robot.isSimulation()) {
