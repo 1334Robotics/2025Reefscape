@@ -7,6 +7,7 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -14,6 +15,7 @@ import frc.robot.RobotContainer;
 import frc.robot.constants.AutoConstants;
 
 public class AutoConfigurer {
+    private static AutoStartHandler autoStartHandler = new AutoStartHandler();
     public static boolean allowDrive = false;
     
     private static void autoDrive(ChassisSpeeds speeds) {
@@ -50,5 +52,15 @@ public class AutoConfigurer {
                                 return false;
                               },
                               RobotContainer.swerveSubsystem);
+    }
+
+    public static void setInitialPose() {
+        Pose2d initialPose = AutoConfigurer.autoStartHandler.getStartPose();
+        if(initialPose == null) return;
+
+        // Print the initial pose for debug purposes
+        System.out.println("Setting initial pose to: " + initialPose);
+
+        RobotContainer.swerveSubsystem.resetOdometry(initialPose);
     }
 }
