@@ -483,6 +483,14 @@ public class SwerveSubsystem extends SubsystemBase {
             },
             // Robot drive method
             (speeds) -> {
+                // Log movement when speeds are non-zero
+                if (Math.abs(speeds.vxMetersPerSecond) > 0.1 || 
+                    Math.abs(speeds.vyMetersPerSecond) > 0.1 || 
+                    Math.abs(speeds.omegaRadiansPerSecond) > 0.1) {
+                    System.out.println(String.format("[PathPlanner] Moving - VX: %.2f, VY: %.2f, Omega: %.2f",
+                        speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond));
+                }
+                
                 SmartDashboard.putNumber("[AUTO] Target VX", speeds.vxMetersPerSecond);
                 SmartDashboard.putNumber("[AUTO] Target VY", speeds.vyMetersPerSecond);
                 SmartDashboard.putNumber("[AUTO] Target Omega", speeds.omegaRadiansPerSecond);

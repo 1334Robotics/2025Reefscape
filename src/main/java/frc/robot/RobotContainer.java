@@ -1,6 +1,5 @@
 package frc.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.auto.AutoConfigurer;
 import frc.robot.commands.led.ToggleLedCommand;
 import frc.robot.commands.climb.ForcePinsDownCommand;
 import frc.robot.commands.climb.ForcePinsUpCommand;
@@ -407,6 +406,25 @@ public class RobotContainer {
   }
 
   /**
+   * Check if PathPlanner is ready and log its state
+   */
+  private boolean isPathPlannerReady() {
+    try {
+        // Try to get a path to verify PathPlanner is ready
+        PathPlannerPath testPath = PathPlannerPath.fromPathFile("AutoDrive21v2");
+        if (testPath == null) {
+            System.err.println("[AUTO] WARNING: PathPlanner not ready - test path is null");
+            return false;
+        }
+        System.out.println("[AUTO] PathPlanner is ready - test path loaded successfully");
+        return true;
+    } catch (Exception e) {
+        System.err.println("[AUTO] WARNING: PathPlanner not ready - error: " + e.getMessage());
+        return false;
+    }
+  }
+
+  /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
    * @return the command to run in autonomous
@@ -419,39 +437,51 @@ public class RobotContainer {
     if (selectedCommand == null || 
         (selectedCommand instanceof InstantCommand && 
          !(selectedCommand instanceof SequentialCommandGroup))) {
-        System.out.println("No auto selected or 'Do Nothing' selected - Using tracking command");
+        System.out.println("[AUTO] No auto selected or 'Do Nothing' selected - Using tracking command");
         return trackCommand;
     }
     
-    System.out.println("Starting autonomous command: " + selectedCommand.getClass().getSimpleName());
+    System.out.println("[AUTO] Starting autonomous command: " + selectedCommand.getClass().getSimpleName());
     
-    // Create a synchronized command sequence
-    return Commands.sequence(
-        // First ensure PathPlanner is ready
-        Commands.runOnce(() -> {
-            System.out.println("Step 1: Ensuring PathPlanner is ready...");
-            // Force a longer delay to ensure everything is initialized
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                // Ignore interrupted exception
-            }
-            System.out.println("PathPlanner ready check complete");
-        }),
-        // Then ensure elevator is at bottom
-        Commands.runOnce(() -> {
-            System.out.println("Step 2: Ensuring elevator is at bottom...");
-            elevatorHandler.setLevel(ElevatorLevel.BOTTOM);
-            System.out.println("Elevator bottom command issued");
-        }),
-        // Wait for elevator to settle
-        Commands.waitSeconds(1.0),
-        Commands.runOnce(() -> {
-            System.out.println("Step 3: Elevator settle wait complete");
-        }),
-        // Finally run the selected auto command
-        selectedCommand
-    );
+    // First, move elevator to bottom level
+    System.out.println("[AUTO] Moving elevator to bottom level...");
+    Command elevatorCommand = new ElevatorGotoBottomCommand();
+    elevatorCommand.schedule();
+    
+    // Wait for elevator to complete movement (up to 2 seconds)
+    int attempts = 0;
+    while (!elevatorCommand.isFinished() && attempts < 100) {
+        try {
+            Thread.sleep(20);  // Wait 20ms between checks
+            attempts++;
+        } catch (InterruptedException e) {
+            break;
+        }
+    }
+    
+    // Add a small delay to ensure elevator settles
+    try {
+        Thread.sleep(100);  // 100ms delay
+    } catch (InterruptedException e) {
+        // Ignore interrupted exception
+    }
+    
+    System.out.println("[AUTO] Elevator state after settling: " + 
+        RobotContainer.elevatorSubsystem.getPosition());
+    
+    // Now get and start the PathPlanner auto sequence
+    System.out.println("[AUTO] Starting PathPlanner auto sequence...");
+    String autoName = selectedCommand.getName();
+    Command autoCommand = AutoBuilder.buildAuto(autoName);
+    if (autoCommand != null) {
+        System.out.println("[AUTO] Successfully built auto command: " + autoName);
+        SmartDashboard.putString("[AUTO] Status", "Starting auto sequence");
+        return autoCommand;
+    } else {
+        System.err.println("[AUTO] ERROR: Failed to build auto command: " + autoName);
+        SmartDashboard.putString("[AUTO] Status", "Failed to build auto command");
+        return Commands.none();
+    }
   }
 
   /**
@@ -502,13 +532,90 @@ public class RobotContainer {
         System.out.println("Registering PathPlanner commands...");
         
         // Register all commands as regular commands, not marker events
-        NamedCommands.registerCommand("Shoot", new ShootCommand());
-        NamedCommands.registerCommand("ElevatorL1", new ElevatorGotoL1Command());
-        NamedCommands.registerCommand("ElevatorBottom", new ElevatorGotoBottomCommand());
-        NamedCommands.registerCommand("ElevatorL2", new ElevatorGotoL2Command());
-        NamedCommands.registerCommand("ElevatorL3", new ElevatorGotoL3Command());
-        NamedCommands.registerCommand("ElevatorL4", new ElevatorGotoL4Command());
-        NamedCommands.registerCommand("Stop", Commands.runOnce(() -> swerveSubsystem.drive(new Translation2d(0, 0), 0)));
+        // Add delays to ensure proper initialization
+        NamedCommands.registerCommand("Shoot", Commands.sequence(
+            Commands.runOnce(() -> {
+                System.out.println("Initializing Shoot command...");
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    // Ignore interrupted exception
+                }
+            }),
+            new ShootCommand()
+        ));
+        
+        NamedCommands.registerCommand("ElevatorL1", Commands.sequence(
+            Commands.runOnce(() -> {
+                System.out.println("Initializing ElevatorL1 command...");
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    // Ignore interrupted exception
+                }
+            }),
+            new ElevatorGotoL1Command()
+        ));
+        
+        NamedCommands.registerCommand("ElevatorBottom", Commands.sequence(
+            Commands.runOnce(() -> {
+                System.out.println("Initializing ElevatorBottom command...");
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    // Ignore interrupted exception
+                }
+            }),
+            new ElevatorGotoBottomCommand()
+        ));
+        
+        NamedCommands.registerCommand("ElevatorL2", Commands.sequence(
+            Commands.runOnce(() -> {
+                System.out.println("Initializing ElevatorL2 command...");
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    // Ignore interrupted exception
+                }
+            }),
+            new ElevatorGotoL2Command()
+        ));
+        
+        NamedCommands.registerCommand("ElevatorL3", Commands.sequence(
+            Commands.runOnce(() -> {
+                System.out.println("Initializing ElevatorL3 command...");
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    // Ignore interrupted exception
+                }
+            }),
+            new ElevatorGotoL3Command()
+        ));
+        
+        NamedCommands.registerCommand("ElevatorL4", Commands.sequence(
+            Commands.runOnce(() -> {
+                System.out.println("Initializing ElevatorL4 command...");
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    // Ignore interrupted exception
+                }
+            }),
+            new ElevatorGotoL4Command()
+        ));
+        
+        NamedCommands.registerCommand("Stop", Commands.sequence(
+            Commands.runOnce(() -> {
+                System.out.println("Initializing Stop command...");
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    // Ignore interrupted exception
+                }
+            }),
+            Commands.runOnce(() -> swerveSubsystem.drive(new Translation2d(0, 0), 0))
+        ));
         
         System.out.println("✓ Registered all commands as regular commands");
         System.out.println("Command registration complete!");
