@@ -52,6 +52,7 @@ public class AutoConfigurer {
                                 return false;
                               },
                               RobotContainer.swerveSubsystem);
+        System.out.println("[AutoConfigurer] AutoBuilder configured");
     }
 
     public static void setInitialPose() {

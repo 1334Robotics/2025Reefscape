@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.auto.AutoCache;
 import frc.robot.auto.AutoConfigurer;
 import frc.robot.commands.elevator.ElevatorResetCommand;
@@ -55,7 +56,6 @@ public class Robot extends LoggedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
-    AutoConfigurer.configure();
 
     // Put the check to disable the elevator reset on TeleOp enable
     SmartDashboard.putBoolean("[ELEVATOR] Reset On TeleOp Enable", true);
@@ -72,8 +72,12 @@ public class Robot extends LoggedRobot {
       // Cache paths
       AutoCache.init();
       AutoCache.getPath("Test Path");
+      AutoCache.getAuto("5M Auto");
       AutoCache.getAuto("Test Auto");
       AutoCache.afterLoad();
+
+      // DEBUG
+      SmartDashboard.putData(CommandScheduler.getInstance());
   }
 
   /**
@@ -193,7 +197,7 @@ public class Robot extends LoggedRobot {
     }
     
     // Set initial robot pose based on the selected position within SmartDashboard
-    AutoConfigurer.setInitialPose();
+    AutoConfigurer.setInitialPose(); // I dont even think this does anything as PathPlanner resets pose when needed
     
     // Small delay to ensure odometry reset is complete
     try {
@@ -206,7 +210,8 @@ public class Robot extends LoggedRobot {
     RobotContainer.trackCommand.enable();
     
     // Get the autonomous command from RobotContainer
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    // Causes an error the second time around
+    m_autonomousCommand = new WaitCommand(0.01).andThen(m_robotContainer.getAutonomousCommand());
     
     // Schedule the autonomous command
     if (m_autonomousCommand != null) {
