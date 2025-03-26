@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.732586510583056,
-        "y": 3.8252880369374904
+        "x": 7.592581582856917,
+        "y": 3.7717989335941358
       },
       "isLocked": false,
       "linkedName": null
@@ -20,12 +20,12 @@
         "y": 1.388
       },
       "prevControl": {
-        "x": 4.704666788390755,
-        "y": 1.2549692866577666
+        "x": 5.656750550268603,
+        "y": 1.521172015335799
       },
       "nextControl": {
-        "x": 4.090833102057566,
-        "y": 1.6407583553502434
+        "x": 3.44960228809823,
+        "y": 1.2686003777539359
       },
       "isLocked": false,
       "linkedName": null
@@ -36,12 +36,12 @@
         "y": 2.515
       },
       "prevControl": {
-        "x": 2.27527654129751,
-        "y": 2.6037318705547525
+        "x": 2.4094587113628343,
+        "y": 2.7443284366502607
       },
       "nextControl": {
-        "x": 2.74272345870249,
-        "y": 2.4262681294452477
+        "x": 2.626529720662177,
+        "y": 2.2442288710703355
       },
       "isLocked": false,
       "linkedName": null
@@ -52,21 +52,26 @@
         "y": 4.273
       },
       "prevControl": {
-        "x": 1.9444134894169438,
-        "y": 4.52571196306251
+        "x": 1.9842758882431772,
+        "y": 4.506520242116635
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 3.0,
+      "rotationDegrees": 180.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 1.0,
+    "maxVelocity": 5.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 250.0,
     "maxAngularAcceleration": 180.0,
     "nominalVoltage": 12.0,
@@ -74,7 +79,7 @@
   },
   "goalEndState": {
     "velocity": 0.0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "reversed": false,
   "folder": null,
