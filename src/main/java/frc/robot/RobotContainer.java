@@ -427,7 +427,7 @@ public class RobotContainer {
     // Configure alliance path button to load and follow a path based on current alliance
     alliancePathButton.onTrue(Commands.runOnce(() -> {
         // Specify the path name (without folder prefix)
-        String pathName = "RedFeed1Tag10Left";
+        String pathName = "RedFeed12Tag17Left";
         
         System.out.println("Loading and following alliance-specific path: " + pathName);
         
