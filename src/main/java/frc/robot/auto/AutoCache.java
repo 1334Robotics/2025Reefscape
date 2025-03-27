@@ -1,23 +1,18 @@
 package frc.robot.auto;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.RobotContainer;
 
 public class AutoCache {
-    private static Map<String, AutoItem> paths = null;
+    private static Map<String, AutoItem> paths = new HashMap<>();
+    private static SendableChooser<AutoItem> autoChooser = new SendableChooser<>();
     private static AutoCache cache = null;
-
-    public AutoCache() {
-        if(AutoCache.paths == null) AutoCache.paths = new HashMap<>();
-    }
 
     public static void init() {
         if(AutoCache.cache == null) AutoCache.cache = new AutoCache();
@@ -38,6 +33,10 @@ public class AutoCache {
         return AutoCache.paths.get(autoName);
     }
 
+    public static AutoItem getSelectedAuto() {
+        return AutoCache.autoChooser.getSelected();
+    }
+
     public static void afterLoad() {
         // Disable real swerve
         AutoConfigurer.allowDrive = false;
@@ -50,12 +49,15 @@ public class AutoCache {
             itemCommand.initialize();
             itemCommand.execute();
             itemCommand.cancel();
+
+            // Add the auto to the autoChooser
+            AutoCache.autoChooser.addOption(item.getName(), item);
         }
 
         // Enable real swerve
         AutoConfigurer.allowDrive = true;
 
-        // Run the swerve wheels at 0 speed
-        RobotContainer.swerveSubsystem.autoDrive(new ChassisSpeeds(0, 0, 0));
+        // Publish the autoChooser to SmartDashboard
+        SmartDashboard.putData("[AUTO] Chooser", AutoCache.autoChooser);
     }
 }

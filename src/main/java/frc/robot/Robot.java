@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.auto.AutoCache;
 import frc.robot.auto.AutoConfigurer;
 import frc.robot.commands.elevator.ElevatorResetCommand;
-import frc.robot.constants.AutoConstants;
 import frc.robot.constants.ElevatorConstants;
 
 import org.ironmaple.simulation.SimulatedArena;
@@ -21,7 +20,6 @@ import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
  * The Virtual Machine is configured to automatically run this class, and to call the methods corresponding to
