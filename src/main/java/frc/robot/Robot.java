@@ -9,17 +9,16 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.auto.AutoCache;
 import frc.robot.auto.AutoConfigurer;
 import frc.robot.commands.elevator.ElevatorResetCommand;
-import frc.robot.constants.AutoConstants;
-import frc.robot.constants.ElevatorConstants;
 
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
  * The Virtual Machine is configured to automatically run this class, and to call the methods corresponding to
@@ -66,6 +65,15 @@ public class Robot extends LoggedRobot {
       
       // Check and log library versions
       logLibraryVersions();
+
+      // Cache paths
+      AutoCache.init();
+      AutoCache.getPath("Test Path");
+      AutoCache.getAuto("5M Auto");
+      AutoCache.getAuto("Test Auto");
+      AutoCache.getAuto("JustAutoMid");
+      AutoCache.getAuto("MidFullAuto");
+      AutoCache.afterLoad();
   }
 
   /**
@@ -115,9 +123,6 @@ public class Robot extends LoggedRobot {
     CommandScheduler.getInstance().run();
     RobotContainer.trackCommand.execute(); // THIS IS BAD. IT SHOULDN'T NEED TO DO THIS
     m_field.setRobotPose(RobotContainer.swerveSubsystem.getPose());
-    
-    // Update alliance indicators on dashboard
-    m_robotContainer.updateAllianceIndicators();
   }
    /** This function is called once when the robot is first started up. */
   @Override
@@ -157,19 +162,13 @@ public class Robot extends LoggedRobot {
   public void disabledInit() {}
 
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    AutoConfigurer.updateInitialPose();
+  }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
-  public void autonomousInit() {
-    // Keep field-relative mode enabled for path following
-    RobotContainer.swerveSubsystem.setFieldRelative(true);
-    
-    // Force automatic control for autonomous
-    RobotContainer.elevatorHandler.setForceManualControl(false);
-
-    AutoConfigurer.configure();
-    
+  public void autonomousInit() {    
     // First, reset the elevator if it hasn't been reset yet
     if (!elevatorReset) {
       System.out.println("Autonomous Init: Zeroing elevator...");
@@ -189,8 +188,8 @@ public class Robot extends LoggedRobot {
       System.out.println("Elevator zeroing completed");
     }
     
-    // Set initial robot pose based on FMS data
-    setInitialPose();
+    // Set initial robot pose based on the selected position within SmartDashboard
+    AutoConfigurer.setInitialPose(); 
     
     // Small delay to ensure odometry reset is complete
     try {
@@ -203,7 +202,8 @@ public class Robot extends LoggedRobot {
     RobotContainer.trackCommand.enable();
     
     // Get the autonomous command from RobotContainer
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    // Causes an error the second time around
+    m_autonomousCommand = new WaitCommand(0.01).andThen(m_robotContainer.getAutonomousCommand());
     
     // Schedule the autonomous command
     if (m_autonomousCommand != null) {
@@ -212,59 +212,6 @@ public class Robot extends LoggedRobot {
     } else {
       System.out.println("No autonomous command selected!");
     }
-  }
-
-  /**
-   * Sets the initial robot pose based on FMS data
-   * This method is called at the start of autonomous to ensure the robot has the
-   * correct pose based on the latest alliance and FMS position settings.
-   */
-  private void setInitialPose() {
-    var alliance = DriverStation.getAlliance();
-    int location = DriverStation.getLocation().orElse(2); // Default to center (2) if not available
-    
-    // Default starting pose (Center, Blue alliance)
-    Pose2d startingPose = new Pose2d(5.89, 5.5, Rotation2d.fromDegrees(180));
-    
-    if (alliance.isPresent()) {
-      if (alliance.get() == DriverStation.Alliance.Blue) {
-        // Blue alliance positions
-        switch (location) {
-          case 1:   // Left
-            startingPose = AutoConstants.BLUE_LEFT_STARTING_POSE;
-            break;
-          case 2:   // Center
-            startingPose = AutoConstants.BLUE_CENTER_STARTING_POSE;
-            break;
-          case 3: // Right
-            startingPose = AutoConstants.BLUE_RIGHT_STARTING_POSE;
-            break;
-        }
-      } else {
-        // Red alliance positions (mirrored across field center)
-        switch (location) {
-          case 1:   // Left
-            startingPose = AutoConstants.RED_LEFT_STARTING_POSE;
-            break;
-          case 2:   // Center
-            startingPose = AutoConstants.RED_CENTER_STARTING_POSE;
-            break;
-          case 3: // Right
-            startingPose = AutoConstants.RED_RIGHT_STARTING_POSE;
-            break;
-        }
-      }
-      
-      // Log the starting position
-      System.out.println("Setting initial pose to: " + startingPose + 
-                        " (Alliance: " + alliance.get() + 
-                        ", Position: " + location + ")");
-    } else {
-      System.out.println("Warning: Using default starting pose - Alliance not available");
-    }
-                      
-    // Reset odometry to the starting pose
-    RobotContainer.swerveSubsystem.resetOdometry(startingPose);
   }
 
   /** This function is called periodically during autonomous. */
@@ -284,22 +231,10 @@ public class Robot extends LoggedRobot {
     RobotContainer.swerveSubsystem.setFieldRelative(true);
     RobotContainer.trackCommand.disable();
     
-    // Restore manual control if that's what we're using
-    if (ElevatorConstants.MANUAL_ELEVATOR_CONTROL) {
-      RobotContainer.elevatorHandler.setForceManualControl(true);
-    }
-    
     // Reset elevator if needed
     if(SmartDashboard.getBoolean("[ELEVATOR] Reset On TeleOp Enable", false) && !this.elevatorReset) {
       (new ElevatorResetCommand()).schedule();
       this.elevatorReset = true;
-    }
-    // This makes sure that the autonomous stops running when
-    // teleop starts running. If you want the autonomous to
-    // continue until interrupted by another command, remove
-    // this line or comment it out.
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
     }
   }
 

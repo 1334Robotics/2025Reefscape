@@ -9,7 +9,6 @@ import frc.robot.subsystems.controller.ControllerVibration;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.Encoder;
 
 public class ClimbSubsystem extends SubsystemBase {
     // Two lower Neo motors for forcing the pins down
