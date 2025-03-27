@@ -35,9 +35,10 @@ public class AlianceBasedPathFind {
 
             // Only flip the path if we're on Blue alliance
             if (isBlueAlliance) {
-                System.out.println("Not Flipping path for Blue alliance");
+                System.out.println("Blue alliance");
+                path = path.flipPath();
             } else {
-                System.out.println("Flipping path (Red alliance or unknown)");
+                System.out.println("Red alliance or unknown");
                 path = path.flipPath();
                 // Although we are using red aliance path for some reason its fliped already, so I have to flip it for Red Aliance won't even question why @_@ if it works it works
             }
