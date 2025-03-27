@@ -74,6 +74,7 @@ public class Robot extends LoggedRobot {
       AutoCache.getPath("Test Path");
       AutoCache.getAuto("5M Auto");
       AutoCache.getAuto("Test Auto");
+      AutoCache.getAuto("MidFullAuto");
       AutoCache.afterLoad();
 
       // DEBUG

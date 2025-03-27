@@ -242,6 +242,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return AutoCache.getAuto("5M Auto").getCommand();
+    return AutoCache.getAuto("MidFullAuto").getCommand();
   }
 }

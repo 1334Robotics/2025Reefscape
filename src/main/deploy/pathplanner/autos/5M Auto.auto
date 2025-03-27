@@ -13,7 +13,25 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 2.0
+            "waitTime": 10.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5M Straight Back"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5M Straight"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 10.0
           }
         },
         {
