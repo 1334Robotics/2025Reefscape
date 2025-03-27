@@ -513,8 +513,12 @@ public class SwerveSubsystem extends SubsystemBase {
                 }
             },
             new PPHolonomicDriveController(
-                new PIDConstants(AutoConstants.PATH_PLANNER_KD, AutoConstants.PATH_PLANNER_KI, AutoConstants.PATH_PLANNER_KD),
-                new PIDConstants(AutoConstants.PATH_PLANNER_KD, AutoConstants.PATH_PLANNER_KI, AutoConstants.PATH_PLANNER_KD)
+                new PIDConstants(AutoConstants.TRANSLATION_KP,
+                AutoConstants.TRANSLATION_KI,
+                AutoConstants.TRANSLATION_KD),
+                new PIDConstants(AutoConstants.TRANSLATION_KP,
+                AutoConstants.TRANSLATION_KI,
+                AutoConstants.TRANSLATION_KD)
             ),
             config,
             () -> {
