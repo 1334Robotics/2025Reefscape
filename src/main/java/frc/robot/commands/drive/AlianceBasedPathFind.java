@@ -39,7 +39,7 @@ public class AlianceBasedPathFind {
             } else {
                 System.out.println("Flipping path (Red alliance or unknown)");
                 path = path.flipPath();
-                // Although we are using red aliance path for some reason its fliped already, so I have to flip it for Red Aliance
+                // Although we are using red aliance path for some reason its fliped already, so I have to flip it for Red Aliance won't even question why @_@ if it works it works
             }
             
             // Use default constraints
