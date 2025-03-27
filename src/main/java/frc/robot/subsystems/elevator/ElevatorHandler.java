@@ -37,20 +37,33 @@ public class ElevatorHandler extends SubsystemBase {
 
     @Override
     public void periodic() {
-        if(ElevatorConstants.MANUAL_ELEVATOR_CONTROL) return;
-        if(!this.hitTarget) {
-            if(this.targetLevel == null) return;
+        SmartDashboard.putNumber("[ELEVATOR] Current Position", RobotContainer.elevatorSubsystem.getPosition());
+        // Check dashboard for manual control toggle
+        boolean dashboardManualControl = SmartDashboard.getBoolean(MANUAL_CONTROL_KEY, false);
+        if (dashboardManualControl != this.forceManualControl) {
+            setForceManualControl(dashboardManualControl);
+        }
 
-            if(this.previousTargetLevel != this.targetLevel) {
-                this.previousTargetLevel = this.targetLevel;
-                this.pidController.zero();
+        // Update dashboard with current state
+        SmartDashboard.putString("Elevator/Control Mode", 
+            (this.forceManualControl || ElevatorConstants.MANUAL_ELEVATOR_CONTROL) ? 
+            "MANUAL" : "AUTOMATED");
+        
+        // 1. Safety check - if in manual mode, let manual control handle everything
+        if(this.forceManualControl || ElevatorConstants.MANUAL_ELEVATOR_CONTROL) {
+            if (this.targetLevel != null) {
+                // System.out.println("Elevator: Manual control active, ignoring target " + this.targetLevel);
             }
+            return;
+        }
 
-            double offPos = Math.abs(RobotContainer.elevatorSubsystem.getPosition() - this.targetLevel.position);
-            if(offPos < ElevatorConstants.MAX_ACCEPTABLE_ERROR) {
-                this.hitTarget = true;
-                return;
-            } 
+        // 2. Stop conditions - no target, hit target, or error within bounds
+        double currentPosition = RobotContainer.elevatorSubsystem.getPosition();
+        
+        if(this.targetLevel == null || this.hitTarget) {
+            RobotContainer.elevatorSubsystem.runMotor(0);
+            return;
+        }
 
             // Get the desired speed
             this.pidController.update(this.targetLevel.position, RobotContainer.elevatorSubsystem.getPosition());

@@ -3,6 +3,7 @@ package frc.robot.subsystems.mailbox;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
+import frc.robot.constants.ElevatorConstants;
 import frc.robot.constants.MailboxConstants;
 import frc.robot.subsystems.elevator.ElevatorLevel;
 
@@ -74,7 +75,7 @@ public class MailboxHandler extends SubsystemBase {
             this.allowFeeding = false;
 
             // Check that the elevator level is correct
-            if(RobotContainer.elevatorHandler.getLevel() != ElevatorLevel.FEED) return;
+            if(RobotContainer.elevatorHandler.getLevel() != ElevatorLevel.FEED && !ElevatorConstants.MANUAL_ELEVATOR_CONTROL) return;
 
             if(!this.outputLaserCan.inRange()) {
                 this.feeding = true;
