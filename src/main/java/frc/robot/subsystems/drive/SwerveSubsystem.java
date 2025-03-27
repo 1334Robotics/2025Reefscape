@@ -218,6 +218,7 @@ public class SwerveSubsystem extends SubsystemBase {
         Logger.recordOutput("FieldSimulation/RobotPose", new Pose3d(swerveDrive.getPose()));
 
         // Update the encoder positions
+        /*
         SwerveModule[] modules = this.swerveDrive.getModules();
         SmartDashboard.putNumber("[SWERVE] Front Left Encoder Position",  modules[0].getRawAbsolutePosition());
         SmartDashboard.putNumber("[SWERVE] Front Right Encoder Position", modules[1].getRawAbsolutePosition());
@@ -233,7 +234,8 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("[SWERVE] Back Left Angle Velocity",   modules[2].getAngleMotor().getVelocity());
         SmartDashboard.putNumber("[SWERVE] Back Right Drive Velocity",  modules[3].getDriveMotor().getVelocity());
         SmartDashboard.putNumber("[SWERVE] Back Right Angle Velocity",  modules[3].getAngleMotor().getVelocity());
-    
+        */
+
         // Debug swerve state
         SmartDashboard.putNumber("Swerve/UpdateCount", count++);
 

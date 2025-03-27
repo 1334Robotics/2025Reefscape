@@ -23,6 +23,7 @@ public class AutoCache {
         if(AutoCache.cache == null) AutoCache.cache = new AutoCache();
 
         AutoConfigurer.configure();
+        AutoConfigurer.registerNamedCommands();
     }
 
     public static AutoItem getPath(String pathName) {
