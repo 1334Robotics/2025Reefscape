@@ -3,8 +3,9 @@
   "robotLength": 0.74,
   "holonomicMode": true,
   "pathFolders": [
-    "Red",
-    "Blue"
+    "Blue",
+    "FeedToTag",
+    "Red"
   ],
   "autoFolders": [],
   "defaultMaxVel": 1.0,
