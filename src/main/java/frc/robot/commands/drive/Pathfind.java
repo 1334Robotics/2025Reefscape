@@ -66,12 +66,12 @@ public class Pathfind {
      * @return A command that will navigate to the specified pose
      */
     public static Command pathfindToPose(Pose2d targetPose) {
-        // More conservative default constraints for better accuracy
+        // Using Default Constraints
         PathConstraints constraints = new PathConstraints(
                 SwerveConstants.MAX_SPEED, // Max speed (m/s)
                 SwerveConstants.MAX_SPEED * 0.5, // Max acceleration (m/s²)
-                edu.wpi.first.math.util.Units.degreesToRadians(90), // angular velocity 
-                edu.wpi.first.math.util.Units.degreesToRadians(180)  // angular acceleration
+                Units.degreesToRadians(540), // Max angular speed
+                Units.degreesToRadians(720) // angular acceleration
         );
         
         return pathfindToPose(targetPose, constraints, 0.0);
