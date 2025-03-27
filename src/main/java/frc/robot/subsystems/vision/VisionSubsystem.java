@@ -18,7 +18,7 @@ import java.util.List;
  * A simple vision subsystem using PhotonVision to detect and track targets.
  */
 public class VisionSubsystem extends SubsystemBase {
-    private static final String CAMERA_NAME = "Arducam_OV9782_USB_Camera";
+    private static final String CAMERA_NAME = "Cam1";
     private double imageAge = 0;
 
     private final PhotonCamera cameraPhotonCamera;

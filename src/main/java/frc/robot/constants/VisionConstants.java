@@ -13,7 +13,7 @@ public final class VisionConstants {
     );
 
     // Camera configuration
-    public static final String CAMERA_NAME = "Arducam_OV9782_USB_Camera";
+    public static final String CAMERA_NAME = "Cam1";
     public static final int CAMERA_RESOLUTION_WIDTH = 640;
     public static final int CAMERA_RESOLUTION_HEIGHT = 480;
     public static final double CAMERA_FOV_DEGREES = 100;
