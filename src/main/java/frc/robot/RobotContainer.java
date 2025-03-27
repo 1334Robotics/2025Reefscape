@@ -1,10 +1,7 @@
 package frc.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.auto.AutoCache;
-import frc.robot.auto.AutoConfigurer;
 import frc.robot.auto.AutoItem;
-import frc.robot.auto.AutoPath;
-import frc.robot.commands.led.ToggleLedCommand;
 import frc.robot.commands.climb.ForcePinsDownCommand;
 import frc.robot.commands.climb.ForcePinsUpCommand;
 import frc.robot.commands.climb.LockClimbCommand;
@@ -35,21 +32,15 @@ import frc.robot.commands.gyro.GyroZeroCommand;
 import frc.robot.commands.mailbox.ShootCommand;
 import frc.robot.commands.mailbox.MailboxFeedCommand;
 import frc.robot.commands.mailbox.MailboxRewindCommand;
-import frc.robot.commands.mailbox.StopCommand;
 import frc.robot.constants.ElevatorConstants;
 import frc.robot.constants.RobotContainerConstants;
-import frc.robot.constants.SimulationConstants;
-import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
-import frc.robot.subsystems.mailbox.LaserCanSubsystem;
 import frc.robot.subsystems.mailbox.MailboxHandler;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
 import frc.robot.subsystems.vision.AutoTagSelector;
 import frc.robot.subsystems.vision.TagInputHandler;
 import frc.robot.subsystems.vision.TagTrackingHandler;
-//import frc.robot.subsystems.simulation.SimulationSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
-import frc.robot.commands.vision.Distance;
 import frc.robot.commands.vision.StartTrackingScoringLeft;
 import frc.robot.commands.vision.StartTrackingScoringRight;
 import frc.robot.subsystems.climb.ClimbSubsystem;
@@ -63,47 +54,16 @@ import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.led.LedHandler;
 import frc.robot.subsystems.led.LedSubsystem;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.path.PathConstraints;
 import frc.robot.subsystems.flopper.FlopperSubsystem;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.ProxyCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import java.util.List;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.io.File;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Filesystem;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.Optional;
-
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-import java.util.function.DoubleSupplier;
-import frc.robot.subsystems.elevator.ElevatorLevel;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
