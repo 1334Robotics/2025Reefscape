@@ -3,11 +3,9 @@ package frc.robot.auto;
 import java.util.HashMap;
 import java.util.Map;
 
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.RobotContainer;
 
 public class AutoCache {
     private static Map<String, AutoItem> paths = new HashMap<>();
