@@ -2,6 +2,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.auto.AutoCache;
 import frc.robot.auto.AutoConfigurer;
+import frc.robot.auto.AutoItem;
 import frc.robot.auto.AutoPath;
 import frc.robot.commands.led.ToggleLedCommand;
 import frc.robot.commands.climb.ForcePinsDownCommand;
@@ -145,8 +146,8 @@ public class RobotContainer {
   private static final JoystickButton pinsUpButton         = new JoystickButton(operatorController, RobotContainerConstants.CLIMB_UP_BUTTON);
 
   // Subsystems
-  public static final LedSubsystem           ledSubsystem              = new LedSubsystem(1); 
-  public static final LedHandler             ledHandler                = new LedHandler(ledSubsystem);
+  public static final LedSubsystem           ledSubsystem                = new LedSubsystem(1); 
+  public static final LedHandler             ledHandler                  = new LedHandler(ledSubsystem);
   public static final GyroSubsystem          gyroSubsystem               = new GyroSubsystem("CANivore");
   public static final MailboxSubsystem       mailboxSubsystem            = new MailboxSubsystem();
   public static final MailboxHandler         mailboxHandler              = new MailboxHandler();
@@ -242,6 +243,8 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return AutoCache.getAuto("MidFullAuto").getCommand();
+    AutoItem selectedAuto = AutoCache.getSelectedAuto();
+    if(selectedAuto == null) return null;
+    return selectedAuto.getCommand();
   }
 }
