@@ -19,7 +19,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.2
+            "waitTime": 1.0
           }
         },
         {
@@ -35,9 +35,39 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "ElevatorBottom"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "AutoTime-Tag21Feed12"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ElevatorFeed"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Feed"
           }
         }
       ]

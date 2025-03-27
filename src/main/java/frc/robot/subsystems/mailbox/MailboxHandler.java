@@ -6,8 +6,6 @@ import frc.robot.RobotContainer;
 import frc.robot.constants.ElevatorConstants;
 import frc.robot.constants.MailboxConstants;
 import frc.robot.subsystems.elevator.ElevatorLevel;
-import frc.robot.subsystems.led.LedHandler;
-import frc.robot.commands.led.LEDColourCommand;
 
 public class MailboxHandler extends SubsystemBase {
     private boolean rewinding;
@@ -55,6 +53,7 @@ public class MailboxHandler extends SubsystemBase {
         return this.feeding;
     }
 
+    @SuppressWarnings("incomplete-switch")
     @Override
     public void periodic() {
         SmartDashboard.putBoolean("[MAILBOX] Allow Shooting", this.allowShoot);

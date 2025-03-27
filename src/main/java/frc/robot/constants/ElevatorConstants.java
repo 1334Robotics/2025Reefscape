@@ -30,8 +30,8 @@ public class ElevatorConstants {
     public static final double PID_KI          = 0.07;
     public static final double PID_KD          = 0;
     public static final double PID_TAU         = 0;
-    public static final double PID_LIM_MIN     = -0.9;
-    public static final double PID_LIM_MAX     = 0.9;
+    public static final double PID_LIM_MIN     = -1;
+    public static final double PID_LIM_MAX     = 1;
     public static final double PID_LIM_MIN_INT = -0.2;
     public static final double PID_LIM_MAX_INT = 0.2;
     public static final double PID_SAMPLE_TIME = 1;
