@@ -1,10 +1,16 @@
 package frc.robot.commands.drive;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj2.command.Command;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
-import frc.robot.constants.AutoConstants;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.FileVersionException;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.constants.SwerveConstants;
+import java.io.IOException;
+import org.json.simple.parser.ParseException;
 
 /**
  * A utility class for creating pathfinding commands using PathPlanner's AutoBuilder.
@@ -60,11 +66,13 @@ public class Pathfind {
      * @return A command that will navigate to the specified pose
      */
     public static Command pathfindToPose(Pose2d targetPose) {
-        // Use default constraints from AutoConstants or create your own defaults
+        // More conservative default constraints for better accuracy
         PathConstraints constraints = new PathConstraints(
-                3.0, 4.0,
-                edu.wpi.first.math.util.Units.degreesToRadians(540), 
-                edu.wpi.first.math.util.Units.degreesToRadians(720));
+                SwerveConstants.MAX_SPEED, // Max speed (m/s)
+                SwerveConstants.MAX_SPEED * 0.5, // Max acceleration (m/s²)
+                edu.wpi.first.math.util.Units.degreesToRadians(90), // angular velocity 
+                edu.wpi.first.math.util.Units.degreesToRadians(180)  // angular acceleration
+        );
         
         return pathfindToPose(targetPose, constraints, 0.0);
     }

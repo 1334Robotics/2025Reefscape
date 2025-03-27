@@ -12,6 +12,7 @@ import frc.robot.commands.directionSnaps.DirectionSnapForwards;
 import frc.robot.commands.directionSnaps.DirectionSnapLeft;
 import frc.robot.commands.directionSnaps.DirectionSnapRight;
 import frc.robot.commands.directionSnaps.StopSnap;
+import frc.robot.commands.drive.AlianceBasedPathFind;
 import frc.robot.commands.drive.BotRelativeCommand;
 import frc.robot.commands.drive.DriveCommand;
 import frc.robot.commands.drive.FieldRelativeCommand;
@@ -145,6 +146,7 @@ public class RobotContainer {
   private static final Trigger        pinsLockButton       = new Trigger(() -> operatorController.getRightTriggerAxis() > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
   private static final JoystickButton pinsUpButton         = new JoystickButton(operatorController, RobotContainerConstants.CLIMB_UP_BUTTON);
   private static final JoystickButton pathfindButton       = new JoystickButton(testController, XboxMappings.Button.A);
+  private final JoystickButton alliancePathButton          = new JoystickButton(testController, XboxMappings.Button.B);
 
   // Subsystems
   public static final LedSubsystem           ledSubsystem              = new LedSubsystem(1); 
@@ -411,15 +413,26 @@ public class RobotContainer {
     
     // Define a field-relative target position (replace with actual field coordinates)
     // This example uses coordinates for a scoring position or other important field location
-    final Pose2d fieldTarget = new Pose2d(8.0, 4.0, Rotation2d.fromDegrees(180));
+    final Pose2d fieldTarget = new Pose2d(11.5, 4.0, Rotation2d.fromDegrees(0));
     
     // Configure pathfind button to navigate to the field-relative target position
-    pathfindButton.onTrue(Commands.runOnce(() -> {
+    pathfindButton.whileTrue(Commands.run(() -> {
         // The robot's current pose is already vision-corrected through the pose estimator
         System.out.println("Pathfinding from current position to: " + fieldTarget);
         
         // Schedule pathfinding command to the target
         Pathfind.pathfindToPose(fieldTarget).schedule();
+    }));
+
+    // Configure alliance path button to load and follow a path based on current alliance
+    alliancePathButton.onTrue(Commands.runOnce(() -> {
+        // Specify the path name (without folder prefix)
+        String pathName = "RedFeed12Tag17Left";
+        
+        System.out.println("Loading and following alliance-specific path: " + pathName);
+        
+        // Schedule the alliance-based pathfind command
+        AlianceBasedPathFind.pathfindThenFollowPath(pathName).schedule();
     }));
   }
 
