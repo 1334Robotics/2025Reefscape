@@ -86,8 +86,8 @@ public class RobotContainer {
   private static final JoystickButton stopSnapButton       = new JoystickButton(driverController,   RobotContainerConstants.SNAP_STOP_BUTTON);
   private static final JoystickButton flopperUpButton      = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_UP_BUTTON);
   private static final JoystickButton flopperDownButton    = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_DOWN_BUTTON);
-  private static final Trigger        mailboxShootButton   = new Trigger(() -> driverController.getRightTriggerAxis()  > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
-  private static final Trigger        mailboxFeedButton    = new Trigger(() -> driverController.getLeftTriggerAxis()  > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
+  private static final Trigger        mailboxShootButton   = new Trigger(() -> operatorController.getRightTriggerAxis()  > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
+  private static final Trigger        mailboxFeedButton    = new Trigger(() -> operatorController.getLeftTriggerAxis()  > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
   private static final JoystickButton mailboxRewindButton  = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_REWIND_BUTTON);
   private static final POVButton      elevatorUpButton     = new POVButton(operatorController, RobotContainerConstants.ELEVATOR_UP_BUTTON);
   private static final POVButton      elevatorDownButton   = new POVButton(operatorController, RobotContainerConstants.ELEVATOR_DOWN_BUTTON);
@@ -103,8 +103,8 @@ public class RobotContainer {
   private static final JoystickButton botRelativeButton    = new JoystickButton(driverController, RobotContainerConstants.BOT_RELATIVE_BUTTON);
   private static final JoystickButton slowDownButton       = new JoystickButton(driverController, RobotContainerConstants.SLOW_DOWN_BUTTON);
   private static final JoystickButton speedUpButton        = new JoystickButton(driverController, RobotContainerConstants.SPEED_UP_BUTTON);
-  private static final Trigger        pinsDownButton       = new Trigger(() -> operatorController.getLeftTriggerAxis()  > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
-  private static final Trigger        pinsLockButton       = new Trigger(() -> operatorController.getRightTriggerAxis() > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
+  // private static final Trigger        pinsDownButton       = new Trigger(() -> operatorController.getLeftTriggerAxis()  > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
+  // private static final Trigger        pinsLockButton       = new Trigger(() -> operatorController.getRightTriggerAxis() > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
   private static final JoystickButton pinsUpButton         = new JoystickButton(operatorController, RobotContainerConstants.CLIMB_UP_BUTTON);
 
   // Subsystems
@@ -196,8 +196,8 @@ public class RobotContainer {
     slowDownButton.onFalse(new NormalSpeedCommand());
     speedUpButton.onTrue(new SpeedUpCommand());
     speedUpButton.onFalse(new NormalSpeedCommand());
-    pinsDownButton.whileTrue(new ForcePinsDownCommand());
-    pinsLockButton.whileTrue(new LockClimbCommand());
+    // pinsDownButton.whileTrue(new ForcePinsDownCommand());
+    // pinsLockButton.whileTrue(new LockClimbCommand());
     pinsUpButton.whileTrue(new ForcePinsUpCommand());
   }
 
