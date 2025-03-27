@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.auto.AutoCache;
 import frc.robot.auto.AutoConfigurer;
 import frc.robot.commands.elevator.ElevatorResetCommand;
-import frc.robot.constants.ElevatorConstants;
 
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -74,9 +73,6 @@ public class Robot extends LoggedRobot {
       AutoCache.getAuto("Test Auto");
       AutoCache.getAuto("MidFullAuto");
       AutoCache.afterLoad();
-
-      // DEBUG
-      SmartDashboard.putData(CommandScheduler.getInstance());
   }
 
   /**
@@ -171,13 +167,7 @@ public class Robot extends LoggedRobot {
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
-  public void autonomousInit() {
-    // Keep field-relative mode enabled for path following
-    RobotContainer.swerveSubsystem.setFieldRelative(true);
-    
-    // Force automatic control for autonomous
-    RobotContainer.elevatorHandler.setForceManualControl(false); // GET RID OF
-    
+  public void autonomousInit() {    
     // First, reset the elevator if it hasn't been reset yet
     if (!elevatorReset) {
       System.out.println("Autonomous Init: Zeroing elevator...");
@@ -198,7 +188,7 @@ public class Robot extends LoggedRobot {
     }
     
     // Set initial robot pose based on the selected position within SmartDashboard
-    AutoConfigurer.setInitialPose(); // I dont even think this does anything as PathPlanner resets pose when needed
+    AutoConfigurer.setInitialPose(); 
     
     // Small delay to ensure odometry reset is complete
     try {
@@ -239,11 +229,6 @@ public class Robot extends LoggedRobot {
 
     RobotContainer.swerveSubsystem.setFieldRelative(true);
     RobotContainer.trackCommand.disable();
-    
-    // Restore manual control if that's what we're using
-    if (ElevatorConstants.MANUAL_ELEVATOR_CONTROL) {
-      RobotContainer.elevatorHandler.setForceManualControl(true);
-    }
     
     // Reset elevator if needed
     if(SmartDashboard.getBoolean("[ELEVATOR] Reset On TeleOp Enable", false) && !this.elevatorReset) {
