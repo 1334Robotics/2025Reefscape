@@ -10,7 +10,7 @@ public class SlowDownCommand extends Command {
 
     @Override
     public void initialize() {
-        DriveCommand.goFast = false;
+        DriveCommand.driveSpeed = DriveSpeed.SLOW;
     }
 
     @Override

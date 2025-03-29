@@ -5,8 +5,9 @@ public class RobotContainerConstants {
     public static final int DRIVER_CONTROLLER_PORT      = 0;
     public static final int OPERATOR_CONTROLLER_PORT    = 1;
 
-    public static final int MAILBOX_SHOOT_BUTTON  = XboxMappings.Button.RightBumper;
-    public static final int MAILBOX_FEED_BUTTON   = XboxMappings.Button.LeftBumper;
+    // Mailbox shoot is the right trigger, feed is the left trigger
+    /*public static final int MAILBOX_SHOOT_BUTTON  = XboxMappings.Button.RightBumper; 
+    public static final int MAILBOX_FEED_BUTTON   = XboxMappings.Button.LeftBumper;*/
     public static final int MAILBOX_REWIND_BUTTON = XboxMappings.Button.Back;
 
     public static final double CONTROLLER_MOVEMENT_DEADBAND = 0.15;
@@ -38,6 +39,7 @@ public class RobotContainerConstants {
     
     public static final int BOT_RELATIVE_BUTTON   = XboxMappings.Button.A;
     public static final int SLOW_DOWN_BUTTON      = XboxMappings.Button.B;
+    public static final int SPEED_UP_BUTTON       = XboxMappings.Button.LeftStick;
 
     public static final int CLIMB_UP_BUTTON = XboxMappings.Button.Start;
 }
