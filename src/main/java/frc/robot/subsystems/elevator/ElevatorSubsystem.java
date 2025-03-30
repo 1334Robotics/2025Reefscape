@@ -42,8 +42,6 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        double position = this.getPosition();
-
         SmartDashboard.putBoolean("[ELEVATOR] Limit Switch Seen", !this.limitSwitch.get());
     }
 }

@@ -63,6 +63,7 @@ public class ElevatorHandler extends SubsystemBase {
 
     @Override
     public void periodic() {
+        SmartDashboard.putNumber("[ELEVATOR] Current Position", RobotContainer.elevatorSubsystem.getPosition());
         // Check dashboard for manual control toggle
         boolean dashboardManualControl = SmartDashboard.getBoolean(MANUAL_CONTROL_KEY, false);
         if (dashboardManualControl != this.forceManualControl) {
