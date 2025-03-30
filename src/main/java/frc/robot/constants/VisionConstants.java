@@ -35,12 +35,7 @@ public final class VisionConstants {
     public static final double FIELD_WIDTH_METERS = 8.0137;
 
     // AprilTag tracking constants
-    public static final int TARGET_TAG_ID = 3;  // Target AprilTag ID
     public static final double AREA_10_DISTANCE = 44.6; // In centimeters
-    public static final double POWER_TABLE_SPACE = 0.005;
-    // Both of these are in centimeters
-    public static final double TRACK_TAG_X = -14;
-    public static final double TRACK_TAG_Y = 80;
 
     // Rotation PID constants
     public static final double ROTATION_KP          = 0.02;
@@ -52,26 +47,26 @@ public final class VisionConstants {
 
     // Drive PID constants
     public static final double FORWARDS_KP          = 0.08;
-    public static final double FORWARDS_KI          = 0.001;
+    public static final double FORWARDS_KI          = 0.00;
     public static final double FORWARDS_KD          = 0.000;
     public static final double FORWARDS_TAU         = 0;
     public static final double FORWARDS_LIM_MIN_INT = -0.3;
     public static final double FORWARDS_LIM_MAX_INT = 0.3;
     
-    public static final double HORIZONTAL_KP          = 0.05;
-    public static final double HORIZONTAL_KI          = 0.0005;
+    public static final double HORIZONTAL_KP          = 0.0;
+    public static final double HORIZONTAL_KI          = 0.000;
     public static final double HORIZONTAL_KD          = 0.000;
     public static final double HORIZONTAL_TAU         = 0;
     public static final double HORIZONTAL_LIM_MIN_INT = -0.3;
     public static final double HORIZONTAL_LIM_MAX_INT = 0.3;
 
-    // Camera mounting position relative to robot center (meters)
-    public static final double CAMERA_POSITION_X = 0.25;  // Forward/back
-    public static final double CAMERA_POSITION_Y = 0.0;  // Left/right
-    public static final double CAMERA_POSITION_Z = 0.5;  // Up/down
+    // Camera mounting position relative to robot center (centimeters)
+    public static final double CAMERA_POSITION_X = 15.9;
+    public static final double CAMERA_POSITION_Y = 35.9;
+    public static final double CAMERA_POSITION_Z = 0;
 
     // Camera mounting angles (radians)
-    public static final double CAMERA_PITCH_RADIANS = 0.0;  // Up/down tilt
+    public static final double CAMERA_PITCH_RADIANS = 0.0;   // Up/down tilt
     public static final double CAMERA_YAW_RADIANS = 0.0;    // Left/right rotation
     public static final double CAMERA_ROLL_RADIANS = 0.0;   // Roll around camera axis
     

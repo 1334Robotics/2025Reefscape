@@ -1,33 +1,24 @@
 package frc.robot.subsystems.drive;
 
-
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;//NEW CAL
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
-import frc.robot.constants.AutoConstants;
 import frc.robot.constants.SimulationConstants;
 import frc.robot.constants.SwerveConstants;
 import frc.robot.constants.VisionConstants;
-import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.subsystems.vision.VisionPoseEstimator;
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
-import swervelib.SwerveModule;
 import swervelib.parser.SwerveParser;
-import swervelib.imu.SwerveIMU;
-import frc.robot.subsystems.gyro.GyroIO;
-import frc.robot.subsystems.gyro.GyroIOSim;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -40,7 +31,6 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 
 import org.ironmaple.simulation.drivesims.COTS;
-import org.ironmaple.simulation.drivesims.GyroSimulation;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
@@ -55,26 +45,12 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
-import org.ironmaple.simulation.SimulatedArena;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
-import com.pathplanner.lib.commands.PathfindingCommand;
-import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.path.PathConstraints;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.DriveFeedforwards;
-import com.pathplanner.lib.util.swerve.SwerveSetpoint;
-import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
+import org.ironmaple.simulation.SimulatedArena;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 import static edu.wpi.first.units.Units.Meter;
-import edu.wpi.first.wpilibj2.command.Commands;
-import com.pathplanner.lib.auto.NamedCommands;
 
 
 
@@ -83,8 +59,6 @@ public class SwerveSubsystem extends SubsystemBase {
     private boolean fieldRelative;
     private SwerveDriveSimulation swerveDriveSimulation;
     private int count = 0;
-    private final SwerveDrivePoseEstimator m_poseEstimator;
-    private final VisionPoseEstimator visionPoseEstimator;
 
   /**
    * Enable vision odometry updates while driving.
@@ -97,8 +71,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public SwerveSubsystem() {
         this.fieldRelative = false;
-        final GyroIO gyroIO;
-        final GyroSimulation gyroSimulation;
         final ModuleIO[] moduleIOs;
         SmartDashboard.putBoolean("[SWERVE] Field Relative", this.fieldRelative);
         
@@ -150,7 +122,7 @@ public class SwerveSubsystem extends SubsystemBase {
                         .withBumperSize(Units.Inches.of(30), Units.Inches.of(30));
                 
                 
-                /* Create a swerve drive simulation */
+                /* Create a swerve drive simulation */ // FIX
                 this.swerveDriveSimulation = new SwerveDriveSimulation(
                 // Specify Configuration
                 driveTrainSimulationConfig,
@@ -160,11 +132,9 @@ public class SwerveSubsystem extends SubsystemBase {
                 // Register with simulation world
                 SimulatedArena.getInstance().addDriveTrainSimulation(swerveDriveSimulation);
 
-                gyroIO = new GyroIOSim(this.swerveDriveSimulation.getGyroSimulation());
                 moduleIOs = new ModuleIO[4];
-                for (int i = 0; i < 4; i++) {
-                    moduleIOs[i] = new ModuleIOSim(swerveDriveSimulation.getModules()[i]);
-                }
+                int i;
+                for(i=0;i<4;i++) moduleIOs[i] = new ModuleIOSim(swerveDriveSimulation.getModules()[i]);
             }
         } 
         catch(IOException e) {
@@ -184,12 +154,15 @@ public class SwerveSubsystem extends SubsystemBase {
         // Enable heading correction and cosine compensator
         this.swerveDrive.setHeadingCorrection(true);
         this.swerveDrive.setCosineCompensator(true);
-        this.swerveDrive.setAngularVelocityCompensation(true,
+        
+        // Unsure what this really does, so it will remain commented out
+        /*this.swerveDrive.setAngularVelocityCompensation(true,
                                                true,
                                                0.1); //Correct for skew that gets worse as angular velocity increases. Start with a coefficient of 0.1.
         this.swerveDrive.setModuleEncoderAutoSynchronize(false,
                                                 1); // Enable if you want to resynchronize your absolute encoders and motor encoders periodically when they are not moving.
         // swerveDrive.pushOffsetsToEncoders(); // Set the absolute encoder to be used over the internal encoder and push the offsets onto it. Throws warning if not possible
+        */
         if (visionDriveTest)
         {
         setupPhotonVision();
@@ -236,9 +209,7 @@ public class SwerveSubsystem extends SubsystemBase {
            RobotContainer.visionSubsystem.getImageAge() < VisionConstants.MAX_ACCEPTABLE_DELAY) {
             
             PhotonTrackedTarget target = RobotContainer.visionSubsystem.getTarget();
-            if (target != null) {
-                Transform3d targetPose = target.getBestCameraToTarget();
-                
+            if (target != null) {                
                 // Calculate vision measurement standard deviations
                 Matrix<N3, N1> visionStdDevs = calculateVisionStdDevs(target);
                 
@@ -261,6 +232,7 @@ public class SwerveSubsystem extends SubsystemBase {
         Logger.recordOutput("FieldSimulation/RobotPose", new Pose3d(swerveDrive.getPose()));
 
         // Update the encoder positions
+        /*
         SwerveModule[] modules = this.swerveDrive.getModules();
         SmartDashboard.putNumber("[SWERVE] Front Left Encoder Position",  modules[0].getRawAbsolutePosition());
         SmartDashboard.putNumber("[SWERVE] Front Right Encoder Position", modules[1].getRawAbsolutePosition());
@@ -276,7 +248,8 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("[SWERVE] Back Left Angle Velocity",   modules[2].getAngleMotor().getVelocity());
         SmartDashboard.putNumber("[SWERVE] Back Right Drive Velocity",  modules[3].getDriveMotor().getVelocity());
         SmartDashboard.putNumber("[SWERVE] Back Right Angle Velocity",  modules[3].getAngleMotor().getVelocity());
-    
+        */
+
         // Debug swerve state
         SmartDashboard.putNumber("Swerve/UpdateCount", count++);
 
@@ -342,7 +315,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public void autoDrive(ChassisSpeeds speeds) {
-        swerveDrive.drive(speeds);
+        swerveDrive.setChassisSpeeds(speeds);
     }
 
     public void zeroGyro() {
@@ -372,15 +345,6 @@ public class SwerveSubsystem extends SubsystemBase {
             
             // Then reset the odometry with the new pose
             swerveDrive.resetOdometry(pose);
-            
-            // Verify the reset was successful
-            Pose2d currentPose = swerveDrive.getPose();
-            if (currentPose != null) {
-                System.out.println("Successfully reset odometry to: " + pose.toString());
-                System.out.println("Current pose: " + currentPose.toString());
-            } else {
-                System.err.println("Warning: Odometry reset may have failed - current pose is null");
-            }
         } catch (Exception e) {
             System.err.println("Error resetting odometry: " + e.getMessage());
             e.printStackTrace();
@@ -407,6 +371,7 @@ public class SwerveSubsystem extends SubsystemBase {
         return swerveDriveSimulation;
     }
 
+    @SuppressWarnings("unused")
     private Pose2d calculateRobotPoseFromVision(Transform3d targetToCamera) {
         // Get the camera position relative to robot center
         Transform3d robotToCamera = new Transform3d(

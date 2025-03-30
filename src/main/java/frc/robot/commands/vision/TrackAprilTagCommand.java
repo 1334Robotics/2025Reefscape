@@ -7,7 +7,6 @@ import frc.robot.RobotContainer;
 import frc.robot.constants.SwerveConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.drive.DriveController.Controller;
-import frc.robot.subsystems.vision.TagTrackingTarget;
 import frc.robot.subsystems.controller.ControllerVibration;
 import frc.robot.subsystems.drive.PIDController;
 
@@ -21,8 +20,47 @@ public class TrackAprilTagCommand extends Command {
     private boolean enabled;
     private int framesSinceLastSeen;
 
-    // Explain this later
-    private double targetYaw;
+    public TrackAprilTagCommand() {
+        this.targetTag = -1;
+        this.enabled = false;
+        this.framesSinceLastSeen = 0;
+
+        // Initialize the PID controllers
+        rotationController   = new PIDController(VisionConstants.ROTATION_KP,
+                                                 VisionConstants.ROTATION_KI,
+                                                 VisionConstants.ROTATION_KD,
+                                                 VisionConstants.ROTATION_TAU,
+                                                 // These are the limMin and limMax terms
+                                                 // Which should allow us to simply multiply the output of the PID controller
+                                                 // by the SwerveConstants.DRIVE_SPEED and the SwerveConstants.
+                                                 -1,
+                                                 1, 
+                                                 VisionConstants.ROTATION_LIM_MIN_INT,
+                                                 VisionConstants.ROTATION_LIM_MAX_INT,
+                                                 1 /* The sampleTime which should never need to be changed (it doesn't do much) */);
+        forwardController   = new PIDController(VisionConstants.FORWARDS_KP,
+                                                VisionConstants.FORWARDS_KI,
+                                                VisionConstants.FORWARDS_KD,
+                                                VisionConstants.FORWARDS_TAU,
+                                                -1,
+                                                1,
+                                                VisionConstants.FORWARDS_LIM_MIN_INT,
+                                                VisionConstants.FORWARDS_LIM_MAX_INT,
+                                                1);
+        horizontalController = new PIDController(VisionConstants.HORIZONTAL_KP,
+                                                 VisionConstants.HORIZONTAL_KI,
+                                                 VisionConstants.HORIZONTAL_KD,
+                                                 VisionConstants.HORIZONTAL_TAU,
+                                                 -1,
+                                                 1,
+                                                 VisionConstants.HORIZONTAL_LIM_MIN_INT,
+                                                 VisionConstants.HORIZONTAL_LIM_MAX_INT,
+                                                 1);
+
+        this.setRelativeDistance(new Distance(-1, -1));
+
+        addRequirements(RobotContainer.swerveSubsystem, RobotContainer.visionSubsystem);
+    }
 
     public TrackAprilTagCommand(int targetTag, Distance relativeDistance) {
         this.targetTag = targetTag;
@@ -76,8 +114,6 @@ public class TrackAprilTagCommand extends Command {
 
         this.targetX   = relativeDistance.x;
         this.targetY   = relativeDistance.y;
-        this.targetYaw = Math.atan2(this.targetX, this.targetY) * (180.0 / Math.PI);
-        SmartDashboard.putNumber("[VISION] Target Yaw", this.targetYaw);
     }
 
     public void setTargetTag(int targetTag) {
@@ -129,6 +165,9 @@ public class TrackAprilTagCommand extends Command {
 
     @Override
     public void execute() {
+        // Ensure that it is initialized
+        if(this.targetTag == -1 || (this.targetX == -1 && this.targetY == -1)) return;
+
         SmartDashboard.putBoolean("[VISION] Tracking Enabled", this.enabled);
         if(!this.enabled) return;
 
