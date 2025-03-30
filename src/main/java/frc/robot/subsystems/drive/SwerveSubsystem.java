@@ -52,6 +52,33 @@ import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 import static edu.wpi.first.units.Units.Meter;
 
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.constants.AutoConstants;
+import frc.robot.subsystems.vision.VisionSubsystem;
+import swervelib.SwerveModule;
+import swervelib.imu.SwerveIMU;
+import frc.robot.subsystems.gyro.GyroIO;
+import frc.robot.subsystems.gyro.GyroIOSim;
+
+import org.ironmaple.simulation.drivesims.GyroSimulation;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.commands.PathfindingCommand;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.DriveFeedforwards;
+import com.pathplanner.lib.util.swerve.SwerveSetpoint;
+import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj2.command.Commands;
+import com.pathplanner.lib.auto.NamedCommands;
+
+
 
 
 public class SwerveSubsystem extends SubsystemBase {
@@ -59,6 +86,8 @@ public class SwerveSubsystem extends SubsystemBase {
     private boolean fieldRelative;
     private SwerveDriveSimulation swerveDriveSimulation;
     private int count = 0;
+    private final SwerveDrivePoseEstimator m_poseEstimator;
+    private final VisionPoseEstimator visionPoseEstimator;
 
   /**
    * Enable vision odometry updates while driving.

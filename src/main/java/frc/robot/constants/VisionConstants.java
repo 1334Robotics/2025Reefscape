@@ -13,6 +13,7 @@ public final class VisionConstants {
     );
 
     // Camera configuration
+    // TODO: Update these values for the actual camera
     public static final String CAMERA_NAME = "Cam1";
     public static final int CAMERA_RESOLUTION_WIDTH = 640;
     public static final int CAMERA_RESOLUTION_HEIGHT = 480;

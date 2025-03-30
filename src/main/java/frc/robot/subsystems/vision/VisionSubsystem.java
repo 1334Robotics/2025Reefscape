@@ -1,9 +1,9 @@
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.units.DistanceUnit;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.commands.vision.Distance;
-import frc.robot.constants.VisionConstants;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
@@ -21,8 +21,7 @@ public class VisionSubsystem extends SubsystemBase {
     private static final String CAMERA_NAME = "Cam1";
     private double imageAge = 0;
 
-    private final PhotonCamera leftCamera;
-    private final PhotonCamera rightCamera;
+    private final PhotonCamera cameraPhotonCamera;
     private PhotonPipelineMetadata cameraMetadata;
 
     // Store the latest result each loop
@@ -30,8 +29,7 @@ public class VisionSubsystem extends SubsystemBase {
 
 
     public VisionSubsystem() {
-        this.leftCamera  = new PhotonCamera(VisionConstants.LEFT_CAMERA_NAME);
-        this.rightCamera = new PhotonCamera(VisionConstants.RIGHT_CAMERA_NAME);
+        cameraPhotonCamera = new PhotonCamera(CAMERA_NAME);
     }
 
     /**
@@ -130,8 +128,8 @@ public class VisionSubsystem extends SubsystemBase {
     public Distance getDistanceAway() {
         if(latestResult != null && latestResult.hasTargets()) {
             PhotonTrackedTarget target = latestResult.getBestTarget();
-            return new Distance(target.getBestCameraToTarget().getMeasureY().in(Centimeters) - VisionConstants.CAMERA_POSITION_X,
-                                target.getBestCameraToTarget().getMeasureX().in(Centimeters) - VisionConstants.CAMERA_POSITION_Y);
+            return new Distance(target.getBestCameraToTarget().getMeasureY().in(Centimeters),
+                                target.getBestCameraToTarget().getMeasureX().in(Centimeters));
         }
         return null;
     }
@@ -147,21 +145,11 @@ public class VisionSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         // 1) Grab all unread results once per loop
-        List<PhotonPipelineResult> results = leftCamera.getAllUnreadResults();
+        List<PhotonPipelineResult> results = cameraPhotonCamera.getAllUnreadResults();
 
-        // 2) If we got anything new, take the last (most recent) one that contains a valid target
-        if(!results.isEmpty()) {
-            this.latestResult = results.get(results.size() - 1);
-
-            /*this.latestResult = null;
-            boolean found = false;
-            int i;
-            for(i=1;i<results.size()&&!found;i++) {
-                this.latestResult = results.get(results.size() - i);
-                if(this.latestResult != null) {
-                    if(this.latestResult.hasTargets()) found = true;
-                }
-            }*/
+        // 2) If we got anything new, take the last (most recent) one
+        if (!results.isEmpty()) {
+            latestResult = results.get(results.size() - 1);
         }
 
         // 3) Update the dashboard
