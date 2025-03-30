@@ -58,8 +58,11 @@ import frc.robot.subsystems.led.LedSubsystem;
 
 import frc.robot.subsystems.flopper.FlopperSubsystem;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
@@ -112,7 +115,7 @@ public class RobotContainer {
   // private static final Trigger        pinsLockButton       = new Trigger(() -> operatorController.getRightTriggerAxis() > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
   private static final JoystickButton pinsUpButton         = new JoystickButton(operatorController, RobotContainerConstants.CLIMB_UP_BUTTON);
   private static final JoystickButton pathfindButton       = new JoystickButton(testController, XboxMappings.Button.A);
-  private final JoystickButton alliancePathButton          = new JoystickButton(testController, XboxMappings.Button.B);
+  private static final JoystickButton alliancePathButton   = new JoystickButton(testController, XboxMappings.Button.B);
 
   // Subsystems
   public static final LedSubsystem           ledSubsystem                = new LedSubsystem(1); 
