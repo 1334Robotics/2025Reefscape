@@ -73,6 +73,7 @@ public class Robot extends LoggedRobot {
       AutoCache.getAuto("Test Auto");
       AutoCache.getAuto("JustAutoMid");
       AutoCache.getAuto("MidFullAuto");
+      AutoCache.getAuto("MidFullAuto-OppositeShooter");
       AutoCache.afterLoad();
   }
 
@@ -124,7 +125,8 @@ public class Robot extends LoggedRobot {
     RobotContainer.trackCommand.execute(); // THIS IS BAD. IT SHOULDN'T NEED TO DO THIS
     m_field.setRobotPose(RobotContainer.swerveSubsystem.getPose());
   }
-   /** This function is called once when the robot is first started up. */
+  
+  /** This function is called once when the robot is first started up. */
   @Override
   public void simulationInit() {
     SimulatedArena.getInstance();
@@ -168,24 +170,11 @@ public class Robot extends LoggedRobot {
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
-  public void autonomousInit() {    
-    // First, reset the elevator if it hasn't been reset yet
-    if (!elevatorReset) {
-      System.out.println("Autonomous Init: Zeroing elevator...");
-      Command resetCommand = new ElevatorResetCommand();
-      resetCommand.schedule();
-      // Wait for the reset to complete (up to 2 seconds)
-      int attempts = 0;
-      while (!resetCommand.isFinished() && attempts < 100) {
-        try {
-          Thread.sleep(20);  // Wait 20ms between checks
-          attempts++;
-        } catch (InterruptedException e) {
-          break;
-        }
-      }
-      elevatorReset = true;
-      System.out.println("Elevator zeroing completed");
+  public void autonomousInit() {
+    // Reset the elevator
+    if(!this.elevatorReset) {
+      (new ElevatorResetCommand()).schedule();
+      this.elevatorReset = true;
     }
     
     // Set initial robot pose based on the selected position within SmartDashboard
@@ -206,7 +195,7 @@ public class Robot extends LoggedRobot {
     m_autonomousCommand = new WaitCommand(0.01).andThen(m_robotContainer.getAutonomousCommand());
     
     // Schedule the autonomous command
-    if (m_autonomousCommand != null) {
+    if(m_autonomousCommand != null) {
       System.out.println("Starting autonomous command: " + m_autonomousCommand.getName());
       m_autonomousCommand.schedule();
     } else {
