@@ -38,8 +38,8 @@ public class LaserCanSubsystem extends SubsystemBase {
                                                                        regionOfInterest.height));
             laserCan.setTimingBudget(LaserCan.TimingBudget.TIMING_BUDGET_33MS);
             System.out.printf("[LaserCan %d] LaserCan configured successfully\n", this.number);
-        } catch (ConfigurationFailedException e) {
-            System.out.printf("[LaserCan %d] LaserCan configuration failed!\n" + e, this.number);
+        } catch(ConfigurationFailedException e) {
+            System.out.printf("[LaserCan %d] LaserCan configuration failed: %s!\n", this.number, e.toString());
         }
     }
 
