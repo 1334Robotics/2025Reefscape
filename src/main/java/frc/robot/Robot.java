@@ -57,6 +57,7 @@ public class Robot extends LoggedRobot {
     // Put the check to disable the elevator reset on TeleOp enable
     SmartDashboard.putBoolean("[ELEVATOR] Reset On TeleOp Enable", true);
   }
+
   @Override
   public void robotInit() {
       Logger.addDataReceiver(new NT4Publisher());
@@ -75,6 +76,9 @@ public class Robot extends LoggedRobot {
       AutoCache.getAuto("MidFullAuto");
       AutoCache.getAuto("MidFullAuto-OppositeShooter");
       AutoCache.afterLoad();
+
+      // Zero the flopper (algae clearer)
+      RobotContainer.flopperSubsystem.resetPose();
   }
 
   /**
