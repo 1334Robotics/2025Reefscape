@@ -19,7 +19,9 @@ public final class VisionConstants {
     // Vision processing constants
     public static final double MAX_AMBIGUITY = 0.2;  // Maximum allowed pose ambiguity
     public static final double MIN_TARGET_AREA = 10.0;  // Minimum target area in pixels²
-    public static final double MAX_ACCEPTABLE_DELAY = 100; // In milliseconds
+    public static final double MAX_ACCEPTABLE_DELAY = 50; // In milliseconds
+    public static final double MIN_TARGET_QUALITY = 0.3;  // Minimum quality score for target selection
+    public static final double SMOOTHING_FACTOR = 0.2;    // Factor for angle smoothing
 
     // Simulation constants
     public static final double SIM_CAMERA_FPS = 30;
