@@ -21,12 +21,12 @@ public class FlopperSubsystem extends SubsystemBase {
     }
 
     public void goUp() {
-        this.motor.set(-FlopperConstants.MOTOR_SPEED);
+        this.motor.set(FlopperConstants.MOTOR_SPEED);
         SmartDashboard.putString("[FLOPPER] State", "Going up");
     }
 
     public void goDown() {
-        this.motor.set(FlopperConstants.MOTOR_SPEED);
+        this.motor.set(-FlopperConstants.MOTOR_SPEED);
         SmartDashboard.putString("[FLOPPER] State", "Going down");
     }
 

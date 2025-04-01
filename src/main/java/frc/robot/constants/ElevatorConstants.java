@@ -16,11 +16,11 @@ public class ElevatorConstants {
     public static final double ELEVATOR_SLOW_HIGH_POS = 5.00;
 
     // No unit
-    public static final double FEED_POSITION = 1.374268;
+    public static final double FEED_POSITION = 1.429077;
     public static final double L1_POSITION   = 1.314453;
     public static final double L2_POSITION   = 1.938770;
     public static final double L3_POSITION   = 3.024644;
-    public static final double L4_POSITION   = 5.155067;
+    public static final double L4_POSITION   = 5.018188;
 
     // Set a limit where KI takes effect
     // D term reduces oscillation
