@@ -9,17 +9,12 @@ public class FlopperUpCommand extends Command {
     }
 
     @Override
-    public void execute() {
+    public void initialize() {
         RobotContainer.flopperSubsystem.goUp();
-    }
-
-    @Override
-    public void end(boolean interrupted) {
-        RobotContainer.flopperSubsystem.stop();
     }
     
     @Override
     public boolean isFinished() {
-        return false;
+        return true;
     }
 }
