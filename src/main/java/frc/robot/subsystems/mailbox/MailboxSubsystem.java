@@ -29,8 +29,6 @@ public class MailboxSubsystem extends SubsystemBase {
     }
 
     public void rewind() {
-        // Fix and remove the print
-        System.out.println("Here");
         this.motors[0].set(-MailboxConstants.REWIND_MOTOR_SPEED);
         this.motors[1].set(MailboxConstants.REWIND_MOTOR_SPEED);
     }
