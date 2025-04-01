@@ -19,6 +19,9 @@ import java.util.List;
  */
 public class VisionSubsystem extends SubsystemBase {
     private double imageAge = 0;
+    private double smoothedAngle = 0;
+    private int stableFrames = 0;
+    private PhotonTrackedTarget lastStableTarget = null;
 
     private final PhotonCamera leftCamera;
     private final PhotonCamera rightCamera;
@@ -26,7 +29,6 @@ public class VisionSubsystem extends SubsystemBase {
 
     // Store the latest result each loop
     private PhotonPipelineResult latestResult;
-
 
     public VisionSubsystem() {
         this.leftCamera  = new PhotonCamera(VisionConstants.LEFT_CAMERA_NAME);
@@ -38,7 +40,11 @@ public class VisionSubsystem extends SubsystemBase {
      * @return true if a target is visible; false otherwise.
      */
     public boolean isTargetVisible() {
-        return (latestResult != null) && latestResult.hasTargets();
+        if (latestResult == null || !latestResult.hasTargets()) return false;
+        
+        PhotonTrackedTarget target = latestResult.getBestTarget();
+        return target.getArea() >= VisionConstants.MIN_TARGET_AREA &&
+               target.getPoseAmbiguity() <= VisionConstants.MAX_AMBIGUITY;
     }
 
     /**
@@ -136,55 +142,94 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     public double getTargetAngle() {
-        if(latestResult != null && latestResult.hasTargets()) {
-            return latestResult.getBestTarget().getBestCameraToTarget().getRotation().getZ() * (180 / Math.PI);
+        if (latestResult != null && latestResult.hasTargets()) {
+            double rawAngle = latestResult.getBestTarget().getBestCameraToTarget().getRotation().getZ() * (180 / Math.PI);
+            smoothedAngle = (1 - VisionConstants.SMOOTHING_FACTOR) * smoothedAngle + 
+                           VisionConstants.SMOOTHING_FACTOR * rawAngle;
+            return smoothedAngle;
         }
-        // If the angle is 1000­°, there is a problem
+        // Return 1000° for error case to maintain compatibility with TrackAprilTagCommand
+        smoothedAngle = 1000;
         return 1000;
+    }
+
+    private double calculateTargetQuality(PhotonTrackedTarget target) {
+        // Combine multiple factors into a single quality score
+        double areaScore = target.getArea() / 100.0;  // Normalize area to 0-1
+        double ambiguityScore = 1.0 - target.getPoseAmbiguity();  // Invert ambiguity
+        double quality = (areaScore * 0.7 + ambiguityScore * 0.3);  // Weighted combination
+        
+        // Return 0 if quality is below threshold
+        return quality >= VisionConstants.MIN_TARGET_QUALITY ? quality : 0;
     }
 
     @Override
     public void periodic() {
-        // 1) Grab all unread results once per loop
-        List<PhotonPipelineResult> results = leftCamera.getAllUnreadResults();
-
-        // 2) If we got anything new, take the last (most recent) one that contains a valid target
-        if(!results.isEmpty()) {
-            this.latestResult = results.get(results.size() - 1);
-
-            /*this.latestResult = null;
-            boolean found = false;
-            int i;
-            for(i=1;i<results.size()&&!found;i++) {
-                this.latestResult = results.get(results.size() - i);
-                if(this.latestResult != null) {
-                    if(this.latestResult.hasTargets()) found = true;
+        // Get results from both cameras
+        List<PhotonPipelineResult> leftResults = leftCamera.getAllUnreadResults();
+        List<PhotonPipelineResult> rightResults = rightCamera.getAllUnreadResults();
+        
+        // Select the best result between both cameras
+        PhotonPipelineResult bestResult = null;
+        double bestQuality = 0;
+        String selectedCamera = "None";
+        
+        // Check left camera results
+        if (!leftResults.isEmpty()) {
+            PhotonPipelineResult result = leftResults.get(leftResults.size() - 1);
+            if (result.hasTargets()) {
+                double quality = calculateTargetQuality(result.getBestTarget());
+                if (quality > bestQuality) {
+                    bestQuality = quality;
+                    bestResult = result;
+                    selectedCamera = "Left";
                 }
-            }*/
+            }
+        }
+        
+        // Check right camera results
+        if (!rightResults.isEmpty()) {
+            PhotonPipelineResult result = rightResults.get(rightResults.size() - 1);
+            if (result.hasTargets()) {
+                double quality = calculateTargetQuality(result.getBestTarget());
+                if (quality > bestQuality) {
+                    bestQuality = quality;
+                    bestResult = result;
+                    selectedCamera = "Right";
+                }
+            }
         }
 
-        // 3) Update the dashboard
+        // Check target stability before using it
+        if (bestResult != null && bestResult.hasTargets()) {
+            PhotonTrackedTarget currentTarget = bestResult.getBestTarget();
+            
+            if (lastStableTarget != null && 
+                currentTarget.getFiducialId() == lastStableTarget.getFiducialId() &&
+                Math.abs(currentTarget.getYaw() - lastStableTarget.getYaw()) < 5.0) {
+                stableFrames++;
+            } else {
+                stableFrames = 0;
+                lastStableTarget = currentTarget;
+            }
+            
+            if (stableFrames < 3) {  // Require 3 stable frames
+                bestResult = null;
+            }
+        }
+
+        // Update latest result and dashboard
+        this.latestResult = bestResult;
         boolean hasTarget = (latestResult != null) && latestResult.hasTargets();
         SmartDashboard.putBoolean("[VISION] Has Target", hasTarget);
+        SmartDashboard.putString("[VISION] Selected Camera", selectedCamera);
+        SmartDashboard.putNumber("[VISION] Target Quality", bestQuality);
+        SmartDashboard.putNumber("[VISION] Stable Frames", stableFrames);
 
         // Show pipeline latency
-        // this compiles but always returns -1.0
-        //*double latencyMs = -1.0;
-        //if (cameraMetadata != null && latestResult != null) {
-        //    latencyMs = cameraMetadata.getLatencyMillis();
-        //}
-        // (1) Robot's current time in seconds
         double currentTimeSeconds = edu.wpi.first.wpilibj.Timer.getFPGATimestamp();
-
-        // (2) The camera capture time (in seconds). 
-        //     Check for a method like getTimestampSeconds(), getFrameTimestampSeconds(), etc.
-        //double captureTimeSeconds = latestResult.getTimestampSeconds(); 
         double captureTimeSeconds = (latestResult != null ? latestResult.getTimestampSeconds() : currentTimeSeconds);
-
-        // (3) Convert to milliseconds
         this.imageAge = (currentTimeSeconds - captureTimeSeconds) * 1000;
-
-        // (4) Send to dashboard
         SmartDashboard.putNumber("[VISION] Image Age (ms)", this.imageAge);
 
         if (hasTarget) {
