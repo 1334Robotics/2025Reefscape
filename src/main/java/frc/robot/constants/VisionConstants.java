@@ -6,10 +6,10 @@ import edu.wpi.first.math.geometry.Translation3d;
 import frc.robot.commands.vision.Distance;
 
 public final class VisionConstants {
-    // Camera mounting position relative to robot center THIS NEEDS TO BE UPDATED FOR THE ACTUAL ROBOT
+    // Camera mounting position relative to robot center
     public static final Transform3d ROBOT_TO_CAMERA = new Transform3d(
-        new Translation3d(0.5, 0, 0.5),  // Camera is 50cm forward, 50cm up
-        new Rotation3d(0, Math.toRadians(-30), 0)  // Pitched up 30 degrees
+        new Translation3d(0.75, 0.5, 0),  // Camera is 75cm forward, 50cm to side
+        new Rotation3d(0, 0, 0)  // No rotation
     );
 
     // Camera configuration
@@ -61,14 +61,14 @@ public final class VisionConstants {
     public static final double HORIZONTAL_LIM_MAX_INT = 0.3;
 
     // Camera mounting position relative to robot center (centimeters)
-    public static final double CAMERA_POSITION_X = 15.9;
-    public static final double CAMERA_POSITION_Y = 35.9;
-    public static final double CAMERA_POSITION_Z = 0;
+    public static final double CAMERA_POSITION_X = 75.0;  // 75cm forward from midpoint
+    public static final double CAMERA_POSITION_Y = 50.0;  // 50cm off centerline
+    public static final double CAMERA_POSITION_Z = 0.0;   // No vertical offset
 
     // Camera mounting angles (radians)
-    public static final double CAMERA_PITCH_RADIANS = 0.0;   // Up/down tilt
-    public static final double CAMERA_YAW_RADIANS = 0.0;    // Left/right rotation
-    public static final double CAMERA_ROLL_RADIANS = 0.0;   // Roll around camera axis
+    public static final double CAMERA_PITCH_RADIANS = 0.0;   // No upward tilt
+    public static final double CAMERA_YAW_RADIANS = 0.0;     // No left/right rotation
+    public static final double CAMERA_ROLL_RADIANS = 0.0;    // No roll
     
     // Vision measurement accuracy constants
     public static final double BASE_VISION_STD_DEV = 0.5;  // Base std dev (Standard deviation) in meters
