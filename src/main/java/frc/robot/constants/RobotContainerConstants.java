@@ -30,8 +30,9 @@ public class RobotContainerConstants {
     public static final int ELEVATOR_L3_BUTTON     = XboxMappings.DPad.Down;
     public static final int ELEVATOR_L4_BUTTON     = XboxMappings.DPad.Left;
 
-    public static final int FLOPPER_UP_BUTTON   = XboxMappings.Button.Y;
-    public static final int FLOPPER_DOWN_BUTTON = XboxMappings.Button.X;
+    public static final int FLOPPER_UP_BUTTON   = XboxMappings.Button.RightBumper;
+    public static final int FLOPPER_DOWN_BUTTON = XboxMappings.Button.LeftBumper;
+    public static final int FLOPPER_ZERO_BUTTON = XboxMappings.Button.X;
 
     public static final int RIP_CONTROL_BUTTON = XboxMappings.Button.Back;
 
