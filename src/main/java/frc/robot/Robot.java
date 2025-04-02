@@ -73,8 +73,8 @@ public class Robot extends LoggedRobot {
       AutoCache.getAuto("5M Auto");
       AutoCache.getAuto("Test Auto");
       AutoCache.getAuto("JustAutoMid");
-      AutoCache.getAuto("MidFullAuto");
-      AutoCache.getAuto("MidFullAuto-OppositeShooter");
+      AutoCache.getAuto("MidFullAuto-Right");
+      AutoCache.getAuto("MidFullAuto-Left");
       AutoCache.afterLoad();
 
       // Zero the flopper (algae clearer)

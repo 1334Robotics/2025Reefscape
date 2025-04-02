@@ -188,7 +188,7 @@ public class RobotContainer {
       elevatorL1Button.onTrue(new ElevatorGotoL1Command());
       elevatorL2Button.onTrue(new ElevatorGotoL2Command());
       elevatorL3Button.onTrue(new ElevatorGotoL3Command());
-      elevatorL4Button.onTrue(new ElevatorGotoL4Command());
+      // elevatorL4Button.onTrue(new ElevatorGotoL4Command());
     } else {
       elevatorUpButton.whileTrue(new ElevatorUpCommand());
       elevatorDownButton.whileTrue(new ElevatorDownCommand());
