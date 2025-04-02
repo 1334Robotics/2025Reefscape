@@ -73,7 +73,7 @@ public class Robot extends LoggedRobot {
       AutoCache.getAuto("5M Auto");
       AutoCache.getAuto("Test Auto");
       AutoCache.getAuto("JustAutoMid");
-      AutoCache.getAuto("MidFullAto-Right");
+      AutoCache.getAuto("MidFullAuto-Right");
       AutoCache.getAuto("MidFullAuto-Left");
       AutoCache.afterLoad();
 
