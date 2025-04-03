@@ -16,10 +16,10 @@ public class ElevatorConstants {
     public static final double ELEVATOR_SLOW_HIGH_POS = 5.00;
 
     // No unit
-    public static final double FEED_POSITION = 1.370117;
+    public static final double FEED_POSITION = 1.082397;
     public static final double L1_POSITION   = 1.35;
-    public static final double L2_POSITION   = 1.967773;
-    public static final double L3_POSITION   = 3.089355;
+    public static final double L2_POSITION   = 1.578735;
+    public static final double L3_POSITION   = 2.734131;
     public static final double L4_POSITION   = 5.018188;
 
     // Set a limit where KI takes effect
