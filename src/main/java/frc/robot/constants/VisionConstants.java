@@ -3,7 +3,6 @@ package frc.robot.constants;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import frc.robot.commands.vision.Distance;
 
 public final class VisionConstants {
     // Camera mounting position relative to robot center
@@ -79,10 +78,6 @@ public final class VisionConstants {
     // Speed
     public static final double DRIVE_SPEED    = 0.2;
     public static final double ROTATION_SPEED = 0.2;
-
-    // Positions
-    public static final Distance RIGHT_SCORE_DISTANCE = new Distance(19, 80);
-    public static final Distance LEFT_SCORE_DISTANCE  = new Distance(-19, 80);
 
     // April tag tracking allowed errors
     public static final double MAX_ALLOWED_ROTATION_ERROR   = 2; // In degrees

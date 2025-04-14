@@ -38,15 +38,9 @@ import frc.robot.constants.RobotContainerConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.mailbox.MailboxHandler;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
-import frc.robot.subsystems.vision.AutoTagSelector;
-import frc.robot.subsystems.vision.TagInputHandler;
-import frc.robot.subsystems.vision.TagTrackingHandler;
 import frc.robot.subsystems.vision.VisionSubsystem;
-import frc.robot.commands.vision.StartTrackingScoringLeft;
-import frc.robot.commands.vision.StartTrackingScoringRight;
 import frc.robot.subsystems.climb.ClimbSubsystem;
 import frc.robot.subsystems.controller.ControllerSubsystem;
-import frc.robot.commands.vision.TrackAprilTagCommand;
 import frc.robot.subsystems.drive.DirectionSnapSubsystem;
 import frc.robot.subsystems.drive.DriveController;
 import frc.robot.subsystems.drive.SwerveSubsystem;
@@ -120,15 +114,9 @@ public class RobotContainer {
   public static final ElevatorHandler        elevatorHandler             = new ElevatorHandler();
   public static final FlopperSubsystem       flopperSubsystem            = new FlopperSubsystem();
   public static final ClimbSubsystem         climbSubsystem              = new ClimbSubsystem();
-  public static final TagInputHandler        tagInputHandler             = new TagInputHandler();
   public static final DriveController        driveController             = new DriveController();
-  public static final TagTrackingHandler     tagTrackingHandler          = new TagTrackingHandler();
   public static final ControllerSubsystem    driverControllerSubsystem   = new ControllerSubsystem(driverController);
   public static final ControllerSubsystem    operatorControllerSubsystem = new ControllerSubsystem(operatorController);
-
-  // Auto
-  public static final TrackAprilTagCommand trackCommand = new TrackAprilTagCommand();
-  public static final AutoTagSelector autoTagSelector = new AutoTagSelector();
 
   public RobotContainer() {
     RobotContainer.configureBindings();

@@ -101,10 +101,6 @@ public class Robot extends LoggedRobot {
     } catch (Exception e) {
       System.err.println("Error logging library versions: " + e.getMessage());
     }
-
-      // Setup tracking
-      RobotContainer.trackCommand.disable();
-      RobotContainer.trackCommand.schedule();
   }
 
   /**
@@ -121,7 +117,6 @@ public class Robot extends LoggedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
-    RobotContainer.trackCommand.execute(); // THIS IS BAD. IT SHOULDN'T NEED TO DO THIS
     m_field.setRobotPose(RobotContainer.swerveSubsystem.getPose());
   }
    /** This function is called once when the robot is first started up. */
@@ -198,9 +193,6 @@ public class Robot extends LoggedRobot {
       e.printStackTrace();
     }
     
-    // Enable tracking if needed
-    RobotContainer.trackCommand.enable();
-    
     // Get the autonomous command from RobotContainer
     // Causes an error the second time around
     m_autonomousCommand = new WaitCommand(0.01).andThen(m_robotContainer.getAutonomousCommand());
@@ -229,7 +221,6 @@ public class Robot extends LoggedRobot {
     }
 
     RobotContainer.swerveSubsystem.setFieldRelative(true);
-    RobotContainer.trackCommand.disable();
     
     // Reset elevator if needed
     if(SmartDashboard.getBoolean("[ELEVATOR] Reset On TeleOp Enable", false) && !this.elevatorReset) {

@@ -2,15 +2,12 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.commands.vision.Distance;
 import frc.robot.constants.VisionConstants;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.targeting.PhotonPipelineMetadata;
-
-import static edu.wpi.first.units.Units.Centimeters;
 
 import java.util.List;
 
@@ -130,15 +127,6 @@ public class VisionSubsystem extends SubsystemBase {
      */
     public double getImageAge() {
         return this.imageAge;
-    }
-
-    public Distance getDistanceAway() {
-        if(latestResult != null && latestResult.hasTargets()) {
-            PhotonTrackedTarget target = latestResult.getBestTarget();
-            return new Distance(target.getBestCameraToTarget().getMeasureY().in(Centimeters) - VisionConstants.CAMERA_POSITION_X,
-                                target.getBestCameraToTarget().getMeasureX().in(Centimeters) - VisionConstants.CAMERA_POSITION_Y);
-        }
-        return null;
     }
 
     public double getTargetAngle() {
