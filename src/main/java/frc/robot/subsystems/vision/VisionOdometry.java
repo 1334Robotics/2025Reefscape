@@ -37,9 +37,14 @@ public class VisionOdometry extends SubsystemBase {
         try {
             fieldLayout = AprilTagFieldLayout.loadFromResource(VisionConstants.APRILTAG_LAYOUT);
             Optional<Alliance> alliance = DriverStation.getAlliance();
-            fieldLayout.setOrigin(alliance.get() == Alliance.Red
-                                  ? OriginPosition.kRedAllianceWallRightSide
-                                  : OriginPosition.kBlueAllianceWallRightSide);
+            if(alliance.isPresent())
+                fieldLayout.setOrigin(alliance.get() == Alliance.Red
+                                      ? OriginPosition.kRedAllianceWallRightSide
+                                      : OriginPosition.kBlueAllianceWallRightSide);
+            else {
+                System.err.println("Alliance is not present. Defaulting to blue");
+                fieldLayout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
+            }
         } catch(IOException e) {
             System.err.println("Failed to load AprilTagFieldLayout: " + e.toString());
             fieldLayout = null;
@@ -51,8 +56,8 @@ public class VisionOdometry extends SubsystemBase {
                                                           RobotContainer.gyroSubsystem.getRotation(),
                                                           RobotContainer.swerveSubsystem.getSwerveModulePositions(),
                                                           new Pose2d(),
-                                                          null,
-                                                          null);
+                                                          VisionConstants.STATE_STD_DEVS,
+                                                          VisionConstants.VISION_STD_DEVS);
     }
 
     @Override

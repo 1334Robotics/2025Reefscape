@@ -40,9 +40,8 @@ public class AutoConfigurer {
             return;
         }
 
-        AutoBuilder.configure(
-                              RobotContainer.visionOdometry::getPose,
-                              RobotContainer.visionOdometry::setPose,
+        AutoBuilder.configure(RobotContainer.visionOdometry::getPose,
+                              RobotContainer.swerveSubsystem::resetOdometry,
                               RobotContainer.swerveSubsystem::getChassisSpeeds,
                               (speeds, feedforwards) -> AutoConfigurer.autoDrive(speeds),
                               new PPHolonomicDriveController(new PIDConstants(AutoConstants.TRANSLATION_KP,
@@ -54,9 +53,8 @@ public class AutoConfigurer {
                               config,
                               () -> {
                                 Optional<Alliance> alliance = DriverStation.getAlliance();
-                                if(alliance.isPresent()) {
+                                if(alliance.isPresent())
                                     return alliance.get() == DriverStation.Alliance.Red;
-                                }
                                 return false;
                               },
                               RobotContainer.swerveSubsystem);

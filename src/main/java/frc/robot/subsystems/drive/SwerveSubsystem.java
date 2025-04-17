@@ -276,6 +276,9 @@ public class SwerveSubsystem extends SubsystemBase {
             
             // Then reset the odometry with the new pose
             swerveDrive.resetOdometry(pose);
+
+            // Also reset the odometry of the VisionOdometry pose estimator
+            RobotContainer.visionOdometry.setPose(pose);
         } catch (Exception e) {
             System.err.println("Error resetting odometry: " + e.getMessage());
             e.printStackTrace();

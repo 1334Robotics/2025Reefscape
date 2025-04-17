@@ -3,9 +3,14 @@ package frc.robot.constants;
 import static edu.wpi.first.units.Units.Millimeters;
 
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
 
 public final class VisionConstants {
@@ -85,4 +90,7 @@ public final class VisionConstants {
     public static final int MAX_ALLOWED_BLANK_FRAMES = 5;
 
     public static final String APRILTAG_LAYOUT = AprilTagFields.k2025ReefscapeAndyMark.m_resourceFile;
+
+    public static final Vector<N3> STATE_STD_DEVS  = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5));
+    public static final Vector<N3> VISION_STD_DEVS = VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(10));
 }
