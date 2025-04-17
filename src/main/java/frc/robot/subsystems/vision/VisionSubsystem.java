@@ -44,6 +44,10 @@ public class VisionSubsystem extends SubsystemBase {
                target.getPoseAmbiguity() <= VisionConstants.MAX_AMBIGUITY;
     }
 
+    public PhotonCamera getCamera() {
+        return this.leftCamera;
+    }
+
     /**
      * Gets the yaw angle to the best visible target.
      * @return yaw in degrees; 0.0 if no target detected.

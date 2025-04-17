@@ -41,12 +41,11 @@ public class AutoConfigurer {
         }
 
         AutoBuilder.configure(
-                              RobotContainer.swerveSubsystem::getPose,
-                              RobotContainer.swerveSubsystem::resetOdometry,
+                              RobotContainer.visionOdometry::getPose,
+                              RobotContainer.visionOdometry::setPose,
                               RobotContainer.swerveSubsystem::getChassisSpeeds,
                               (speeds, feedforwards) -> AutoConfigurer.autoDrive(speeds),
-                              new PPHolonomicDriveController(
-                                                             new PIDConstants(AutoConstants.TRANSLATION_KP,
+                              new PPHolonomicDriveController(new PIDConstants(AutoConstants.TRANSLATION_KP,
                                                                               AutoConstants.TRANSLATION_KI,
                                                                               AutoConstants.TRANSLATION_KD),
                                                              new PIDConstants(AutoConstants.ROTATION_KP,

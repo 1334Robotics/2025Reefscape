@@ -6,6 +6,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -298,6 +300,14 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public SwerveDriveSimulation getSwerveDriveSimulation() {
         return swerveDriveSimulation;
+    }
+
+    public SwerveDriveKinematics getSwerveDriveKinematics() {
+        return this.swerveDrive.kinematics;
+    }
+
+    public SwerveModulePosition[] getSwerveModulePositions() {
+        return this.swerveDrive.getModulePositions();
     }
 
     @SuppressWarnings("unused")
