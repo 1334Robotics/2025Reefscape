@@ -1,8 +1,12 @@
 package frc.robot.constants;
 
+import static edu.wpi.first.units.Units.Millimeters;
+
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.units.measure.Distance;
 
 public final class VisionConstants {
     // Camera mounting position relative to robot center
@@ -33,9 +37,6 @@ public final class VisionConstants {
     public static final double FIELD_LENGTH_METERS = 16.54175;
     public static final double FIELD_WIDTH_METERS = 8.0137;
 
-    // AprilTag tracking constants
-    public static final double AREA_10_DISTANCE = 44.6; // In centimeters
-
     // Rotation PID constants
     public static final double ROTATION_KP          = 0.02;
     public static final double ROTATION_KI          = 0.000;
@@ -60,6 +61,12 @@ public final class VisionConstants {
     public static final double HORIZONTAL_LIM_MAX_INT = 0.3;
 
     // Camera mounting position relative to robot center (centimeters)
+    public static final Transform3d CAMERA_POSITION = new Transform3d(Distance.ofBaseUnits(75, Millimeters), // Forwards
+                                                                      Distance.ofBaseUnits(50, Millimeters), // Off centerline
+                                                                      Distance.ofBaseUnits(0, Millimeters),  // Vertical offset
+                                                                      new Rotation3d(0,
+                                                                                     0,
+                                                                                     0));
     public static final double CAMERA_POSITION_X = 75.0;  // 75cm forward from midpoint
     public static final double CAMERA_POSITION_Y = 50.0;  // 50cm off centerline
     public static final double CAMERA_POSITION_Z = 0.0;   // No vertical offset
@@ -75,14 +82,7 @@ public final class VisionConstants {
     public static final double MIN_VISION_STD_DEV = 0.1;   // Min std dev in meters
     public static final double AREA_TO_STD_DEV_FACTOR = 20.0; // Higher area = lower std dev
 
-    // Speed
-    public static final double DRIVE_SPEED    = 0.2;
-    public static final double ROTATION_SPEED = 0.2;
-
-    // April tag tracking allowed errors
-    public static final double MAX_ALLOWED_ROTATION_ERROR   = 2; // In degrees
-    public static final double MAX_ALLOWED_HORIZONTAL_ERROR = 1; // In centimeters
-    public static final double MAX_ALLOWED_FORWARDS_ERROR   = 5; // In centimeters
-
     public static final int MAX_ALLOWED_BLANK_FRAMES = 5;
+
+    public static final String APRILTAG_LAYOUT = AprilTagFields.k2025ReefscapeAndyMark.m_resourceFile;
 }

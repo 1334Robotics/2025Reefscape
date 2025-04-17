@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Degrees;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -46,6 +47,10 @@ public class GyroSubsystem extends SubsystemBase {
         Angle roll  = pigeon.getRoll().getValue();
         
         return new GyroData(yaw.in(Degrees), pitch.in(Degrees), roll.in(Degrees));
+    }
+
+    public Rotation2d getRotation() {
+        return this.pigeon.getRotation2d();
     }
 
     @Override

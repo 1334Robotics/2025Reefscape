@@ -38,6 +38,7 @@ import frc.robot.constants.RobotContainerConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
 import frc.robot.subsystems.mailbox.MailboxHandler;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
+import frc.robot.subsystems.vision.VisionOdometry;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.subsystems.climb.ClimbSubsystem;
 import frc.robot.subsystems.controller.ControllerSubsystem;
@@ -108,6 +109,7 @@ public class RobotContainer {
   public static final MailboxSubsystem       mailboxSubsystem            = new MailboxSubsystem();
   public static final MailboxHandler         mailboxHandler              = new MailboxHandler();
   public static final VisionSubsystem        visionSubsystem             = new VisionSubsystem();
+  public static final VisionOdometry         visionOdometry              = new VisionOdometry(visionSubsystem.getCamera());
   public static final SwerveSubsystem        swerveSubsystem             = new SwerveSubsystem();
   public static final DirectionSnapSubsystem directionSnapSubsystem      = new DirectionSnapSubsystem();
   public static final ElevatorSubsystem      elevatorSubsystem           = new ElevatorSubsystem();
