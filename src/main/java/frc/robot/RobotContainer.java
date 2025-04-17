@@ -109,7 +109,7 @@ public class RobotContainer {
   public static final MailboxSubsystem       mailboxSubsystem            = new MailboxSubsystem();
   public static final MailboxHandler         mailboxHandler              = new MailboxHandler();
   public static final VisionSubsystem        visionSubsystem             = new VisionSubsystem();
-  public static final VisionOdometry         visionOdometry              = new VisionOdometry(visionSubsystem.getCamera());
+  public static       VisionOdometry         visionOdometry;
   public static final SwerveSubsystem        swerveSubsystem             = new SwerveSubsystem();
   public static final DirectionSnapSubsystem directionSnapSubsystem      = new DirectionSnapSubsystem();
   public static final ElevatorSubsystem      elevatorSubsystem           = new ElevatorSubsystem();

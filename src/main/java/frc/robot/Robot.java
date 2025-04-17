@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.auto.AutoCache;
 import frc.robot.auto.AutoConfigurer;
 import frc.robot.commands.elevator.ElevatorResetCommand;
+import frc.robot.subsystems.vision.VisionOdometry;
 
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -59,6 +60,9 @@ public class Robot extends LoggedRobot {
   }
   @Override
   public void robotInit() {
+      // Create the VisionOdometry subsystem once everything else has been initialized in the RobotContainer
+      RobotContainer.visionOdometry = new VisionOdometry(RobotContainer.visionSubsystem.getCamera());
+
       Logger.addDataReceiver(new NT4Publisher());
       Logger.start();
       SmartDashboard.putData("Field", m_field);
