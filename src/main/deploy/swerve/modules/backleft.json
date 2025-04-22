@@ -3,10 +3,10 @@
     "front": -14.5,
     "left": 14.5
   },
-  "absoluteEncoderOffset": 278.106201,
+  "absoluteEncoderOffset": 335.830078,
   "drive": {
     "type": "krakenx60",
-    "id": 14,
+    "id": 10,
     "canbus": "CANivore"
   },
   "inverted": {
@@ -15,12 +15,12 @@
   },
   "angle": {
     "type": "krakenx60",
-    "id": 13,
+    "id": 9,
     "canbus": "CANivore"
   },
   "encoder": {
     "type": "cancoder",
-    "id": 5,
+    "id": 3,
     "canbus": "CANivore"
   },
   "absoluteEncoderInverted": false

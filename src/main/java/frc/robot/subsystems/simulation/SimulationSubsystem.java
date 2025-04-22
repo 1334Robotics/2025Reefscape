@@ -52,7 +52,6 @@ public class SimulationSubsystem extends SubsystemBase {
         Logger.recordOutput("FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
 
         // Log robot component positions
-        Logger.recordOutput("Robot/ElevatorHeight", RobotContainer.elevatorSubsystem.getCurrentHeight());
         Logger.recordOutput("Robot/IntakeState", RobotContainer.intakeSubsystem.isCoralInsideIntake() ? 1 : 0);
 
         // Update intake simulation

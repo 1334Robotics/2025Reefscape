@@ -1,30 +1,45 @@
 package frc.robot.constants;
 
 public class ElevatorConstants {
-    public static final double GEAR_RATIO = 10;
-    public static final double MAX_HEIGHT_INCHES = 30;
-    public static final double MIN_HEIGHT_INCHES = 0;
-    public static final double POSITION_TOLERANCE = 0.5;
-    public static final double DRUM_RADIUS_INCHES = 0.75;
-    public static final double POSITION_TOLERANCE_INCHES = 0.5;
-    
-    public static final double PRIMARY_MAX_HEIGHT_INCHES = 48;
-    public static final double PRIMARY_MIN_HEIGHT_INCHES = 0;
-    public static final double SECONDARY_MAX_HEIGHT_INCHES = 24;
-    public static final double SECONDARY_MIN_HEIGHT_INCHES = 0;
-    
-    public static final double PRIMARY_DRUM_RADIUS_INCHES = 1;
-    public static final double SECONDARY_DRUM_RADIUS_INCHES = 0.75;
+    public static final boolean MANUAL_ELEVATOR_CONTROL = false;
 
-    public static final double GROUND_PRIMARY_HEIGHT = 0;
-    public static final double GROUND_SECONDARY_HEIGHT = 0;
-    public static final double MIDDLE_PRIMARY_HEIGHT = 24;
-    public static final double MIDDLE_SECONDARY_HEIGHT = 12;
-    public static final double HIGH_PRIMARY_HEIGHT = 48;
-    public static final double HIGH_SECONDARY_HEIGHT = 24;
+    public static final int MOTOR_ONE_ID    = 20;
+    public static final int LIMIT_SWITCH_ID = 8;
 
-    public static final double L1_HEIGHT_INCHES = 18;
-    public static final double L2_HEIGHT_INCHES = 31.875;
-    public static final double L3_HEIGHT_INCHES = 47.625;
-    public static final double L4_HEIGHT_INCHES = 72;
+    public static final double ELEVATOR_UP_SPEED    = 0.5;
+    public static final double ELEVATOR_DOWN_SPEED  = 0.4;
+    public static final double ELEVATOR_SLOW_SPEED  = 0.1;
+    public static final double ELEVATOR_RESET_SPEED = 0.3;
+
+    // No unit
+    public static final double ELEVATOR_SLOW_LOW_POS  = 0.15;
+    public static final double ELEVATOR_SLOW_HIGH_POS = 5.00;
+
+    // No unit
+    public static final double FEED_POSITION = 1.429077;
+    public static final double L1_POSITION   = 1.314453;
+    public static final double L2_POSITION   = 1.938770;
+    public static final double L3_POSITION   = 3.024644;
+    public static final double L4_POSITION   = 5.018188;
+
+    // Set a limit where KI takes effect
+    // D term reduces oscillation
+    // I term pretty much inverses the D term
+    // Put units for setpoints
+    public static final double PID_KP          = 0.9;
+    public static final double PID_KI          = 0.07;
+    public static final double PID_KD          = 0;
+    public static final double PID_TAU         = 0;
+    public static final double PID_LIM_MIN     = -1;
+    public static final double PID_LIM_MAX     = 1;
+    public static final double PID_LIM_MIN_INT = -0.2;
+    public static final double PID_LIM_MAX_INT = 0.2;
+    public static final double PID_SAMPLE_TIME = 1;
+    public static final double PID_ISTART      = 0.5;
+
+    public static final double MAX_ACCEPTABLE_ERROR = 0.005;
+
+    public static final int    ENCODER_DIO_A              = 0;
+    public static final int    ENCODER_DIO_B              = 1;
+    public static final double ENCODER_PULSE_PER_ROTATION = 2048;
 }

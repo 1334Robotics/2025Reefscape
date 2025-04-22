@@ -1,55 +1,79 @@
 package frc.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.auto.AutoCache;
 import frc.robot.auto.AutoConfigurer;
+import frc.robot.auto.AutoItem;
 import frc.robot.commands.climb.ForcePinsDownCommand;
+import frc.robot.commands.climb.ForcePinsUpCommand;
 import frc.robot.commands.climb.LockClimbCommand;
 import frc.robot.commands.climb.StopClimbCommand;
+import frc.robot.commands.climb.UnlockClimbCommand;
 import frc.robot.commands.directionSnaps.DirectionSnapBackwards;
 import frc.robot.commands.directionSnaps.DirectionSnapForwards;
 import frc.robot.commands.directionSnaps.DirectionSnapLeft;
 import frc.robot.commands.directionSnaps.DirectionSnapRight;
 import frc.robot.commands.directionSnaps.StopSnap;
+import frc.robot.commands.drive.BotRelativeCommand;
 import frc.robot.commands.drive.DriveCommand;
-import frc.robot.commands.elevator.LowerElevatorCommand;
-import frc.robot.commands.elevator.RaiseElevatorCommand;
-import frc.robot.commands.drive.TrackAprilTagCommand;
+import frc.robot.commands.drive.FieldRelativeCommand;
+import frc.robot.commands.drive.NormalSpeedCommand;
+import frc.robot.commands.drive.RipControlCommand;
+import frc.robot.commands.drive.SlowDownCommand;
+import frc.robot.commands.drive.SpeedUpCommand;
+import frc.robot.commands.elevator.ElevatorDownCommand;
+import frc.robot.commands.elevator.ElevatorGotoBottomCommand;
+import frc.robot.commands.elevator.ElevatorGotoFeedCommand;
+import frc.robot.commands.elevator.ElevatorGotoL1Command;
+import frc.robot.commands.elevator.ElevatorGotoL2Command;
+import frc.robot.commands.elevator.ElevatorGotoL3Command;
+import frc.robot.commands.elevator.ElevatorGotoL4Command;
+import frc.robot.commands.elevator.ElevatorUpCommand;
+import frc.robot.commands.flopper.FlopperDownCommand;
+import frc.robot.commands.flopper.FlopperStopCommand;
+import frc.robot.commands.flopper.FlopperUpCommand;
+import frc.robot.commands.flopper.FlopperZeroCommand;
 import frc.robot.commands.gyro.GyroZeroCommand;
-import frc.robot.commands.mailbox.InputCommand;
-import frc.robot.commands.mailbox.OutputCommand;
-import frc.robot.commands.mailbox.StopCommand;
-import frc.robot.commands.solenoid.ExtendCommand;
-import frc.robot.commands.solenoid.RetractCommand;
+import frc.robot.commands.mailbox.ShootCommand;
+import frc.robot.commands.mailbox.MailboxFeedCommand;
+import frc.robot.commands.mailbox.MailboxRewindCommand;
+import frc.robot.constants.ElevatorConstants;
 import frc.robot.constants.RobotContainerConstants;
-import frc.robot.constants.SimulationConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.gyro.GyroSubsystem;
+import frc.robot.subsystems.mailbox.MailboxHandler;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.mailbox.MailboxSubsystem;
-import frc.robot.subsystems.simulation.SimulationSubsystem;
+import frc.robot.subsystems.vision.AutoTagSelector;
+import frc.robot.subsystems.vision.TagInputHandler;
+import frc.robot.subsystems.vision.TagTrackingHandler;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.subsystems.climb.ClimbSubsystem;
+import frc.robot.subsystems.controller.ControllerSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystemSim;
 import frc.robot.subsystems.drive.DirectionSnapSubsystem;
+import frc.robot.subsystems.simulation.SimulationSubsystem;
+import frc.robot.subsystems.drive.DriveController;
 import frc.robot.subsystems.drive.SwerveSubsystem;
+import frc.robot.subsystems.elevator.ElevatorHandler;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
-
-import com.pathplanner.lib.auto.AutoBuilder;
-
-import edu.wpi.first.math.MathUtil;
+import frc.robot.subsystems.led.LedHandler;
+import frc.robot.subsystems.led.LedSubsystem;
+import frc.robot.constants.SimulationConstants;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.subsystems.flopper.FlopperSubsystem;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import frc.robot.subsystems.solenoid.SolenoidSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.vision.TrackAprilTagCommand;
 
-import frc.robot.commands.elevator.ElevatorHeightCalculation;
-
+import edu.wpi.first.wpilibj.DriverStation;
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -58,97 +82,97 @@ import frc.robot.commands.elevator.ElevatorHeightCalculation;
  */
 public class RobotContainer {
   // Controllers
-  private final XboxController driverController   = new XboxController(RobotContainerConstants.DRIVER_CONTROLLER_PORT);
-  private final XboxController operatorController = new XboxController(RobotContainerConstants.OPERATOR_CONTROLLER_PORT);
+  public static final XboxController driverController   = new XboxController(RobotContainerConstants.DRIVER_CONTROLLER_PORT);
+  public static final XboxController operatorController = new XboxController(RobotContainerConstants.OPERATOR_CONTROLLER_PORT);
 
   // Controller buttons
-  private final JoystickButton mailboxInputButton       = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_INPUT_BUTTON);
-  private final JoystickButton mailboxOutputButton      = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_OUTPUT_BUTTON);
-  private final JoystickButton mailboxStopButton        = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_STOP_BUTTON);
-  private final JoystickButton extendButton             = new JoystickButton(operatorController, RobotContainerConstants.SOLENOID_EXTEND_BUTTON);
-  private final JoystickButton retractButton            = new JoystickButton(operatorController, RobotContainerConstants.SOLENOID_RETRACT_BUTTON);
-  private final JoystickButton gyroZeroButton           = new JoystickButton(driverController, RobotContainerConstants.GYRO_ZERO_BUTON);
-  private final POVButton      forwardsSnapButton       = new POVButton(driverController, RobotContainerConstants.SNAP_FORWARDS_DIRECTION);
-  private final POVButton      leftSnapButton           = new POVButton(driverController, RobotContainerConstants.SNAP_LEFT_DIRECTION);
-  private final POVButton      rightSnapButton          = new POVButton(driverController, RobotContainerConstants.SNAP_RIGHT_DIRECTION);
-  private final POVButton      backwardsSnapButton      = new POVButton(driverController, RobotContainerConstants.SNAP_BACKWARDS_DIRECTION);
-  private final JoystickButton stopSnapButton           = new JoystickButton(driverController, RobotContainerConstants.SNAP_STOP_BUTTON);
-  private final JoystickButton elevatorL1Button         = new JoystickButton(operatorController, RobotContainerConstants.ELEVATOR_L1_BUTTON);
-  private final Trigger elevatorL2Trigger = new Trigger(() -> 
-    operatorController.getRawButton(RobotContainerConstants.ELEVATOR_L2_BUTTONS[0]) &&
-    operatorController.getRawButton(RobotContainerConstants.ELEVATOR_L2_BUTTONS[1])
-  );
-  private final Trigger elevatorL3Trigger = new Trigger(() -> 
-      operatorController.getRawButton(RobotContainerConstants.ELEVATOR_L3_BUTTONS[0]) &&
-      operatorController.getRawButton(RobotContainerConstants.ELEVATOR_L3_BUTTONS[1])
-  );
-
-  private final Trigger elevatorL4Trigger = new Trigger(() -> 
-      operatorController.getRawButton(RobotContainerConstants.ELEVATOR_L4_BUTTONS[0]) &&
-      operatorController.getRawButton(RobotContainerConstants.ELEVATOR_L4_BUTTONS[1])
-  );
-  private final Trigger elevatorLowerTrigger = new Trigger(() -> 
-    operatorController.getRawButton(RobotContainerConstants.ELEVATOR_LOWER_BUTTON[0]) &&
-    operatorController.getRawButton(RobotContainerConstants.ELEVATOR_LOWER_BUTTON[1])
-  );
-  private final JoystickButton climbLockButton         = new JoystickButton(operatorController, RobotContainerConstants.CLIMB_LOCK_BUTTON);
-  private final JoystickButton climbForceDownButton     = new JoystickButton(operatorController, RobotContainerConstants.CLIMB_FORCE_DOWN_BUTTON);
-  private final JoystickButton climbStopButton          = new JoystickButton(operatorController, RobotContainerConstants.CLIMB_STOP_BUTTON);
+  private static final JoystickButton gyroZeroButton       = new JoystickButton(driverController,   RobotContainerConstants.GYRO_ZERO_BUTON);
+  private static final POVButton      forwardsSnapButton   = new POVButton(driverController,        RobotContainerConstants.SNAP_FORWARDS_DIRECTION);
+  private static final POVButton      leftSnapButton       = new POVButton(driverController,        RobotContainerConstants.SNAP_LEFT_DIRECTION);
+  private static final POVButton      rightSnapButton      = new POVButton(driverController,        RobotContainerConstants.SNAP_RIGHT_DIRECTION);
+  private static final POVButton      backwardsSnapButton  = new POVButton(driverController,        RobotContainerConstants.SNAP_BACKWARDS_DIRECTION);
+  private static final JoystickButton stopSnapButton       = new JoystickButton(driverController,   RobotContainerConstants.SNAP_STOP_BUTTON);
+  private static final JoystickButton flopperUpButton      = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_UP_BUTTON);
+  private static final JoystickButton flopperDownButton    = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_DOWN_BUTTON);
+  private static final JoystickButton flopperZeroButton    = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_ZERO_BUTTON);
+  private static final Trigger        mailboxShootButton   = new Trigger(() -> operatorController.getRightTriggerAxis()  > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
+  private static final Trigger        mailboxFeedButton    = new Trigger(() -> operatorController.getLeftTriggerAxis()  > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
+  private static final JoystickButton mailboxRewindButton  = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_REWIND_BUTTON);
+  private static final POVButton      elevatorUpButton     = new POVButton(operatorController, RobotContainerConstants.ELEVATOR_UP_BUTTON);
+  private static final POVButton      elevatorDownButton   = new POVButton(operatorController, RobotContainerConstants.ELEVATOR_DOWN_BUTTON);
+  private static final JoystickButton elevatorBottomButton = new JoystickButton(operatorController, RobotContainerConstants.ELEVATOR_BOTTOM_BUTTON);
+  private static final JoystickButton elevatorFeedButton   = new JoystickButton(operatorController, RobotContainerConstants.ELEVATOR_FEED_BUTTON);
+  private static final POVButton      elevatorL1Button     = new POVButton(operatorController, RobotContainerConstants.ELEVATOR_L1_BUTTON);
+  private static final POVButton      elevatorL2Button     = new POVButton(operatorController, RobotContainerConstants.ELEVATOR_L2_BUTTON);
+  private static final POVButton      elevatorL3Button     = new POVButton(operatorController, RobotContainerConstants.ELEVATOR_L3_BUTTON);
+  private static final POVButton      elevatorL4Button     = new POVButton(operatorController, RobotContainerConstants.ELEVATOR_L4_BUTTON);
+  private static final JoystickButton ripControlButton     = new JoystickButton(driverController, RobotContainerConstants.RIP_CONTROL_BUTTON);
+  // private static final Trigger        trackLeftButton      = new Trigger(() -> driverController.getLeftTriggerAxis()  > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
+  // private static final Trigger        trackRightButton     = new Trigger(() -> driverController.getRightTriggerAxis() > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
+  private static final JoystickButton botRelativeButton    = new JoystickButton(driverController, RobotContainerConstants.BOT_RELATIVE_BUTTON);
+  private static final JoystickButton slowDownButton       = new JoystickButton(driverController, RobotContainerConstants.SLOW_DOWN_BUTTON);
+  private static final JoystickButton speedUpButton        = new JoystickButton(driverController, RobotContainerConstants.SPEED_UP_BUTTON);
+  // private static final Trigger        pinsDownButton       = new Trigger(() -> operatorController.getLeftTriggerAxis()  > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
+  // private static final Trigger        pinsLockButton       = new Trigger(() -> operatorController.getRightTriggerAxis() > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
+  private static final JoystickButton pinsUpButton         = new JoystickButton(operatorController, RobotContainerConstants.CLIMB_UP_BUTTON);
 
   // Subsystems
-  public static final GyroSubsystem gyroSubsystem                   = new GyroSubsystem("CANivore");
-  public static final ElevatorSubsystem elevatorSubsystem           = new ElevatorSubsystem(RobotContainerConstants.ELEVATOR_PRIMARY_MOTOR_ID,
-                                                                                            RobotContainerConstants.ELEVATOR_SECONDARY_MOTOR_ID);
-  public static final MailboxSubsystem mailboxSubsystem             = new MailboxSubsystem();
-  public static final SwerveSubsystem swerveSubsystem               = new SwerveSubsystem();
-  public static final SolenoidSubsystem solenoidSubsystem           = new SolenoidSubsystem();
+  public static final LedSubsystem           ledSubsystem                = new LedSubsystem(1); 
+  public static final LedHandler             ledHandler                  = new LedHandler(ledSubsystem);
+  public static final GyroSubsystem          gyroSubsystem               = new GyroSubsystem("CANivore");
+  public static final MailboxSubsystem       mailboxSubsystem            = new MailboxSubsystem();
+  public static final MailboxHandler         mailboxHandler              = new MailboxHandler();
+  public static final VisionSubsystem        visionSubsystem             = new VisionSubsystem();
+  public static final SwerveSubsystem        swerveSubsystem             = new SwerveSubsystem();
+  public static final ElevatorSubsystem      elevatorSubsystem           = new ElevatorSubsystem();
+  public static final ElevatorHandler        elevatorHandler             = new ElevatorHandler();
+  public static final FlopperSubsystem       flopperSubsystem            = new FlopperSubsystem();
+  public static final ClimbSubsystem         climbSubsystem              = new ClimbSubsystem();
+  public static final TagInputHandler        tagInputHandler             = new TagInputHandler();
+  public static final DriveController        driveController             = new DriveController();
+  public static final TagTrackingHandler     tagTrackingHandler          = new TagTrackingHandler();
+  public static final ControllerSubsystem    driverControllerSubsystem   = new ControllerSubsystem(driverController);
+  public static final ControllerSubsystem    operatorControllerSubsystem = new ControllerSubsystem(operatorController);
   public static final DirectionSnapSubsystem directionSnapSubsystem = new DirectionSnapSubsystem();
   private static final IntakeIOSim intakeIOSim = new IntakeIOSim(swerveSubsystem.getSwerveDriveSimulation());
   public static final IntakeSubsystem intakeSubsystem = new IntakeSubsystem(intakeIOSim);
 
-  public final VisionSubsystem visionSubsystem;
-  public final VisionSubsystemSim visionSubsystemSim;
-  public static final ClimbSubsystem climbSubsystem                 = new ClimbSubsystem();
+  public VisionSubsystemSim visionSubsystemSim;
+  public SimulationSubsystem simulationSubsystem;
 
-  //Conditionally create SimulationSubsystem
-  public final SimulationSubsystem simulationSubsystem;
+  // Auto
+  public static final TrackAprilTagCommand trackCommand = new TrackAprilTagCommand();
+  public static final AutoTagSelector autoTagSelector = new AutoTagSelector();
 
-  // Auto chooser for PathPlanner
-  private final SendableChooser<Command> autoChooser;
-
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    configureBindings();
+    setupDefaultCommands();
+    registerClimbCommands();
+  }
+
+  private static void registerClimbCommands() {
+    SmartDashboard.putData("[CLIMB] Lock",            new LockClimbCommand());
+    SmartDashboard.putData("[CLIMB] Unlock",          new UnlockClimbCommand());
+    SmartDashboard.putData("[CLIMB] Stop",            new StopClimbCommand());
+    SmartDashboard.putData("[CLIMB] Force Pins Down", new ForcePinsDownCommand());
+    SmartDashboard.putData("[CLIMB] Force Pins Up",   new ForcePinsUpCommand());
+  }
+
+  private void setupDefaultCommands() {
+    DriveCommand xboxDriveCommand = new DriveCommand(
+        () -> MathUtil.applyDeadband(driverController.getLeftX(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
+        () -> MathUtil.applyDeadband(driverController.getLeftY(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
+        () -> MathUtil.applyDeadband(-driverController.getRightX(), RobotContainerConstants.CONTROLLER_ROTATION_DEADBAND));
     // Configure path planner
     AutoConfigurer.configure();
-
-    // Create an auto chooser and add it to SmartDashboard
-    autoChooser = AutoBuilder.buildAutoChooser();
-    SmartDashboard.putData("[PATHPLANNER] Auto Chooser", autoChooser);
 
     // Conditionally initialize the vision subsystem
   if (Robot.isSimulation()) {
       visionSubsystemSim = new VisionSubsystemSim(swerveSubsystem::getPose, VisionConstants.fieldLayout);
-      visionSubsystem = null; // No real vision subsystem in simulation
-  } else {
-      visionSubsystem = new VisionSubsystem();
-      visionSubsystemSim = null; // No simulated vision subsystem on the real robot
-  }
-
-  // Create the TrackAprilTagCommand with the correct vision subsystem
-  if (Robot.isSimulation()) {
-      new TrackAprilTagCommand(visionSubsystemSim, swerveSubsystem);
-  } else {
-      new TrackAprilTagCommand(visionSubsystem, swerveSubsystem);
   }
 
     // Configure the trigger bindings
     configureBindings();
-
-    DriveCommand xboxDriveCommand = new DriveCommand(() -> MathUtil.applyDeadband(driverController.getLeftX(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
-                                                     () -> MathUtil.applyDeadband(driverController.getLeftY(), RobotContainerConstants.CONTROLLER_MOVEMENT_DEADBAND),
-                                                     () -> MathUtil.applyDeadband(-driverController.getRightX(), RobotContainerConstants.CONTROLLER_ROTATION_DEADBAND));
-
-    swerveSubsystem.setDefaultCommand(xboxDriveCommand);
 
     //Conditionally initialize the simulation subsystem
     if (Robot.isSimulation()) {
@@ -157,12 +181,6 @@ public class RobotContainer {
   } else {
       simulationSubsystem = null;
   }
-
-    SmartDashboard.putData("Elevator L1", new RaiseElevatorCommand(ElevatorHeightCalculation.L1));
-    SmartDashboard.putData("Elevator L2", new RaiseElevatorCommand(ElevatorHeightCalculation.L2));
-    SmartDashboard.putData("Elevator L3", new RaiseElevatorCommand(ElevatorHeightCalculation.L3));
-    SmartDashboard.putData("Elevator L4", new RaiseElevatorCommand(ElevatorHeightCalculation.L4));
-    SmartDashboard.putData("Elevator Lower", new LowerElevatorCommand());
   }
 
   /**
@@ -174,26 +192,46 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
-  private void configureBindings() {
-    mailboxInputButton.onTrue(new InputCommand());
-    mailboxOutputButton.onTrue(new OutputCommand());
-    mailboxStopButton.onTrue(new StopCommand());
-    extendButton.onTrue(new ExtendCommand());
-    retractButton.onTrue(new RetractCommand());
+  private static void configureBindings() {
+    DriverStation.silenceJoystickConnectionWarning(true);
+
     gyroZeroButton.onTrue(new GyroZeroCommand()); 
     forwardsSnapButton.onTrue(new DirectionSnapForwards());
     leftSnapButton.onTrue(new DirectionSnapLeft());
     rightSnapButton.onTrue(new DirectionSnapRight());
     backwardsSnapButton.onTrue(new DirectionSnapBackwards());
     stopSnapButton.onTrue(new StopSnap());
-    elevatorL1Button.onTrue(new RaiseElevatorCommand(ElevatorHeightCalculation.L1));
-    elevatorL2Trigger.onTrue(new RaiseElevatorCommand(ElevatorHeightCalculation.L2));
-    elevatorL3Trigger.onTrue(new RaiseElevatorCommand(ElevatorHeightCalculation.L3));
-    elevatorL4Trigger.onTrue(new RaiseElevatorCommand(ElevatorHeightCalculation.L4));
-    elevatorLowerTrigger.onTrue(new LowerElevatorCommand());
-    climbLockButton.onTrue(new LockClimbCommand());
-    climbForceDownButton.onTrue(new ForcePinsDownCommand());
-    climbStopButton.onTrue(new StopClimbCommand());
+    flopperUpButton.onTrue(new FlopperUpCommand());
+    flopperUpButton.onFalse(new FlopperStopCommand());
+    flopperDownButton.onTrue(new FlopperDownCommand());
+    flopperDownButton.onFalse(new FlopperStopCommand());
+    flopperZeroButton.onTrue(new FlopperZeroCommand());
+    mailboxShootButton.onTrue(new ShootCommand());
+    mailboxFeedButton.onTrue(new MailboxFeedCommand());
+    mailboxRewindButton.whileTrue(new MailboxRewindCommand());
+    if(!ElevatorConstants.MANUAL_ELEVATOR_CONTROL) {
+      elevatorBottomButton.onTrue(new ElevatorGotoBottomCommand());
+      elevatorFeedButton.onTrue(new ElevatorGotoFeedCommand());
+      elevatorL1Button.onTrue(new ElevatorGotoL1Command());
+      elevatorL2Button.onTrue(new ElevatorGotoL2Command());
+      elevatorL3Button.onTrue(new ElevatorGotoL3Command());
+      elevatorL4Button.onTrue(new ElevatorGotoL4Command());
+    } else {
+      elevatorUpButton.whileTrue(new ElevatorUpCommand());
+      elevatorDownButton.whileTrue(new ElevatorDownCommand());
+    }
+    ripControlButton.onTrue(new RipControlCommand());
+    // trackLeftButton.onTrue(new StartTrackingScoringLeft());
+    // trackRightButton.onTrue(new StartTrackingScoringRight());
+    botRelativeButton.onTrue(new BotRelativeCommand());
+    botRelativeButton.onFalse(new FieldRelativeCommand());
+    slowDownButton.onTrue(new SlowDownCommand());
+    slowDownButton.onFalse(new NormalSpeedCommand());
+    speedUpButton.onTrue(new SpeedUpCommand());
+    speedUpButton.onFalse(new NormalSpeedCommand());
+    // pinsDownButton.whileTrue(new ForcePinsDownCommand());
+    // pinsLockButton.whileTrue(new LockClimbCommand());
+    pinsUpButton.whileTrue(new ForcePinsUpCommand());
   }
 
   /**
@@ -202,10 +240,8 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // Using ProointTargetInfo causes a command scheduler loop overrun when fieldRelative is enabled
-    //return null; // new PrintTargetInfo(visionSubsystem);
-    // return autoChooser.getSelected(visionSubsystem, swerveSubsystem);
-    return autoChooser.getSelected();
-  
+    AutoItem selectedAuto = AutoCache.getSelectedAuto();
+    if(selectedAuto == null) return null;
+    return selectedAuto.getCommand();
   }
 }
