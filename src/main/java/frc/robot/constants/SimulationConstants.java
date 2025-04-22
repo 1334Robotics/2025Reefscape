@@ -10,7 +10,7 @@ public class SimulationConstants {
     public static final Voltage STEER_FRICTION_VOLTAGE = Units.Volts.of(0.05);
     public static final Distance WHEEL_RADIUS = Units.Inches.of(2);
     public static final MomentOfInertia STEER_MOI = Units.KilogramSquareMeters.of(0.03);
-    public static final double WHEEL_COF = 1.19;
+    public static final double WHEEL_COF = 1.43;
     public static final Distance TRACK_WIDTH = Units.Inches.of(29);
     public static final Distance TRACK_LENGTH = Units.Inches.of(29);
     public static final Distance BUMPER_WIDTH = Units.Inches.of(30);

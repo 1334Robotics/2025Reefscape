@@ -2,28 +2,35 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.commands.vision.Distance;
+import frc.robot.constants.VisionConstants;
+
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.targeting.PhotonPipelineMetadata;
 import org.littletonrobotics.junction.Logger;
 
+import static edu.wpi.first.units.Units.Centimeters;
+
 import java.util.List;
 
 /**
  * A simple vision subsystem using PhotonVision to detect and track targets.
  */
-public class VisionSubsystem extends SubsystemBase implements VisionSubsystemBase{
-    private static final String CAMERA_NAME = "Arducam_OV9782_USB_Camera"; 
+public class VisionSubsystem extends SubsystemBase {
+    private double imageAge = 0;
 
-    private final PhotonCamera cameraPhotonCamera;
+    private final PhotonCamera leftCamera;
+    private final PhotonCamera rightCamera;
     private PhotonPipelineMetadata cameraMetadata;
 
     // Store the latest result each loop
     private PhotonPipelineResult latestResult;
 
     public VisionSubsystem() {
-        cameraPhotonCamera = new PhotonCamera(CAMERA_NAME);
+        this.leftCamera  = new PhotonCamera(VisionConstants.LEFT_CAMERA_NAME);
+        this.rightCamera = new PhotonCamera(VisionConstants.RIGHT_CAMERA_NAME);
     }
 
     /**
@@ -111,14 +118,49 @@ public class VisionSubsystem extends SubsystemBase implements VisionSubsystemBas
         return null;
     }
 
+    /**
+     * Gets the current age of the image as calculated in VisionSubsystem.periodic()
+     * @return The image age
+     */
+    public double getImageAge() {
+        return this.imageAge;
+    }
+
+    public Distance getDistanceAway() {
+        if(latestResult != null && latestResult.hasTargets()) {
+            PhotonTrackedTarget target = latestResult.getBestTarget();
+            return new Distance(target.getBestCameraToTarget().getMeasureY().in(Centimeters) - VisionConstants.CAMERA_POSITION_X,
+                                target.getBestCameraToTarget().getMeasureX().in(Centimeters) - VisionConstants.CAMERA_POSITION_Y);
+        }
+        return null;
+    }
+
+    public double getTargetAngle() {
+        if(latestResult != null && latestResult.hasTargets()) {
+            return latestResult.getBestTarget().getBestCameraToTarget().getRotation().getZ() * (180 / Math.PI);
+        }
+        // If the angle is 1000­°, there is a problem
+        return 1000;
+    }
+
     @Override
     public void periodic() {
         // 1) Grab all unread results once per loop
-        List<PhotonPipelineResult> results = cameraPhotonCamera.getAllUnreadResults();
+        List<PhotonPipelineResult> results = leftCamera.getAllUnreadResults();
 
-        // 2) If we got anything new, take the last (most recent) one
-        if (!results.isEmpty()) {
-            latestResult = results.get(results.size() - 1);
+        // 2) If we got anything new, take the last (most recent) one that contains a valid target
+        if(!results.isEmpty()) {
+            this.latestResult = results.get(results.size() - 1);
+
+            /*this.latestResult = null;
+            boolean found = false;
+            int i;
+            for(i=1;i<results.size()&&!found;i++) {
+                this.latestResult = results.get(results.size() - i);
+                if(this.latestResult != null) {
+                    if(this.latestResult.hasTargets()) found = true;
+                }
+            }*/
         }
 
         // 3) Update the dashboard
@@ -138,6 +180,7 @@ public class VisionSubsystem extends SubsystemBase implements VisionSubsystemBas
         //     Check for a method like getTimestampSeconds(), getFrameTimestampSeconds(), etc.
         //double captureTimeSeconds = latestResult.getTimestampSeconds(); 
         double captureTimeSeconds = (latestResult != null ? latestResult.getTimestampSeconds() : currentTimeSeconds);
+
         // (3) Convert to milliseconds
         double imageAgeMs = (currentTimeSeconds - captureTimeSeconds) * 1000;
 
