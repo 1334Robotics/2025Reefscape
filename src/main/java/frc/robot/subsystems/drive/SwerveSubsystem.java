@@ -5,6 +5,8 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -50,6 +52,7 @@ public class SwerveSubsystem extends SubsystemBase {
     private boolean fieldRelative;
     private SwerveDriveSimulation swerveDriveSimulation;
     private int count = 0;
+    private final NetworkTable limelightTable = NetworkTableInstance.getDefault().getTable("limelight"); 
 
     public SwerveSubsystem() {
         this.fieldRelative = false;
@@ -301,6 +304,20 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     @SuppressWarnings("unused")
+
+    public Pose2d getLimelightFieldPose() {
+        // Get the pose from the limelight subsystem
+        double[] botPose = limelightTable.getEntry("botpose").getDoubleArray(new double[6]);
+        if (botPose.length < 6) {
+            return new Pose2d();
+        }
+        double x = botPose[0];
+        double y = botPose[1];
+        double yaw = botPose[5]; 
+
+        return new Pose2d(x, y, Rotation2d.fromDegrees(yaw));
+    }
+
     private Pose2d calculateRobotPoseFromVision(Transform3d targetToCamera) {
         // Get the camera position relative to robot center
         Transform3d robotToCamera = new Transform3d(
