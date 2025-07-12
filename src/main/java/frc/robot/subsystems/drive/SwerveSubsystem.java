@@ -1,5 +1,6 @@
 package frc.robot.subsystems.drive;
 
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -28,6 +29,8 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.wpilibj.Timer;
 
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -45,6 +48,10 @@ import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 import static edu.wpi.first.units.Units.Meter;
 
+import frc.robot.subsystems.limelight.LimelightSubsystem;
+
+
+
 
 
 public class SwerveSubsystem extends SubsystemBase {
@@ -52,9 +59,13 @@ public class SwerveSubsystem extends SubsystemBase {
     private boolean fieldRelative;
     private SwerveDriveSimulation swerveDriveSimulation;
     private int count = 0;
-    private final NetworkTable limelightTable = NetworkTableInstance.getDefault().getTable("limelight"); 
+    // private final NetworkTable limelightTable = NetworkTableInstance.getDefault().getTable("limelight"); 
+    private final LimelightSubsystem limelightSubsystem;
 
-    public SwerveSubsystem() {
+ 
+
+    public SwerveSubsystem(LimelightSubsystem limelightSubsystem) {
+        this.limelightSubsystem = limelightSubsystem;
         this.fieldRelative = false;
         final ModuleIO[] moduleIOs;
         SmartDashboard.putBoolean("[SWERVE] Field Relative", this.fieldRelative);
@@ -147,6 +158,11 @@ public class SwerveSubsystem extends SubsystemBase {
             SmartDashboard.putBoolean("Swerve/GyroValid", false);
             return;
         }
+
+        if (limelightSubsystem.hasTarget()) {
+            Pose2d targetPose = limelightSubsystem.getLimelightFieldPose();
+        }
+
         SmartDashboard.putBoolean("Swerve/GyroValid", true);
 
         //Primary feedback loop for the swerve drive with encoders/gryo
@@ -305,18 +321,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     @SuppressWarnings("unused")
 
-    public Pose2d getLimelightFieldPose() {
-        // Get the pose from the limelight subsystem
-        double[] botPose = limelightTable.getEntry("botpose").getDoubleArray(new double[6]);
-        if (botPose.length < 6) {
-            return new Pose2d();
-        }
-        double x = botPose[0];
-        double y = botPose[1];
-        double yaw = botPose[5]; 
 
-        return new Pose2d(x, y, Rotation2d.fromDegrees(yaw));
-    }
 
     private Pose2d calculateRobotPoseFromVision(Transform3d targetToCamera) {
         // Get the camera position relative to robot center
@@ -375,4 +380,26 @@ public class SwerveSubsystem extends SubsystemBase {
         );
     }
 
+
+
+
+
+    
+    // Get the pose of the robot in the field frame from the limelight
+
+
+
+
+    // public Pose2d getLimelightFieldPose() {
+    //     // Get the pose from the limelight subsystem
+    //     double[] botPose = limelightTable.getEntry("botpose").getDoubleArray(new double[6]);
+    //     if (botPose.length < 6) {
+    //         return new Pose2d();
+    //     }
+    //     double x = botPose[0];
+    //     double y = botPose[1];
+    //     double yaw = botPose[5]; 
+
+    //     return new Pose2d(x, y, Rotation2d.fromDegrees(yaw));
+    // }
 }

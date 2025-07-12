@@ -28,7 +28,7 @@ public class LimelightSubsystem extends SubsystemBase {
 
     public double getTargetYaw() {
         // return tx.getDouble(0.0);
-        return getBotPose()[2];
+        return getBotPose()[5];
     }
 
     public double getTargetPitch() {
@@ -49,9 +49,9 @@ public class LimelightSubsystem extends SubsystemBase {
         return getBotPose()[1];
     }
 
-    public double getRotation() {
-        return limelightTable.getEntry("rotation").getDouble(0.0);
-    }
+    // public double getRotation() {
+    //     return limelightTable.getEntry("rotation").getDouble(0.0);
+    // }
 
     public double getHorizontalOffset() {
         return tx.getDouble(0.0);
