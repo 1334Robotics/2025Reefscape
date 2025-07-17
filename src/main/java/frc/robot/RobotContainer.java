@@ -52,7 +52,7 @@ import frc.robot.commands.vision.TrackAprilTagCommand;
 import frc.robot.subsystems.drive.DirectionSnapSubsystem;
 
 import frc.robot.subsystems.limelight.LimelightSubsystem;
-import frc.robot.commands.limelight.TurnToAprilTagCommand;
+import frc.robot.commands.limelight.Position;
 
 import frc.robot.subsystems.drive.DriveController;
 import frc.robot.subsystems.drive.SwerveSubsystem;
@@ -122,7 +122,7 @@ public class RobotContainer {
   public static final MailboxHandler         mailboxHandler              = new MailboxHandler();
   public static final VisionSubsystem        visionSubsystem             = new VisionSubsystem();
   public static final LimelightSubsystem     limelightSubsystem          = new LimelightSubsystem();
-  public static final SwerveSubsystem        swerveSubsystem             = new SwerveSubsystem();
+  public static final SwerveSubsystem        swerveSubsystem             = new SwerveSubsystem(limelightSubsystem);
   public static final DirectionSnapSubsystem directionSnapSubsystem      = new DirectionSnapSubsystem();
   public static final ElevatorSubsystem      elevatorSubsystem           = new ElevatorSubsystem();
   public static final ElevatorHandler        elevatorHandler             = new ElevatorHandler();
