@@ -51,7 +51,8 @@ public class Position extends Command{
     @Override
     public void execute() {
         if (targetPose != null) {
-            return; //add drive to pose later
+            swerve.driveToPose(targetPose);
+             //add drive to pose in swerve subsystem later
         }
     }
 
@@ -63,4 +64,11 @@ public class Position extends Command{
         return swerve.getPose().getTranslation().getDistance(targetPose.getTranslation()) < 0.1; // 10 cm tolerance
     }   
 
+    @Override
+    public void end(boolean interrupted) {
+        if (interrupted) {
+            swerve.stop();  
+            //Write swerve.stop later
+        }  
+    }
 }

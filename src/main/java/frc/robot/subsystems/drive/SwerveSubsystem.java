@@ -49,7 +49,7 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 import static edu.wpi.first.units.Units.Meter;
 
 import frc.robot.subsystems.limelight.LimelightSubsystem;
-
+import frc.robot.subsystems.drive.PIDController;
 
 
 
@@ -62,12 +62,48 @@ public class SwerveSubsystem extends SubsystemBase {
     // private final NetworkTable limelightTable = NetworkTableInstance.getDefault().getTable("limelight"); 
     private final LimelightSubsystem limelightSubsystem;
 
+    private final PIDController xController = new PIDController(
+        1.0,
+        0.0,
+        0.0,
+        0.0, // tau 
+        -2.0,
+        2.0,
+        -0.5,
+        0.5,
+        0.5
+    );
+
+    private final PIDController yontroller = new PIDController(
+        1.0,
+        0.0,
+        0.0,
+        0.0, // tau 
+        -2.0,
+        2.0,
+        -0.5,
+        0.5,
+        0.5
+    );
+
+    private final PIDController thetaController = new PIDController(
+        2.0,
+        0.0,
+        0.0,
+        0.2, // tau 
+        -Math.PI,
+        Math.PI,
+        -0.5,
+        0.5,
+        0.02
+    );
  
 
     public SwerveSubsystem(LimelightSubsystem limelightSubsystem) {
         this.limelightSubsystem = limelightSubsystem;
         this.fieldRelative = false;
         final ModuleIO[] moduleIOs;
+        
         SmartDashboard.putBoolean("[SWERVE] Field Relative", this.fieldRelative);
         
         // Get alliance dynamically instead of hardcoding
@@ -387,19 +423,18 @@ public class SwerveSubsystem extends SubsystemBase {
     
     // Get the pose of the robot in the field frame from the limelight
 
+    public Pose2d getLimeLightFPose(){
+        // Get the pose from the limelight subsystem
+        double[] botPose = limelightSubsystem.getBotPose();
+        //     double[] botPose = limelightTable.getEntry("botpose").getDoubleArray(new double[6]);
+        if (botPose == null || botPose.length < 6) {
+            return new Pose2d();
+        }
+        double x = botPose[0];
+        double y = botPose[1];
+        double yaw = botPose[5]; 
 
+        return new Pose2d(x, y, Rotation2d.fromDegrees(yaw));
+    }
 
-
-    // public Pose2d getLimelightFieldPose() {
-    //     // Get the pose from the limelight subsystem
-    //     double[] botPose = limelightTable.getEntry("botpose").getDoubleArray(new double[6]);
-    //     if (botPose.length < 6) {
-    //         return new Pose2d();
-    //     }
-    //     double x = botPose[0];
-    //     double y = botPose[1];
-    //     double yaw = botPose[5]; 
-
-    //     return new Pose2d(x, y, Rotation2d.fromDegrees(yaw));
-    // }
 }
