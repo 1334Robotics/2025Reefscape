@@ -11,7 +11,7 @@ public class RipControlCommand extends Command {
     @Override
     public void initialize() {
         RobotContainer.driveController.takeAllControlAway();
-        RobotContainer.trackCommand.disable();
+        // RobotContainer.trackCommand.disable();
         RobotContainer.directionSnapSubsystem.stop();
     }
 

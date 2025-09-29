@@ -86,9 +86,9 @@ public class RobotContainer {
   private static final POVButton      rightSnapButton      = new POVButton(driverController,        RobotContainerConstants.SNAP_RIGHT_DIRECTION);
   private static final POVButton      backwardsSnapButton  = new POVButton(driverController,        RobotContainerConstants.SNAP_BACKWARDS_DIRECTION);
   private static final JoystickButton stopSnapButton       = new JoystickButton(driverController,   RobotContainerConstants.SNAP_STOP_BUTTON);
-  private static final JoystickButton flopperUpButton      = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_UP_BUTTON);
-  private static final JoystickButton flopperDownButton    = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_DOWN_BUTTON);
-  private static final JoystickButton flopperZeroButton    = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_ZERO_BUTTON);
+  // private static final JoystickButton flopperUpButton      = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_UP_BUTTON);
+  // private static final JoystickButton flopperDownButton    = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_DOWN_BUTTON);
+  // private static final JoystickButton flopperZeroButton    = new JoystickButton(operatorController, RobotContainerConstants.FLOPPER_ZERO_BUTTON);
   private static final Trigger        mailboxShootButton   = new Trigger(() -> operatorController.getRightTriggerAxis()  > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
   private static final Trigger        mailboxFeedButton    = new Trigger(() -> operatorController.getLeftTriggerAxis()  > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
   private static final JoystickButton mailboxRewindButton  = new JoystickButton(operatorController, RobotContainerConstants.MAILBOX_REWIND_BUTTON);
@@ -100,7 +100,7 @@ public class RobotContainer {
   private static final POVButton      elevatorL2Button     = new POVButton(operatorController, RobotContainerConstants.ELEVATOR_L2_BUTTON);
   private static final POVButton      elevatorL3Button     = new POVButton(operatorController, RobotContainerConstants.ELEVATOR_L3_BUTTON);
   private static final POVButton      elevatorL4Button     = new POVButton(operatorController, RobotContainerConstants.ELEVATOR_L4_BUTTON);
-  private static final JoystickButton ripControlButton     = new JoystickButton(driverController, RobotContainerConstants.RIP_CONTROL_BUTTON);
+  // private static final JoystickButton ripControlButton     = new JoystickButton(driverController, RobotContainerConstants.RIP_CONTROL_BUTTON);
   // private static final Trigger        trackLeftButton      = new Trigger(() -> driverController.getLeftTriggerAxis()  > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
   // private static final Trigger        trackRightButton     = new Trigger(() -> driverController.getRightTriggerAxis() > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
   private static final JoystickButton botRelativeButton    = new JoystickButton(driverController, RobotContainerConstants.BOT_RELATIVE_BUTTON);
@@ -108,7 +108,7 @@ public class RobotContainer {
   private static final JoystickButton speedUpButton        = new JoystickButton(driverController, RobotContainerConstants.SPEED_UP_BUTTON);
   // private static final Trigger        pinsDownButton       = new Trigger(() -> operatorController.getLeftTriggerAxis()  > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
   // private static final Trigger        pinsLockButton       = new Trigger(() -> operatorController.getRightTriggerAxis() > RobotContainerConstants.TRIGGER_ACTIVATE_POINT);
-  private static final JoystickButton pinsUpButton         = new JoystickButton(operatorController, RobotContainerConstants.CLIMB_UP_BUTTON);
+  // private static final JoystickButton pinsUpButton         = new JoystickButton(operatorController, RobotContainerConstants.CLIMB_UP_BUTTON);
 
   // Subsystems
   public static final LedSubsystem           ledSubsystem                = new LedSubsystem(1); 
@@ -116,27 +116,27 @@ public class RobotContainer {
   public static final GyroSubsystem          gyroSubsystem               = new GyroSubsystem("CANivore");
   public static final MailboxSubsystem       mailboxSubsystem            = new MailboxSubsystem();
   public static final MailboxHandler         mailboxHandler              = new MailboxHandler();
-  public static final VisionSubsystem        visionSubsystem             = new VisionSubsystem();
+  // public static final VisionSubsystem        visionSubsystem             = new VisionSubsystem();
   public static final SwerveSubsystem        swerveSubsystem             = new SwerveSubsystem();
   public static final DirectionSnapSubsystem directionSnapSubsystem      = new DirectionSnapSubsystem();
   public static final ElevatorSubsystem      elevatorSubsystem           = new ElevatorSubsystem();
   public static final ElevatorHandler        elevatorHandler             = new ElevatorHandler();
-  public static final FlopperSubsystem       flopperSubsystem            = new FlopperSubsystem();
-  public static final ClimbSubsystem         climbSubsystem              = new ClimbSubsystem();
-  public static final TagInputHandler        tagInputHandler             = new TagInputHandler();
+  // public static final FlopperSubsystem       flopperSubsystem            = new FlopperSubsystem();
+  // public static final ClimbSubsystem         climbSubsystem              = new ClimbSubsystem();
+  // public static final TagInputHandler        tagInputHandler             = new TagInputHandler();
   public static final DriveController        driveController             = new DriveController();
-  public static final TagTrackingHandler     tagTrackingHandler          = new TagTrackingHandler();
+  // public static final TagTrackingHandler     tagTrackingHandler          = new TagTrackingHandler();
   public static final ControllerSubsystem    driverControllerSubsystem   = new ControllerSubsystem(driverController);
   public static final ControllerSubsystem    operatorControllerSubsystem = new ControllerSubsystem(operatorController);
 
   // Auto
-  public static final TrackAprilTagCommand trackCommand = new TrackAprilTagCommand();
-  public static final AutoTagSelector autoTagSelector = new AutoTagSelector();
+  // public static final TrackAprilTagCommand trackCommand = new TrackAprilTagCommand();
+  // public static final AutoTagSelector autoTagSelector = new AutoTagSelector();
 
   public RobotContainer() {
     RobotContainer.configureBindings();
     RobotContainer.setupDefaultCommands();
-    RobotContainer.registerClimbCommands();
+    // RobotContainer.registerClimbCommands();
   }
 
   private static void registerClimbCommands() {
@@ -174,11 +174,11 @@ public class RobotContainer {
     rightSnapButton.onTrue(new DirectionSnapRight());
     backwardsSnapButton.onTrue(new DirectionSnapBackwards());
     stopSnapButton.onTrue(new StopSnap());
-    flopperUpButton.onTrue(new FlopperUpCommand());
-    flopperUpButton.onFalse(new FlopperStopCommand());
-    flopperDownButton.onTrue(new FlopperDownCommand());
-    flopperDownButton.onFalse(new FlopperStopCommand());
-    flopperZeroButton.onTrue(new FlopperZeroCommand());
+    // flopperUpButton.onTrue(new FlopperUpCommand());
+    // flopperUpButton.onFalse(new FlopperStopCommand());
+    // flopperDownButton.onTrue(new FlopperDownCommand());
+    // flopperDownButton.onFalse(new FlopperStopCommand());
+    // flopperZeroButton.onTrue(new FlopperZeroCommand());
     mailboxShootButton.onTrue(new ShootCommand());
     mailboxFeedButton.onTrue(new MailboxFeedCommand());
     mailboxRewindButton.whileTrue(new MailboxRewindCommand());
@@ -193,7 +193,7 @@ public class RobotContainer {
       elevatorUpButton.whileTrue(new ElevatorUpCommand());
       elevatorDownButton.whileTrue(new ElevatorDownCommand());
     }
-    ripControlButton.onTrue(new RipControlCommand());
+    // ripControlButton.onTrue(new RipControlCommand());
     // trackLeftButton.onTrue(new StartTrackingScoringLeft());
     // trackRightButton.onTrue(new StartTrackingScoringRight());
     botRelativeButton.onTrue(new BotRelativeCommand());
@@ -204,7 +204,7 @@ public class RobotContainer {
     speedUpButton.onFalse(new NormalSpeedCommand());
     // pinsDownButton.whileTrue(new ForcePinsDownCommand());
     // pinsLockButton.whileTrue(new LockClimbCommand());
-    pinsUpButton.whileTrue(new ForcePinsUpCommand());
+    // pinsUpButton.whileTrue(new ForcePinsUpCommand());
   }
 
   /**

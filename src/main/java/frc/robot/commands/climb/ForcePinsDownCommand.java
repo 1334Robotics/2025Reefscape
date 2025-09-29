@@ -5,25 +5,25 @@ import frc.robot.RobotContainer;
 import frc.robot.subsystems.climb.ClimbSubsystem;
 
 public class ForcePinsDownCommand extends Command {
-    private final ClimbSubsystem climb;
+    // private final ClimbSubsystem climb;
 
-    public ForcePinsDownCommand() {
-        this.climb = RobotContainer.climbSubsystem;
-        addRequirements(climb);
-    }
+    // public ForcePinsDownCommand() {
+    //     this.climb = RobotContainer.climbSubsystem;
+    //     addRequirements(climb);
+    // }
 
-    @Override
-    public void execute() {
-        climb.forcePinsDown();
-    }
+    // @Override
+    // public void execute() {
+    //     climb.forcePinsDown();
+    // }
 
-    @Override
-    public void end(boolean interrupted) {
-        climb.stopClimb();
-    }
+    // @Override
+    // public void end(boolean interrupted) {
+    //     climb.stopClimb();
+    // }
 
-    @Override
-    public boolean isFinished() {
-        return false;
-    }
+    // @Override
+    // public boolean isFinished() {
+    //     return false;
+    // }
 }
