@@ -158,25 +158,25 @@ public class SwerveSubsystem extends SubsystemBase {
         
         // Secondary feedback loop for the swerve drive with vision
         // 2. If vision target visible & data fresh, use as correction
-        if(RobotContainer.visionSubsystem.isTargetVisible() && 
-           RobotContainer.visionSubsystem.getImageAge() < VisionConstants.MAX_ACCEPTABLE_DELAY) {
+        // if(RobotContainer.visionSubsystem.isTargetVisible() && 
+        //    RobotContainer.visionSubsystem.getImageAge() < VisionConstants.MAX_ACCEPTABLE_DELAY) {
             
-            PhotonTrackedTarget target = RobotContainer.visionSubsystem.getTarget();
-            if (target != null) {                
-                // Calculate vision measurement standard deviations
-                Matrix<N3, N1> visionStdDevs = calculateVisionStdDevs(target);
+        //     PhotonTrackedTarget target = RobotContainer.visionSubsystem.getTarget();
+        //     if (target != null) {                
+        //         // Calculate vision measurement standard deviations
+        //         Matrix<N3, N1> visionStdDevs = calculateVisionStdDevs(target);
                 
-                // This makes testing much more difficult than it needs to be
-                /*swerveDrive.addVisionMeasurement(
-                    calculateRobotPoseFromVision(targetPose),
-                    Timer.getFPGATimestamp() - (RobotContainer.visionSubsystem.getImageAge() / 1000.0),
-                    visionStdDevs
-                );*/
+        //         // This makes testing much more difficult than it needs to be
+        //         /*swerveDrive.addVisionMeasurement(
+        //             calculateRobotPoseFromVision(targetPose),
+        //             Timer.getFPGATimestamp() - (RobotContainer.visionSubsystem.getImageAge() / 1000.0),
+        //             visionStdDevs
+        //         );*/
                 
-                // Log std devs for tuning
-                SmartDashboard.putNumber("Vision/StdDev", visionStdDevs.get(0, 0));
-            }
-        }
+        //         // Log std devs for tuning
+        //         SmartDashboard.putNumber("Vision/StdDev", visionStdDevs.get(0, 0));
+        //     }
+        // }
 
         Logger.recordOutput("Drive/Pose", swerveDrive.getPose());
         Pose2d currentPose = swerveDrive.getPose();

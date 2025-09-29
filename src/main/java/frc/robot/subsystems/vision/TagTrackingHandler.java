@@ -17,10 +17,10 @@ public class TagTrackingHandler extends SubsystemBase {
         if(this.target == null) return;
         switch(this.target) {
             case SCORING_LEFT:
-                RobotContainer.trackCommand.setRelativeDistance(VisionConstants.LEFT_SCORE_DISTANCE);
+                // RobotContainer.trackCommand.setRelativeDistance(VisionConstants.LEFT_SCORE_DISTANCE);
                 break;
             case SCORING_RIGHT:
-                RobotContainer.trackCommand.setRelativeDistance(VisionConstants.RIGHT_SCORE_DISTANCE);
+                // RobotContainer.trackCommand.setRelativeDistance(VisionConstants.RIGHT_SCORE_DISTANCE);
                 break;
         }
     }
@@ -39,10 +39,10 @@ public class TagTrackingHandler extends SubsystemBase {
         SmartDashboard.putString("[TAG TRACKING] Target", this.getTargetName());
         
         if (this.target == null) {
-            RobotContainer.trackCommand.disable();
+            // RobotContainer.trackCommand.disable();
             return;
         }
 
-        RobotContainer.trackCommand.enable();
+        // RobotContainer.trackCommand.enable();
     }
 }

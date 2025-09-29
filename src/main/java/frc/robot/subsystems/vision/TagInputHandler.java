@@ -17,7 +17,7 @@ public class TagInputHandler extends SubsystemBase {
         int gotTag = (int)SmartDashboard.getNumber("[VISION] Chosen Tag", 0);
         if(gotTag != chosenTag && gotTag != 0) {
             chosenTag = gotTag;
-            RobotContainer.trackCommand.setTargetTag(chosenTag);
+            // RobotContainer.trackCommand.setTargetTag(chosenTag);
         }
     }
 }

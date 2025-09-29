@@ -75,7 +75,7 @@ public class MailboxHandler extends SubsystemBase {
             this.allowFeeding = false;
 
             // Check that the elevator level is correct
-            if(RobotContainer.elevatorHandler.getLevel() != ElevatorLevel.FEED && !ElevatorConstants.MANUAL_ELEVATOR_CONTROL) return;
+            // if(RobotContainer.elevatorHandler.getLevel() != ElevatorLevel.FEED && !ElevatorConstants.MANUAL_ELEVATOR_CONTROL) return;
 
             if(!this.outputLaserCan.inRange()) {
                 this.feeding = true;
@@ -94,7 +94,7 @@ public class MailboxHandler extends SubsystemBase {
             if(this.allowShoot) {
                 // Ensure that the level is valid (L1-L4)
                 ElevatorLevel level = RobotContainer.elevatorHandler.getLevel();
-                if(level == null || level == ElevatorLevel.BOTTOM || level == ElevatorLevel.FEED) return;
+                // if(level == null || level == ElevatorLevel.BOTTOM || level == ElevatorLevel.FEED) return;
 
                 switch(level) {
                     case L1     -> RobotContainer.mailboxSubsystem.outputL1();
