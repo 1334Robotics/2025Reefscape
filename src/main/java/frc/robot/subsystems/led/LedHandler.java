@@ -50,17 +50,17 @@ public class LedHandler extends SubsystemBase {
         SmartDashboard.putNumber("[LED] Active Controller", Long.highestOneBit(this.controller));
 
         // Check vision system for tag visibility
-        if (RobotContainer.visionSubsystem.isTargetVisible()) {
-            // If we're aligning, show green
-            if (RobotContainer.trackCommand.isAligned()) {
-                setColour(Controller.VISIONTRACK, LEDColourCommand.Colour.GREEN);
-            } else {
-                // If we see tag but not aligned, show blue
-                setColour(Controller.VISIONTRACK, LEDColourCommand.Colour.BLUE);
-            }
-        } else {
+        // if (RobotContainer.visionSubsystem.isTargetVisible()) {
+        //     // If we're aligning, show green
+        //     if (RobotContainer.trackCommand.isAligned()) {
+        //         setColour(Controller.VISIONTRACK, LEDColourCommand.Colour.GREEN);
+        //     } else {
+        //         // If we see tag but not aligned, show blue
+        //         setColour(Controller.VISIONTRACK, LEDColourCommand.Colour.BLUE);
+        //     }
+        // } else {
             // No tag visible, show red
             setColour(Controller.VISION, LEDColourCommand.Colour.RED);
-        }
+        // }
     }
 }
