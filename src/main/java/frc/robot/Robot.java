@@ -78,7 +78,7 @@ public class Robot extends LoggedRobot {
       AutoCache.afterLoad();
 
       // Zero the flopper (algae clearer)
-      RobotContainer.flopperSubsystem.resetPose();
+      // RobotContainer.flopperSubsystem.resetPose();
   }
 
   /**
@@ -108,8 +108,8 @@ public class Robot extends LoggedRobot {
     }
 
       // Setup tracking
-      RobotContainer.trackCommand.disable();
-      RobotContainer.trackCommand.schedule();
+      // RobotContainer.trackCommand.disable();
+      // RobotContainer.trackCommand.schedule();
   }
 
   /**
@@ -126,7 +126,7 @@ public class Robot extends LoggedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
-    RobotContainer.trackCommand.execute(); // THIS IS BAD. IT SHOULDN'T NEED TO DO THIS
+    // RobotContainer.trackCommand.execute(); // THIS IS BAD. IT SHOULDN'T NEED TO DO THIS
     m_field.setRobotPose(RobotContainer.swerveSubsystem.getPose());
   }
   
@@ -192,7 +192,7 @@ public class Robot extends LoggedRobot {
     }
     
     // Enable tracking if needed
-    RobotContainer.trackCommand.enable();
+    // RobotContainer.trackCommand.enable();
     
     // Get the autonomous command from RobotContainer
     // Causes an error the second time around
@@ -222,7 +222,7 @@ public class Robot extends LoggedRobot {
     }
 
     RobotContainer.swerveSubsystem.setFieldRelative(true);
-    RobotContainer.trackCommand.disable();
+    // RobotContainer.trackCommand.disable();
     
     // Reset elevator if needed
     if(SmartDashboard.getBoolean("[ELEVATOR] Reset On TeleOp Enable", false) && !this.elevatorReset) {
